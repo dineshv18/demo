@@ -273,8 +273,18 @@ export interface HierarchyItem {
 }
 
 // ─── Referral API ───
+export type ReferralDashboardStats = {
+  totalReferrals: number;
+  registered: number;
+  kycDone: number;
+  deposited: number;
+  totalCommission: number;
+  commissionRate: number;
+};
+
 export const referralAPI = {
   getMyCode: () => request<ReferralCode>("/referral/my-code"),
   getMyReferrals: () => request<{ referrals: Referral[]; stats: ReferralStats }>("/referral/my-referrals"),
+  getMyStats: () => request<{ stats: ReferralDashboardStats }>("/referral/stats"),
   getHierarchy: () => request<{ hierarchy: HierarchyItem[] }>("/referral/hierarchy"),
 };

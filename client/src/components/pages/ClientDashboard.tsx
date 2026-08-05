@@ -4,11 +4,11 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/AuthContext";
-import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData } from "@/lib/api";
+import { walletAPI, kycAPI, referralAPI, type WalletData, type TransactionData, type KycData, type ReferralDashboardStats } from "@/lib/api";
 import {
   IconWallet, IconShieldCheck, IconShield, IconClock,
   IconArrowUpRight, IconArrowDownLeft, IconLoader2, IconLock,
-  IconAlertCircle, IconCheck, IconX,
+  IconAlertCircle, IconCheck, IconX, IconUserPlus,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -30,6 +30,7 @@ export default function ClientDashboard() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [kyc, setKyc] = useState<KycData | null>(null);
+  const [referralStats, setReferralStats] = useState<ReferralDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -52,14 +53,16 @@ export default function ClientDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [walletRes, txRes, kycRes] = await Promise.allSettled([
+        const [walletRes, txRes, kycRes, refRes] = await Promise.allSettled([
           walletAPI.getWallet(),
           walletAPI.getTransactions(),
           kycAPI.getStatus(),
+          referralAPI.getMyStats(),
         ]);
         if (walletRes.status === "fulfilled") setWallet(walletRes.value.wallet);
         if (txRes.status === "fulfilled") setTransactions(txRes.value.transactions);
         if (kycRes.status === "fulfilled") setKyc(kycRes.value.kyc);
+        if (refRes.status === "fulfilled") setReferralStats(refRes.value.stats);
       } finally {
         setLoading(false);
       }
@@ -227,6 +230,31 @@ export default function ClientDashboard() {
               </div>
             )}
           </div>
+
+          {/* Referral Stats */}
+          <Link href="/dashboard/referral" className="block bg-card rounded-2xl border border-border p-5 space-y-3 hover:border-brand/30 transition-colors">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <IconUserPlus className="h-4 w-4 text-brand" /> Referrals
+              </h3>
+              <span className="text-[10px] font-medium text-brand bg-brand/10 px-2 py-0.5 rounded-full">{referralStats?.commissionRate || 2}% commission</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Total Referrals</span>
+              <span className="text-sm font-bold text-foreground">{referralStats?.totalReferrals || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Deposited</span>
+              <span className="text-sm font-bold text-emerald-500">{referralStats?.deposited || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Total Earned</span>
+              <span className="text-sm font-bold text-brand">{sym}{(referralStats?.totalCommission || 0).toFixed(2)}</span>
+            </div>
+            <div className="pt-1 text-center">
+              <span className="text-[10px] font-medium text-muted-foreground hover:text-brand transition-colors">View Referral Dashboard →</span>
+            </div>
+          </Link>
         </div>
 
         {/* Right Column: Balance + Chart + Recent Transactions */}

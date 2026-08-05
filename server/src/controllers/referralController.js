@@ -5,6 +5,32 @@ function generateCode() {
   return crypto.randomBytes(4).toString("hex").toUpperCase();
 }
 
+export const getMyStats = async (req, res) => {
+  try {
+    const referrals = await getPrisma().referral.findMany({
+      where: { referrerId: req.user.id },
+      include: { commissions: true },
+    });
+
+    const settings = await getPrisma().referralSettings.findFirst();
+    const commissionRate = settings ? parseFloat(settings.commissionRate) : 2;
+
+    const stats = {
+      totalReferrals: referrals.length,
+      registered: referrals.filter(r => r.status === "REGISTERED").length,
+      kycDone: referrals.filter(r => ["KYC_DONE", "DEPOSITED", "COMMISSION_PAID"].includes(r.status)).length,
+      deposited: referrals.filter(r => ["DEPOSITED", "COMMISSION_PAID"].includes(r.status)).length,
+      totalCommission: referrals.reduce((sum, r) => sum + r.commissions.reduce((cs, c) => cs + parseFloat(c.amount), 0), 0),
+      commissionRate,
+    };
+
+    return res.status(200).json({ stats });
+  } catch (error) {
+    console.error("Get referral stats error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getMyCode = async (req, res) => {
   try {
     let user = await getPrisma().user.findUnique({ where: { id: req.user.id } });
