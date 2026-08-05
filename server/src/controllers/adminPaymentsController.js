@@ -1,5 +1,6 @@
 import getPrisma from "../config/db.js";
 import { logActivity } from "../middleware/activityLog.js";
+import { processReferralCommission } from "./referralController.js";
 
 function mapPayment(tx) {
   return {
@@ -126,6 +127,10 @@ export const approvePayment = async (req, res) => {
     });
 
     const updated = await getPrisma().transaction.findUnique({ where: { id: tx.id } });
+
+    if (tx.type === "DEPOSIT") {
+      await processReferralCommission(getPrisma(), updated);
+    }
 
     await logActivity({
       userId: req.user.id,

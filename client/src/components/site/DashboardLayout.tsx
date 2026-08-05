@@ -18,6 +18,7 @@ import {
   IconShield,
   IconSun,
   IconMoon,
+  IconUserPlus,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -52,6 +53,7 @@ const allNavItems = [
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main" },
   { slug: "trading", to: "/dashboard/trading", label: "Live Trading", icon: IconChartLine, group: "main" },
   { slug: "exchange", to: "/dashboard/exchange", label: "Exchange", icon: IconExchange, group: "main" },
+  { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main" },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other" },
   { slug: "news", to: "/dashboard/news", label: "News", icon: IconNews, group: "other" },
   { slug: "blog", to: "/dashboard/blog", label: "Blog", icon: IconSpeakerphone, group: "other" },

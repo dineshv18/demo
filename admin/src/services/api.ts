@@ -212,3 +212,38 @@ export const usersAPI = {
   setCurrency: (id: string, currency: "USD") =>
     request<{ message: string; wallet: { userId: string; currency: string } }>(`/users/${id}/currency`, { method: "POST", body: JSON.stringify({ currency }) }),
 };
+
+// ─── Referral Types ───
+export interface ReferralSettings {
+  id: string;
+  commissionRate: string;
+  isActive: boolean;
+}
+
+export interface AdminReferral {
+  id: string;
+  status: string;
+  code: string;
+  registeredAt: string;
+  kycAt: string | null;
+  depositedAt: string | null;
+  referrer: { id: string; name: string; email: string };
+  referred: { id: string; name: string; email: string };
+  commissions: { id: string; amount: string; percentage: string; status: string }[];
+}
+
+// ─── Referral API ───
+export const referralAPI = {
+  getSettings: () => request<{ settings: ReferralSettings }>("/admin/referrals/settings"),
+  updateSettings: (commissionRate: number) =>
+    request<{ message: string; settings: ReferralSettings }>("/admin/referrals/settings", {
+      method: "PUT",
+      body: JSON.stringify({ commissionRate }),
+    }),
+  getAll: (params?: { page?: number; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params) Object.entries(params).forEach(([k, v]) => { if (v !== undefined) query.set(k, String(v)); });
+    const qs = query.toString();
+    return request<{ referrals: AdminReferral[]; total: number }>(`/admin/referrals${qs ? `?${qs}` : ""}`);
+  },
+};

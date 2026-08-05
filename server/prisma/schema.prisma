@@ -58,9 +58,17 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  referralCode  String?  @unique
+  referredById  String?
+
   activityLogs      ActivityLog[]
   wallet            Wallet?
   kyc               Kyc?
+  referrer     User?    @relation("ReferredBy", fields: [referredById], references: [id], onDelete: SetNull)
+  referredUsers User[]  @relation("ReferredBy")
+  referrals    Referral[] @relation("Referrer")
+  referred     Referral? @relation("Referred")
+  commissions  ReferralCommission[] @relation("UserCommissions")
 }
 
 model Role {
@@ -195,4 +203,52 @@ model ActivityLog {
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+model Referral {
+  id            String   @id @default(uuid())
+  referrerId    String
+  referredId    String   @unique
+  code          String
+  status        String   @default("REGISTERED")
+  registeredAt  DateTime @default(now())
+  kycAt         DateTime?
+  depositedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  referrer      User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred      User     @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  commissions   ReferralCommission[]
+
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([code])
+}
+
+model ReferralSettings {
+  id            String   @id @default(uuid())
+  commissionRate Decimal @default(2) @db.Decimal(5, 2)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ReferralCommission {
+  id            String   @id @default(uuid())
+  referralId    String
+  userId        String?
+  amount        Decimal  @db.Decimal(18, 2)
+  percentage    Decimal  @db.Decimal(5, 2)
+  status        String   @default("PENDING")
+  depositTxId   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  referral      Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  user          User?    @relation("UserCommissions", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([referralId])
+  @@index([status])
 }

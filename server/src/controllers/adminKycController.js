@@ -1,5 +1,6 @@
 import getPrisma from "../config/db.js";
 import { logActivity } from "../middleware/activityLog.js";
+import { processReferralKyc } from "./referralController.js";
 
 // Map Prisma Kyc record → admin API shape
 function mapKyc(kyc) {
@@ -123,6 +124,8 @@ export const approveKyc = async (req, res) => {
         console.error("KYC approval email failed:", mailErr);
       }
     }
+
+    await processReferralKyc(kyc.userId);
 
     await logActivity({
       userId: req.user.id,

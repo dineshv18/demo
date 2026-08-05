@@ -11,6 +11,7 @@ import KycVerification from "./pages/KycVerification";
 import Payments from "./pages/Payments";
 import Support from "./pages/Support";
 import Users from "./pages/Users";
+import ReferralSettings from "./pages/ReferralSettings";
 import type { ReactNode } from "react";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="payments" element={<Payments />} />
         <Route path="support" element={<Support />} />
         <Route path="activity" element={<Activity />} />
+        <Route path="referrals" element={<ReferralSettings />} />
         <Route path="settings" element={<div className="text-gray-900 dark:text-white text-lg font-semibold">Settings - Coming Soon</div>} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

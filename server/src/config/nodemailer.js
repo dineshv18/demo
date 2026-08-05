@@ -134,3 +134,43 @@ export const sendResetPasswordEmail = async (email, name, resetToken) => {
     `,
   });
 };
+
+// ─── Referral Notification Email ───
+export const sendReferralNotification = async (referrerEmail, referrerName, newUserName) => {
+  return getTransporter().sendMail({
+    from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: referrerEmail,
+    subject: "New Referral Sign-Up on Ovantra Financial!",
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <tr><td style="background:linear-gradient(135deg,#d4af37,#c9a84c);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">New Referral!</h1>
+                <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;">Someone joined using your referral code</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#374151;font-size:15px;margin:0 0 8px;">Hello ${referrerName},</p>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.6;"><strong>${newUserName}</strong> has registered using your referral link. When they complete KYC and make a deposit, you'll earn a commission!</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:20px;margin:0 0 20px;">
+                  <p style="color:#374151;font-size:13px;margin:0 0 8px;font-weight:600;">Next Steps:</p>
+                  <p style="color:#6b7280;font-size:13px;margin:0 0 4px;">1. User completes KYC verification</p>
+                  <p style="color:#6b7280;font-size:13px;margin:0 0 4px;">2. User makes their first deposit</p>
+                  <p style="color:#6b7280;font-size:13px;margin:0 0 4px;">3. You earn commission automatically!</p>
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${getEnv().CLIENT_URL || 'http://localhost:3000'}/dashboard/referral" style="display:inline-block;background:linear-gradient(135deg,#d4af37,#c9a84c);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View Referral Dashboard</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} Ovantra Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};

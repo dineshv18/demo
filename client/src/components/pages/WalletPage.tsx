@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   IconPlus, IconMinus, IconLoader2, IconAlertCircle,
   IconCheck, IconArrowUpRight, IconArrowDownLeft, IconClock,
-  IconRefresh, IconLock, IconShieldCheck, IconUpload, IconX,
+  IconRefresh, IconLock, IconShieldCheck, IconUpload, IconCreditCard,
   IconCopy,
 } from "@tabler/icons-react";
 import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type UsdPaymentInfo } from "@/lib/api";
@@ -72,7 +72,7 @@ export default function WalletPage() {
   const kycApproved = kyc?.status === "APPROVED";
   const balance = wallet ? parseFloat(wallet.balance) : 0;
   const frozen = wallet ? parseFloat(wallet.frozen) : 0;
-  const sym = currencySymbol(wallet?.currency);
+  const sym = currencySymbol();
   const hasPending = !!pendingRequest;
 
   const handleScreenshot = (file: File) => {
@@ -173,12 +173,6 @@ export default function WalletPage() {
     setWithdrawUpiId("");
     setWithdrawError("");
     setWithdrawSuccess(false);
-  };
-
-  const copyUpi = () => {
-    navigator.clipboard.writeText(upiId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });

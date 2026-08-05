@@ -44,7 +44,7 @@ function getClientIpFromReq(req) {
 // ─── REGISTER (Client users only) ───
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, ref } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -80,6 +80,24 @@ export const register = async (req, res) => {
     const user = await getPrisma().user.create({
       data: { name: name.trim(), email: email.toLowerCase().trim(), password: hashed, role: userRole, assignedRoleId },
     });
+
+    if (ref) {
+      const referrer = await getPrisma().user.findFirst({ where: { referralCode: ref } });
+      if (referrer && referrer.id !== user.id) {
+        await getPrisma().referral.create({
+          data: {
+            referrerId: referrer.id,
+            referredId: user.id,
+            code: ref,
+            status: "REGISTERED",
+          },
+        });
+        try {
+          const { sendReferralNotification } = await import("../config/nodemailer.js");
+          await sendReferralNotification(referrer.email, referrer.name, user.name);
+        } catch (e) { console.error("Referral notification email failed:", e); }
+      }
+    }
 
     const otp = generateOTP();
     await getPrisma().user.update({

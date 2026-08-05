@@ -43,6 +43,7 @@ const allNavItems = [
   { slug: "payments", to: "/dashboard/payments", label: "Payment Requests", icon: IconWallet },
   { slug: "support", to: "/dashboard/support", label: "Support Team", icon: IconHeadset },
   { slug: "activity", to: "/dashboard/activity", label: "Activity Logs", icon: IconActivity },
+  { slug: "referrals", to: "/dashboard/referrals", label: "Referral Settings", icon: IconUsers },
   { slug: "settings", to: "/dashboard/settings", label: "Settings", icon: IconSettings },
 ];
 

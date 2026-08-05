@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent, useCallback } from "react";
 import { authAPI } from "@/lib/api";
 import {
@@ -23,6 +23,8 @@ type View = "register" | "otp" | "success";
 
 export default function ClientRegister() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref");
   const [view, setView] = useState<View>("register");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -66,7 +68,7 @@ export default function ClientRegister() {
     if (!validateRegister()) return;
     setLoading(true); setErrors({});
     try {
-      await authAPI.register({ name, email, password });
+      await authAPI.register({ name, email, password, ref: refCode || undefined });
       startResendTimer();
       setView("otp");
     } catch (err: unknown) {

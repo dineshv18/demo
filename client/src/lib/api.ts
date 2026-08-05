@@ -133,7 +133,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 // ─── Auth API ───
 export const authAPI = {
-  register: (data: { name: string; email: string; password: string }) =>
+  register: (data: { name: string; email: string; password: string; ref?: string }) =>
     request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
 
   login: (data: { email: string; password: string }) =>
@@ -222,4 +222,59 @@ export const kycAPI = {
       body: formData,
       headers: {},
     }),
+};
+
+// ─── Referral Types ───
+export interface ReferralCode {
+  code: string;
+  link: string;
+}
+
+export interface ReferralUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface ReferralCommission {
+  id: string;
+  amount: string;
+  percentage: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface Referral {
+  id: string;
+  status: string;
+  registeredAt: string;
+  kycAt: string | null;
+  depositedAt: string | null;
+  referred: ReferralUser;
+  commissions: ReferralCommission[];
+}
+
+export interface ReferralStats {
+  total: number;
+  registered: number;
+  kycDone: number;
+  deposited: number;
+  totalCommission: number;
+}
+
+export interface HierarchyItem {
+  id: string;
+  status: string;
+  registeredAt: string;
+  referred: ReferralUser;
+  level: number;
+  subReferrals?: HierarchyItem[];
+}
+
+// ─── Referral API ───
+export const referralAPI = {
+  getMyCode: () => request<ReferralCode>("/referral/my-code"),
+  getMyReferrals: () => request<{ referrals: Referral[]; stats: ReferralStats }>("/referral/my-referrals"),
+  getHierarchy: () => request<{ hierarchy: HierarchyItem[] }>("/referral/hierarchy"),
 };

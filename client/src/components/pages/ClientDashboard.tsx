@@ -8,7 +8,7 @@ import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData 
 import {
   IconWallet, IconShieldCheck, IconShield, IconClock,
   IconArrowUpRight, IconArrowDownLeft, IconLoader2, IconLock,
-  IconAlertCircle, IconRefresh, IconCheck, IconX,
+  IconAlertCircle, IconCheck, IconX,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -77,7 +77,7 @@ export default function ClientDashboard() {
 
   const balance = wallet ? parseFloat(wallet.balance) : 0;
   const frozen = wallet ? parseFloat(wallet.frozen) : 0;
-  const sym = currencySymbol(wallet?.currency);
+  const sym = currencySymbol();
   const kycStatus = kyc?.status || "NOT_STARTED";
 
   const totalDeposits = transactions
