@@ -17,6 +17,9 @@ import adminPaymentsRoutes from "./routes/adminPayments.js";
 
 const app = express();
 
+// Trust reverse proxies (Nginx / Cloudflare) to extract accurate client IP
+app.set("trust proxy", 1);
+
 // ─── Helmet (Security Headers) ───
 app.use(helmet({
   contentSecurityPolicy: {

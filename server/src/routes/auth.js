@@ -9,57 +9,62 @@ import { bruteForceProtection } from "../middleware/bruteForce.js";
 
 const router = Router();
 
-// ─── Per-Route Rate Limiters ───
+// Helper function to extract client IP behind reverse proxy (e.g. Nginx, Cloudflare)
+const getClientIp = (req) => {
+  return req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+    || req.headers["x-real-ip"]
+    || req.socket?.remoteAddress
+    || "unknown";
+};
 
-// Login: 5 attempts per 15 min (strict - brute force protection)
+// Login: 15 attempts per 15 min
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 15,
   message: { message: "Too many login attempts. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
-      || req.headers["x-real-ip"]
-      || req.socket?.remoteAddress
-      || "unknown";
-  },
+  keyGenerator: getClientIp,
 });
 
-// Register: 3 per hour (prevent spam accounts)
+// Register: 50 attempts per 15 min (prevent lockout during testing / normal usage)
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 3,
-  message: { message: "Too many registration attempts. Please try again after 1 hour." },
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { message: "Too many registration attempts. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
 });
 
-// OTP: 3 per 10 min (prevent OTP bombing)
+// OTP: 20 per 10 min
 const otpLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 3,
+  max: 20,
   message: { message: "Too many OTP requests. Please try again after 10 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
 });
 
-// Forgot password: 3 per 15 min (prevent email bombing)
+// Forgot password: 15 per 15 min
 const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 3,
+  max: 15,
   message: { message: "Too many password reset requests. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
 });
 
-// Reset password: 5 per hour
+// Reset password: 20 per hour
 const resetPasswordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 20,
   message: { message: "Too many reset attempts. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
 });
 
 // ─── Routes ───
