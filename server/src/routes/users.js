@@ -75,15 +75,34 @@ router.post("/:id/toggle-active", async (req, res) => {
   }
 });
 
-// ─── DELETE USER ───
+// ─── DELETE USER (by id or email) ───
 router.delete("/:id", async (req, res) => {
   try {
-    const user = await getPrisma().user.findUnique({ where: { id: req.params.id } });
+    const { id } = req.params;
+    const { email } = req.query;
+
+    let user;
+    if (email) {
+      user = await getPrisma().user.findUnique({ where: { email } });
+    } else {
+      user = await getPrisma().user.findUnique({ where: { id } });
+    }
+
     if (!user) return res.status(404).json({ message: "User not found" });
     if (user.role === "SUPER_ADMIN") return res.status(400).json({ message: "Cannot delete super admin" });
 
-    await getPrisma().user.delete({ where: { id: req.params.id } });
-    return res.status(200).json({ message: "User deleted" });
+    // Delete related records first
+    await getPrisma().referralCommission.deleteMany({ where: { referrerId: user.id } });
+    await getPrisma().referralCommission.deleteMany({ where: { referredUserId: user.id } });
+    await getPrisma().referral.deleteMany({ where: { referrerId: user.id } });
+    await getPrisma().referral.deleteMany({ where: { referredUserId: user.id } });
+    await getPrisma().transaction.deleteMany({ where: { wallet: { userId: user.id } } });
+    await getPrisma().wallet.deleteMany({ where: { userId: user.id } });
+    await getPrisma().kycRequest.deleteMany({ where: { userId: user.id } });
+    await getPrisma().supportTicket.deleteMany({ where: { userId: user.id } });
+    await getPrisma().user.delete({ where: { id: user.id } });
+
+    return res.status(200).json({ message: `User ${user.email} deleted` });
   } catch (error) {
     console.error("Delete user error:", error);
     return res.status(500).json({ message: "Internal server error" });
