@@ -1,13 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 let prisma;
 
 function getPrisma() {
   if (!prisma) {
-    const adapter = new PrismaPg({
+    const pool = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
     });
+
+    const adapter = new PrismaPg(pool);
 
     prisma = new PrismaClient({
       adapter,
