@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  ANALYST
+  USER
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  password          String
+  role              UserRole  @default(USER)
+  isVerified        Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  otp               String?
+  otpExpiry         DateTime?
+  phoneOtp          String?
+  phoneOtpExpiry    DateTime?
+  resetToken        String?
+  resetExpiry       DateTime?
+  failedAttempts    Int       @default(0)
+  lockedUntil       DateTime?
+  lastFailedLogin   DateTime?
+  lastLoginAt       DateTime?
+  lastLoginIp       String?
+  assignedRoleId    String?
+  assignedRole      Role?     @relation(fields: [assignedRoleId], references: [id], onDelete: SetNull)
+  theme             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  activityLogs      ActivityLog[]
+  wallet            Wallet?
+  kyc               Kyc?
+}
+
+model Role {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  displayName   String
+  description   String?
+  color         String   @default("#6366f1")
+  theme         String   @default("default")
+  isSystem      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pages         RolePage[]
+  users         User[]
+}
+
+model Page {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?
+  category    String   @default("general")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles       RolePage[]
+}
+
+model RolePage {
+  id        String   @id @default(uuid())
+  roleId    String
+  pageId    String
+  canView   Boolean  @default(true)
+  canCreate Boolean  @default(false)
+  canEdit   Boolean  @default(false)
+  canDelete Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, pageId])
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Decimal  @default(0) @db.Decimal(18, 2)
+  frozen    Decimal  @default(0) @db.Decimal(18, 2)
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  walletId      String
+  type          TransactionType
+  amount        Decimal           @db.Decimal(18, 2)
+  status        TransactionStatus @default(PENDING)
+  description   String?
+  reference     String?
+  // QR-based manual payment flow fields
+  screenshotUrl    String?
+  transactionId    String?
+  upiId            String?
+  currency         String?
+  processedBy      String?
+  processedAt      DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  wallet        Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Kyc {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  status            KycStatus @default(NOT_STARTED)
+
+  fullName          String?
+  email             String?
+  emailVerified     Boolean   @default(false)
+  phone             String?
+  countryCode       String?
+  phoneVerified     Boolean   @default(false)
+  gender            String?
+  dateOfBirth       DateTime?
+  age               Int?
+  country           String?
+  governmentIdType  String?
+  documentUrl       String?
+  documentFileName  String?
+
+  rejectionReason   String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  resubmitAfter     DateTime?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String
+  page        String?
+  details     Json?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
