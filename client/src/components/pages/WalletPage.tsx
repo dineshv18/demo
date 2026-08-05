@@ -6,11 +6,11 @@ import {
   IconPlus, IconMinus, IconLoader2, IconAlertCircle,
   IconCheck, IconArrowUpRight, IconArrowDownLeft, IconClock,
   IconRefresh, IconLock, IconShieldCheck, IconUpload, IconX,
-  IconCopy, IconCreditCard,
+  IconCopy,
 } from "@tabler/icons-react";
 import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type UsdPaymentInfo } from "@/lib/api";
 
-const currencySymbol = (c?: string | null) => (c === "INR" ? "₹" : "$");
+const currencySymbol = () => "$";
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
@@ -41,8 +41,6 @@ export default function WalletPage() {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   const [copied, setCopied] = useState(false);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
-  const [currencyLoading, setCurrencyLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchData(); }, []);
@@ -64,13 +62,6 @@ export default function WalletPage() {
       }
       if (txRes.status === "fulfilled") setTransactions(txRes.value.transactions);
       if (kycRes.status === "fulfilled") setKyc(kycRes.value.kyc);
-
-      // Auto-show currency selection if KYC approved, no transactions yet, wallet loaded
-      const wData = walletRes.status === "fulfilled" ? walletRes.value : null;
-      const kData = kycRes.status === "fulfilled" ? kycRes.value.kyc : null;
-      if (wData && kData?.status === "APPROVED" && !wData.currencyLocked) {
-        setShowCurrencyModal(true);
-      }
     } catch {
       setError("Failed to load wallet data");
     } finally {
@@ -190,19 +181,6 @@ export default function WalletPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleCurrencyChange = async (newCurrency: "INR" | "USD") => {
-    setCurrencyLoading(true);
-    try {
-      await walletAPI.setCurrency(newCurrency);
-      await fetchData();
-      setShowCurrencyModal(false);
-    } catch {
-      setError("Failed to set currency");
-    } finally {
-      setCurrencyLoading(false);
-    }
-  };
-
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const statusColor = (s: string) => {
@@ -226,12 +204,8 @@ export default function WalletPage() {
         <div className="flex items-center gap-3">
           {/* Currency Badge */}
           {wallet?.currency && (
-            <span className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border ${
-              wallet.currency === "INR"
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                : "border-blue-500/30 bg-blue-500/10 text-blue-500"
-            }`}>
-              {wallet.currency === "INR" ? "₹ INR" : "$ USD"}
+            <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border border-blue-500/30 bg-blue-500/10 text-blue-500">
+              $ USD
               {currencyLocked && <IconLock className="h-3 w-3 opacity-50" />}
             </span>
           )}
@@ -424,68 +398,36 @@ export default function WalletPage() {
               </div>
             ) : depositStep === "qr" ? (
               <>
-                {wallet?.currency === "INR" ? (
-                  <>
-                    <p className="text-sm text-muted-foreground text-center">Scan the QR code below to make payment</p>
+                <p className="text-sm text-muted-foreground text-center">Make a bank transfer to the details below</p>
 
-                    {/* INR QR Code */}
-                    <div className="flex flex-col items-center gap-3 py-4">
-                      <div className="rounded-xl border-2 border-border bg-white p-4">
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${encodeURIComponent(upiId)}&pn=Ovantra`}
-                          alt="UPI QR Code"
-                          className="h-48 w-48"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">Scan with any UPI app</p>
+                {/* USD Bank Details */}
+                <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Bank Name</span>
+                    <span className="text-sm font-semibold text-foreground">{usdPayment?.bankName || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Account Name</span>
+                    <span className="text-sm font-semibold text-foreground">{usdPayment?.accountName || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Account Number</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.accountNumber || "—"}</span>
+                      <button onClick={() => { navigator.clipboard.writeText(usdPayment?.accountNumber || ""); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-1 text-xs text-brand hover:underline">
+                        <IconCopy className="h-3.5 w-3.5" /> {copied ? "Copied!" : "Copy"}
+                      </button>
                     </div>
-
-                    {/* UPI ID */}
-                    <div className="rounded-lg border border-border bg-accent/50 p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Send payment to UPI ID:</p>
-                      <div className="flex items-center justify-between">
-                        <p className="font-mono text-sm font-semibold text-foreground">{upiId}</p>
-                        <button onClick={copyUpi} className="flex items-center gap-1 text-xs text-brand hover:underline">
-                          <IconCopy className="h-3.5 w-3.5" />
-                          {copied ? "Copied!" : "Copy"}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm text-muted-foreground text-center">Make a bank transfer to the details below</p>
-
-                    {/* USD Bank Details */}
-                    <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Bank Name</span>
-                        <span className="text-sm font-semibold text-foreground">{usdPayment?.bankName || "—"}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Account Name</span>
-                        <span className="text-sm font-semibold text-foreground">{usdPayment?.accountName || "—"}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Account Number</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.accountNumber || "—"}</span>
-                          <button onClick={() => { navigator.clipboard.writeText(usdPayment?.accountNumber || ""); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-1 text-xs text-brand hover:underline">
-                            <IconCopy className="h-3.5 w-3.5" /> {copied ? "Copied!" : "Copy"}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Routing Number</span>
-                        <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.routingNumber || "—"}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">SWIFT Code</span>
-                        <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.swiftCode || "—"}</span>
-                      </div>
-                    </div>
-                  </>
-                )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Routing Number</span>
+                    <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.routingNumber || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">SWIFT Code</span>
+                    <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.swiftCode || "—"}</span>
+                  </div>
+                </div>
 
                 <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
                   After payment, click &quot;I&apos;ve Paid&quot; to submit your transaction details
@@ -510,7 +452,7 @@ export default function WalletPage() {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Amount ({wallet?.currency || "INR"}) *</label>
+                    <label className="text-xs font-medium text-muted-foreground">Amount (USD) *</label>
                     <div className="relative mt-1">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
                       <input
@@ -609,7 +551,7 @@ export default function WalletPage() {
                   <IconCheck className="h-8 w-8 text-emerald-500" />
                 </div>
                 <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Withdrawal Request Submitted!</p>
-                <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your {wallet?.currency === "INR" ? "UPI" : "bank account"} within 12-24 working hours.</p>
+                <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your bank account within 12-24 working hours.</p>
                 <button onClick={closeWithdraw} className="w-full rounded-lg bg-foreground py-2.5 text-sm font-semibold text-background hover:bg-foreground/90 transition-colors">Done</button>
               </div>
             ) : (
@@ -630,8 +572,8 @@ export default function WalletPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">{wallet?.currency === "INR" ? "Your UPI ID" : "Your Bank UPI ID"} (where you&apos;ll receive funds) *</label>
-                    <input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder={wallet?.currency === "INR" ? "yourname@upi" : "yourname@bank"}
+                    <label className="text-xs font-medium text-muted-foreground">Your UPI ID (where you&apos;ll receive funds) *</label>
+                    <input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="yourname@upi"
                       className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background" />
                   </div>
                 </div>
@@ -648,49 +590,6 @@ export default function WalletPage() {
         </div>
       )}
 
-      {/* One-Time Currency Selection Modal */}
-      {showCurrencyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 space-y-5">
-            <div className="text-center space-y-2">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20">
-                <IconCreditCard className="h-7 w-7 text-brand" />
-              </div>
-              <h3 className="font-display text-lg font-bold">Select Your Currency</h3>
-              <p className="text-sm text-muted-foreground">Choose how you want to transact. This cannot be changed after your first transaction.</p>
-            </div>
-
-            {currencyLoading ? (
-              <div className="flex justify-center py-4"><IconLoader2 className="h-6 w-6 animate-spin text-brand" /></div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleCurrencyChange("INR")}
-                  className="group flex flex-col items-center gap-2 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 p-5 hover:border-emerald-500 hover:bg-emerald-500/10 transition-all"
-                >
-                  <span className="text-3xl">₹</span>
-                  <span className="font-display text-sm font-bold text-emerald-500">INR</span>
-                  <span className="text-xs text-muted-foreground">Indian Rupee</span>
-                  <span className="text-[10px] text-emerald-500/70">QR + UPI Payment</span>
-                </button>
-                <button
-                  onClick={() => handleCurrencyChange("USD")}
-                  className="group flex flex-col items-center gap-2 rounded-xl border-2 border-blue-500/30 bg-blue-500/5 p-5 hover:border-blue-500 hover:bg-blue-500/10 transition-all"
-                >
-                  <span className="text-3xl">$</span>
-                  <span className="font-display text-sm font-bold text-blue-500">USD</span>
-                  <span className="text-xs text-muted-foreground">US Dollar</span>
-                  <span className="text-[10px] text-blue-500/70">Bank Transfer</span>
-                </button>
-              </div>
-            )}
-
-            <p className="text-[10px] text-center text-muted-foreground/60">
-              You can change this anytime before your first transaction. After that it&apos;s locked.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const currencySymbol = (c?: string | null) => (c === "INR" ? "₹" : "$");
+const currencySymbol = () => "$";
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -189,10 +189,8 @@ export default function ClientDashboard() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Currency</span>
-                <span className={`inline-flex items-center gap-1 text-xs font-bold ${
-                  wallet?.currency === "INR" ? "text-emerald-500" : "text-blue-500"
-                }`}>
-                  {wallet?.currency === "INR" ? "₹ INR" : "$ USD"}
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-500">
+                  $ USD
                   {wallet?.currency && <IconLock className="h-3 w-3 opacity-40" />}
                 </span>
               </div>

@@ -33,25 +33,14 @@ export const getWallet = async (req, res) => {
 
 export const setCurrency = async (req, res) => {
   try {
-    const { currency } = req.body;
-    if (!currency || !["INR", "USD"].includes(currency)) {
-      return res.status(400).json({ message: "Currency must be INR or USD" });
-    }
-
     let wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
     if (!wallet) {
-      wallet = await getPrisma().wallet.create({ data: { userId: req.user.id, currency } });
-      return res.status(200).json({ message: `Currency set to ${currency}`, wallet });
+      wallet = await getPrisma().wallet.create({ data: { userId: req.user.id, currency: "USD" } });
+      return res.status(200).json({ message: "Currency set to USD", wallet });
     }
 
-    // Lock: if any transaction exists, currency cannot be changed
-    const txCount = await getPrisma().transaction.count({ where: { walletId: wallet.id } });
-    if (txCount > 0) {
-      return res.status(400).json({ message: "Currency cannot be changed after transactions. Contact support." });
-    }
-
-    wallet = await getPrisma().wallet.update({ where: { id: wallet.id }, data: { currency } });
-    return res.status(200).json({ message: `Currency set to ${currency}`, wallet });
+    wallet = await getPrisma().wallet.update({ where: { id: wallet.id }, data: { currency: "USD" } });
+    return res.status(200).json({ message: "Currency set to USD", wallet });
   } catch (error) {
     console.error("Set currency error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -90,7 +79,7 @@ export const requestDeposit = async (req, res) => {
     const file = req.file;
 
     if (!amount || amount <= 0) return res.status(400).json({ message: "Invalid amount" });
-    if (amount < 10) return res.status(400).json({ message: `Minimum deposit is ${wallet.currency === "INR" ? "₹10" : "$10"}` });
+    if (amount < 10) return res.status(400).json({ message: "Minimum deposit is $10" });
 
     const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
     if (!kyc || kyc.status !== "APPROVED") {
@@ -143,7 +132,7 @@ export const requestWithdrawal = async (req, res) => {
     const { amount, upiId } = req.body;
 
     if (!amount || amount <= 0) return res.status(400).json({ message: "Invalid amount" });
-    if (amount < 10) return res.status(400).json({ message: `Minimum withdrawal is ${wallet.currency === "INR" ? "₹10" : "$10"}` });
+    if (amount < 10) return res.status(400).json({ message: "Minimum withdrawal is $10" });
     if (!upiId || !upiId.trim()) return res.status(400).json({ message: "Your UPI ID is required to receive the withdrawal" });
 
     const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });

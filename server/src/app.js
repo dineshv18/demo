@@ -50,7 +50,7 @@ app.use(cookieParser());
 // ─── Global Rate Limiter ───
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "development" ? 1000 : 100,
+  max: process.env.NODE_ENV === "development" ? 1000 : 500,
   message: { message: "Too many requests. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -62,6 +62,21 @@ const globalLimiter = rateLimit({
   },
 });
 app.use(globalLimiter);
+
+// ─── Admin Rate Limiter (higher limit for authenticated admin routes) ───
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "development" ? 2000 : 1000,
+  message: { message: "Too many admin requests. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+      || req.headers["x-real-ip"]
+      || req.socket?.remoteAddress
+      || "unknown";
+  },
+});
 
 // ─── Disable fingerprinting ───
 app.disable("x-powered-by");
@@ -86,8 +101,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/kyc", kycRoutes);
-app.use("/api/admin/kyc", adminKycRoutes);
-app.use("/api/admin/payments", adminPaymentsRoutes);
+app.use("/api/admin/kyc", adminLimiter, adminKycRoutes);
+app.use("/api/admin/payments", adminLimiter, adminPaymentsRoutes);
 
 // ─── Health Check ───
 app.get("/api/health", (req, res) => {

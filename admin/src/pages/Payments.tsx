@@ -132,7 +132,7 @@ export default function Payments() {
   });
 
   const fmtDate = (d: string) => new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  const fmtAmt = (p: PaymentRequest) => `${p.currency || ""} ${parseFloat(p.amount).toFixed(2)}`;
+  const fmtAmt = (p: PaymentRequest) => `$ ${parseFloat(p.amount).toFixed(2)}`;
 
   return (
     <div className="space-y-6">

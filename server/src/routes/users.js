@@ -90,24 +90,20 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// ─── SET USER WALLET CURRENCY (INR/USD) ───
+// ─── SET USER WALLET CURRENCY (USD only) ───
 router.post("/:id/currency", async (req, res) => {
   try {
-    const { currency } = req.body;
-    if (!["INR", "USD"].includes(currency)) {
-      return res.status(400).json({ message: "Currency must be INR or USD" });
-    }
     const user = await getPrisma().user.findUnique({ where: { id: req.params.id } });
     if (!user) return res.status(404).json({ message: "User not found" });
     if (user.role === "SUPER_ADMIN") return res.status(400).json({ message: "Cannot modify super admin" });
 
     const wallet = await getPrisma().wallet.upsert({
       where: { userId: user.id },
-      update: { currency },
-      create: { userId: user.id, currency },
+      update: { currency: "USD" },
+      create: { userId: user.id, currency: "USD" },
     });
 
-    return res.status(200).json({ message: `Currency set to ${currency}`, wallet });
+    return res.status(200).json({ message: "Currency set to USD", wallet });
   } catch (error) {
     console.error("Set currency error:", error);
     return res.status(500).json({ message: "Internal server error" });

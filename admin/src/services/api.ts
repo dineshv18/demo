@@ -209,6 +209,6 @@ export const usersAPI = {
   },
   toggleActive: (id: string) =>
     request<{ message: string; user: AdminUser }>(`/users/${id}/toggle-active`, { method: "POST" }),
-  setCurrency: (id: string, currency: "INR" | "USD") =>
+  setCurrency: (id: string, currency: "USD") =>
     request<{ message: string; wallet: { userId: string; currency: string } }>(`/users/${id}/currency`, { method: "POST", body: JSON.stringify({ currency }) }),
 };

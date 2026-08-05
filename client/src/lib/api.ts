@@ -193,7 +193,7 @@ export const walletAPI = {
       body: JSON.stringify({ amount, upiId }),
     }),
 
-  setCurrency: (currency: "INR" | "USD") =>
+  setCurrency: (currency: "USD") =>
     request<{ message: string; wallet: WalletData }>("/wallet/currency", {
       method: "POST",
       body: JSON.stringify({ currency }),

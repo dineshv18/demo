@@ -36,12 +36,12 @@ export default function Users() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const setCurrency = async (id: string, currency: "INR" | "USD") => {
+  const setCurrency = async (id: string) => {
     setUpdating(id);
     try {
-      await usersAPI.setCurrency(id, currency);
-      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, wallet: { currency, balance: u.wallet?.balance || "0" } } : u));
-      showToast("success", `Currency set to ${currency}`);
+      await usersAPI.setCurrency(id, "USD");
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, wallet: { currency: "USD", balance: u.wallet?.balance || "0" } } : u));
+      showToast("success", "Currency set to USD");
     } catch (err: any) {
       showToast("error", err.message || "Failed to update currency");
     } finally {
@@ -74,7 +74,7 @@ export default function Users() {
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage client users, set their wallet currency (INR/USD), and toggle active status.</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage client users and toggle active status.</p>
       </div>
 
       <div className="relative">
@@ -103,7 +103,7 @@ export default function Users() {
                 <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                   <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">User</th>
                   <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Role</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Currency</th>
+                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Balance</th>
                   <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
                   <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Joined</th>
                   <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Actions</th>
@@ -129,18 +129,9 @@ export default function Users() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-800 p-0.5 bg-gray-50 dark:bg-gray-800/50">
-                        {(["USD", "INR"] as const).map((c) => (
-                          <button key={c} onClick={() => setCurrency(u.id, c)} disabled={updating === u.id}
-                            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all disabled:opacity-50 ${
-                              u.wallet?.currency === c
-                                ? "bg-amber-500 text-white shadow"
-                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            }`}>
-                            {c}
-                          </button>
-                        ))}
-                      </div>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                        $ USD
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       {u.isActive ? (
