@@ -383,6 +383,9 @@ export default function KycPage() {
   const [ccSearch, setCcSearch] = useState("");
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
+  const [dobYear, setDobYear] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
   const [country, setCountry] = useState("");
 
   // Step 2 state - Email OTP
@@ -407,12 +410,7 @@ export default function KycPage() {
   const age = calculateAge(dob);
   const isUnder18 = age !== null && age < 18;
 
-  // ─── DOB selects (Year / Month / Day) — clean & unambiguous ───
-  const dobParts = dob ? dob.split("-") : ["", "", ""];
-  const dobYear = dobParts[0] || "";
-  const dobMonth = dobParts[1] || "";
-  const dobDay = dobParts[2] || "";
-
+  // ─── DOB selects (Year / Month / Day) ───
   const daysInMonth = (y: string, m: string) => {
     if (!y || !m) return 31;
     return new Date(parseInt(y), parseInt(m), 0).getDate();
@@ -422,10 +420,18 @@ export default function KycPage() {
     const y = part === "y" ? value : dobYear;
     const m = part === "m" ? value : dobMonth;
     const d = part === "d" ? value : dobDay;
+
+    if (part === "y") setDobYear(value);
+    if (part === "m") setDobMonth(value);
+    if (part === "d") setDobDay(value);
+
     if (y && m && d) {
       // Clamp day if month changed and previous day invalid
       const max = daysInMonth(y, m);
       const finalDay = parseInt(d) > max ? String(max).padStart(2, "0") : d.padStart(2, "0");
+      if (finalDay !== d) {
+        setDobDay(finalDay);
+      }
       setDob(`${y}-${m.padStart(2, "0")}-${finalDay}`);
     } else {
       setDob("");
@@ -458,7 +464,13 @@ export default function KycPage() {
       if (res.kyc.phone) setPhone(res.kyc.phone);
       if (res.kyc.countryCode) setCountryCode(res.kyc.countryCode);
       if (res.kyc.gender) setGender(res.kyc.gender);
-      if (res.kyc.dateOfBirth) setDob(res.kyc.dateOfBirth);
+      if (res.kyc.dateOfBirth) {
+        setDob(res.kyc.dateOfBirth);
+        const parts = res.kyc.dateOfBirth.split("-");
+        if (parts[0]) setDobYear(parts[0]);
+        if (parts[1]) setDobMonth(parts[1]);
+        if (parts[2]) setDobDay(parts[2]);
+      }
       if (res.kyc.country) setCountry(res.kyc.country);
       if (res.kyc.governmentIdType) setIdType(res.kyc.governmentIdType);
       if (res.kyc.emailVerified) setOtpSuccess(true);
