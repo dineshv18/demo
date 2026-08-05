@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   IconUsers, IconShield, IconMail, IconChartBar,
-  IconUserCheck, IconWallet, IconAlertTriangle, IconArrowRight,
+  IconUserCheck, IconWallet, IconArrowRight,
 } from "@tabler/icons-react";
 
 export default function Dashboard() {
