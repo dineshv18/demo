@@ -14,7 +14,6 @@ const currencySymbol = () => "$";
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [upiId, setUpiId] = useState("");
   const [usdPayment, setUsdPayment] = useState<UsdPaymentInfo | null>(null);
   const [currencyLocked, setCurrencyLocked] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<TransactionData | null>(null);
@@ -55,7 +54,6 @@ export default function WalletPage() {
       ]);
       if (walletRes.status === "fulfilled") {
         setWallet(walletRes.value.wallet);
-        setUpiId(walletRes.value.upiId || "");
         setUsdPayment(walletRes.value.usdPayment || null);
         setPendingRequest(walletRes.value.pendingRequest);
         setCurrencyLocked(walletRes.value.currencyLocked);

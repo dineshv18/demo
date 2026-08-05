@@ -36,19 +36,6 @@ export default function Users() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const setCurrency = async (id: string) => {
-    setUpdating(id);
-    try {
-      await usersAPI.setCurrency(id, "USD");
-      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, wallet: { currency: "USD", balance: u.wallet?.balance || "0" } } : u));
-      showToast("success", "Currency set to USD");
-    } catch (err: any) {
-      showToast("error", err.message || "Failed to update currency");
-    } finally {
-      setUpdating(null);
-    }
-  };
-
   const toggleActive = async (id: string) => {
     setUpdating(id);
     try {

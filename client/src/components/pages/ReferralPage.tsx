@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  IconCopy, IconUsers, IconCheck, IconClock, IconWallet,
+  IconCopy, IconUsers, IconCheck, IconWallet,
   IconShare, IconLink, IconUserPlus, IconTrophy, IconRefresh,
   IconLoader2, IconAlertCircle, IconChevronRight, IconShield,
 } from "@tabler/icons-react";

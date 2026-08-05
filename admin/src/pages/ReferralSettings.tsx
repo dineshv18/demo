@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import { IconSettings, IconCheck, IconLoader2, IconUsers, IconWallet } from "@tabler/icons-react";
-import { referralAPI, type ReferralSettings as ReferralSettingsType, type AdminReferral } from "../services/api";
+import { referralAPI, type AdminReferral } from "../services/api";
 
 export default function ReferralSettings() {
-  const [settings, setSettings] = useState<ReferralSettingsType | null>(null);
   const [rate, setRate] = useState("2");
   const [referrals, setReferrals] = useState<AdminReferral[]>([]);
   const [total, setTotal] = useState(0);
@@ -25,7 +24,6 @@ export default function ReferralSettings() {
         referralAPI.getAll({ limit: 50 }),
       ]);
       if (settingsRes.status === "fulfilled") {
-        setSettings(settingsRes.value.settings);
         setRate(settingsRes.value.settings.commissionRate);
       }
       if (referralsRes.status === "fulfilled") {
