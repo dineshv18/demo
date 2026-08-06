@@ -26,17 +26,17 @@ const getBaseHeaders = () => {
     "Reply-To": env.BREVO_SENDER_EMAIL,
     "List-Unsubscribe": `<mailto:${env.BREVO_SENDER_EMAIL}?subject=unsubscribe>`,
     "X-Mailer": "Ovantra Financial",
-    "Precedence": "bulk",
   };
 };
 
 // ─── OTP Email ───
 export const sendOTP = async (email, otp) => {
   return getTransporter().sendMail({
-    from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    from: `"Ovantra Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
-    subject: "Your OTP for Ovantra Financial",
+    subject: `Your verification code: ${otp}`,
     headers: getBaseHeaders(),
+    text: `Your Ovantra Financial verification code is: ${otp}\n\nThis code expires in 10 minutes.\nIf you didn't request this, ignore this email.\n\nOvantra Financial Team`,
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -69,10 +69,11 @@ export const sendOTP = async (email, otp) => {
 // ─── Welcome Email (after OTP verified) ───
 export const sendWelcomeEmail = async (email, name) => {
   return getTransporter().sendMail({
-    from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    from: `"Ovantra Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
     subject: "Welcome to Ovantra Financial!",
     headers: getBaseHeaders(),
+    text: `Hello ${name},\n\nYour email has been verified and your account is now active.\nYou can start trading Forex and Crypto CFDs on our platform.\n\nGo to your dashboard: ${getEnv().CLIENT_URL || 'http://localhost:3000'}\n\nOvantra Financial Team`,
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -116,10 +117,11 @@ export const sendWelcomeEmail = async (email, name) => {
 export const sendResetPasswordEmail = async (email, name, resetToken) => {
   const resetUrl = `${getEnv().CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
   return getTransporter().sendMail({
-    from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    from: `"Ovantra Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
     subject: "Reset Your Password — Ovantra Financial",
     headers: getBaseHeaders(),
+    text: `Hello ${name},\n\nYou requested a password reset. Click the link below to reset your password:\n\n${resetUrl}\n\nThis link expires in 1 hour.\nIf you didn't request this, ignore this email.\n\nOvantra Financial Team`,
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -152,10 +154,11 @@ export const sendResetPasswordEmail = async (email, name, resetToken) => {
 // ─── Referral Notification Email ───
 export const sendReferralNotification = async (referrerEmail, referrerName, newUserName) => {
   return getTransporter().sendMail({
-    from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    from: `"Ovantra Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: referrerEmail,
     subject: "New Referral Sign-Up on Ovantra Financial!",
     headers: getBaseHeaders(),
+    text: `Hello ${referrerName},\n\n${newUserName} has registered using your referral link.\nWhen they complete KYC and make a deposit, you'll earn a commission!\n\nView your referral dashboard: ${getEnv().CLIENT_URL || 'http://localhost:3000'}/dashboard/referral\n\nOvantra Financial Team`,
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
