@@ -21,7 +21,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 const COUNTRY_CODES = [
   { code: "+1", country: "USA", flag: "🇺🇸" },
@@ -349,11 +349,21 @@ const ID_TYPES: Record<string, string[]> = {
 
 const DEFAULT_ID_TYPES = ["Passport", "National ID", "Driver's License"];
 
+const ADDRESS_PROOF_TYPES = [
+  "Utility Bill",
+  "Bank Statement",
+  "Rent Agreement",
+  "Insurance Policy",
+  "Government Letter",
+  "Voter Registration",
+];
+
 const STEP_TITLES: Record<Step, string> = {
   1: "Personal Information",
   2: "Email Verification",
-  3: "Document Upload",
-  4: "Review & Submit",
+  3: "Government ID",
+  4: "Address Proof",
+  5: "Review & Submit",
 };
 
 function calculateAge(dob: string): number | null {
@@ -396,12 +406,27 @@ export default function KycPage() {
   const [otpSuccess, setOtpSuccess] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Step 3 state
+  // Step 3 state - Government ID
   const [idType, setIdType] = useState("");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
+  const [documentFileBack, setDocumentFileBack] = useState<File | null>(null);
+  const [documentPreviewBack, setDocumentPreviewBack] = useState<string | null>(null);
+  const [dragActiveFront, setDragActiveFront] = useState(false);
+  const [dragActiveBack, setDragActiveBack] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefBack = useRef<HTMLInputElement>(null);
+
+  // Step 4 state - Address Proof
+  const [addressProofType, setAddressProofType] = useState("");
+  const [addressFile, setAddressFile] = useState<File | null>(null);
+  const [addressPreview, setAddressPreview] = useState<string | null>(null);
+  const [addressFileBack, setAddressFileBack] = useState<File | null>(null);
+  const [addressPreviewBack, setAddressPreviewBack] = useState<string | null>(null);
+  const [dragActiveAddrFront, setDragActiveAddrFront] = useState(false);
+  const [dragActiveAddrBack, setDragActiveAddrBack] = useState(false);
+  const addrFileInputRef = useRef<HTMLInputElement>(null);
+  const addrFileInputRefBack = useRef<HTMLInputElement>(null);
 
   // Step 4
   const [submitted, setSubmitted] = useState(false);
@@ -557,39 +582,115 @@ export default function KycPage() {
     }
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = (file: File, side: "front" | "back") => {
     if (file.size > 5 * 1024 * 1024) {
       setError("File must be less than 5MB");
       return;
     }
-    setDocumentFile(file);
-    setError("");
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (e) => setDocumentPreview(e.target?.result as string);
-      reader.readAsDataURL(file);
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!validTypes.includes(file.type)) {
+      setError("File must be JPEG, PNG, WebP, or PDF");
+      return;
+    }
+    if (side === "front") {
+      setDocumentFile(file);
+      setError("");
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => setDocumentPreview(e.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setDocumentPreview(null);
+      }
     } else {
-      setDocumentPreview(null);
+      setDocumentFileBack(file);
+      setError("");
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => setDocumentPreviewBack(e.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setDocumentPreviewBack(null);
+      }
     }
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e: React.DragEvent, side: "front" | "back") => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
-    if (e.type === "dragleave") setDragActive(false);
+    if (side === "front") {
+      if (e.type === "dragenter" || e.type === "dragover") setDragActiveFront(true);
+      if (e.type === "dragleave") setDragActiveFront(false);
+    } else {
+      if (e.type === "dragenter" || e.type === "dragover") setDragActiveBack(true);
+      if (e.type === "dragleave") setDragActiveBack(false);
+    }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent, side: "front" | "back") => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
+    if (side === "front") setDragActiveFront(false);
+    else setDragActiveBack(false);
+    if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0], side);
+  };
+
+  const handleAddressFile = (file: File, side: "front" | "back") => {
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File must be less than 5MB");
+      return;
+    }
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!validTypes.includes(file.type)) {
+      setError("File must be JPEG, PNG, WebP, or PDF");
+      return;
+    }
+    if (side === "front") {
+      setAddressFile(file);
+      setError("");
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => setAddressPreview(e.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setAddressPreview(null);
+      }
+    } else {
+      setAddressFileBack(file);
+      setError("");
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => setAddressPreviewBack(e.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setAddressPreviewBack(null);
+      }
+    }
+  };
+
+  const handleAddressDrag = (e: React.DragEvent, side: "front" | "back") => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (side === "front") {
+      if (e.type === "dragenter" || e.type === "dragover") setDragActiveAddrFront(true);
+      if (e.type === "dragleave") setDragActiveAddrFront(false);
+    } else {
+      if (e.type === "dragenter" || e.type === "dragover") setDragActiveAddrBack(true);
+      if (e.type === "dragleave") setDragActiveAddrBack(false);
+    }
+  };
+
+  const handleAddressDrop = (e: React.DragEvent, side: "front" | "back") => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (side === "front") setDragActiveAddrFront(false);
+    else setDragActiveAddrBack(false);
+    if (e.dataTransfer.files?.[0]) handleAddressFile(e.dataTransfer.files[0], side);
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !phone || !gender || !dob || !country || !idType || !documentFile) {
-      setError("Please fill all fields and upload a document");
+    if (!fullName || !phone || !gender || !dob || !country || !idType || !documentFile || !documentFileBack || !addressProofType || !addressFile || !addressFileBack) {
+      setError("Please fill all fields and upload all required documents");
       return;
     }
     setLoading(true);
@@ -603,7 +704,11 @@ export default function KycPage() {
       formData.append("dateOfBirth", dob);
       formData.append("country", country);
       formData.append("governmentIdType", idType);
-      formData.append("document", documentFile);
+      formData.append("addressProofType", addressProofType);
+      formData.append("documentFront", documentFile);
+      formData.append("documentBack", documentFileBack);
+      formData.append("addressFront", addressFile);
+      formData.append("addressBack", addressFileBack);
       await kycAPI.submit(formData);
       setSubmitted(true);
     } catch (err) {
@@ -1209,14 +1314,14 @@ export default function KycPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Upload Document</Label>
+                  <Label>Upload Document — Front</Label>
                   <div
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
+                    onDragEnter={(e) => handleDrag(e, "front")}
+                    onDragLeave={(e) => handleDrag(e, "front")}
+                    onDragOver={(e) => handleDrag(e, "front")}
+                    onDrop={(e) => handleDrop(e, "front")}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActive
+                    className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveFront
                         ? "border-brand bg-brand/5"
                         : documentFile
                           ? "border-emerald-500/50 bg-emerald-500/5"
@@ -1229,7 +1334,7 @@ export default function KycPage() {
                       accept="image/*,.pdf"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files?.[0]) handleFile(e.target.files[0]);
+                        if (e.target.files?.[0]) handleFile(e.target.files[0], "front");
                       }}
                     />
                     {documentFile ? (
@@ -1237,7 +1342,7 @@ export default function KycPage() {
                         {documentPreview ? (
                           <img
                             src={documentPreview}
-                            alt="Preview"
+                            alt="Front Preview"
                             className="max-h-32 rounded-lg object-contain mb-2"
                           />
                         ) : (
@@ -1271,7 +1376,77 @@ export default function KycPage() {
                           <span className="text-brand font-medium">browse</span>
                         </p>
                         <p className="text-xs text-muted-foreground/60 mt-1">
-                          PNG, JPG, PDF up to 5MB
+                          Front side — PNG, JPG, PDF up to 5MB
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Upload Document — Back</Label>
+                  <div
+                    onDragEnter={(e) => handleDrag(e, "back")}
+                    onDragLeave={(e) => handleDrag(e, "back")}
+                    onDragOver={(e) => handleDrag(e, "back")}
+                    onDrop={(e) => handleDrop(e, "back")}
+                    onClick={() => fileInputRefBack.current?.click()}
+                    className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveBack
+                        ? "border-brand bg-brand/5"
+                        : documentFileBack
+                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          : "border-border hover:border-brand/50 hover:bg-accent/50"
+                      }`}
+                  >
+                    <input
+                      ref={fileInputRefBack}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleFile(e.target.files[0], "back");
+                      }}
+                    />
+                    {documentFileBack ? (
+                      <>
+                        {documentPreviewBack ? (
+                          <img
+                            src={documentPreviewBack}
+                            alt="Back Preview"
+                            className="max-h-32 rounded-lg object-contain mb-2"
+                          />
+                        ) : (
+                          <IconFile className="h-10 w-10 text-muted-foreground mb-2" />
+                        )}
+                        <p className="text-sm font-medium text-center break-all px-2">
+                          {documentFileBack.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {(documentFileBack.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDocumentFileBack(null);
+                            setDocumentPreviewBack(null);
+                          }}
+                          className="mt-2 text-xs text-destructive hover:text-destructive"
+                        >
+                          Remove
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload className="h-10 w-10 text-muted-foreground/40 mb-2" />
+                        <p className="text-sm text-muted-foreground text-center">
+                          Drag & drop or{" "}
+                          <span className="text-brand font-medium">browse</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">
+                          Back side — PNG, JPG, PDF up to 5MB
                         </p>
                       </>
                     )}
@@ -1291,12 +1466,145 @@ export default function KycPage() {
                   <Button
                     type="button"
                     onClick={() => {
-                      if (!idType || !documentFile) {
-                        setError("Please select ID type and upload document");
+                      if (!idType || !documentFile || !documentFileBack) {
+                        setError("Please select ID type and upload both front and back of your government ID");
                         return;
                       }
                       setError("");
                       setStep(4);
+                    }}
+                    className="flex-1 btn-glow btn-glow-hover border-0"
+                  >
+                    Continue
+                    <IconArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Address Proof */}
+            {step === 4 && (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label>Address Proof Type</Label>
+                  <Select value={addressProofType} onValueChange={setAddressProofType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select document type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ADDRESS_PROOF_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Address Proof — Front</Label>
+                  <div
+                    onDragEnter={(e) => handleAddressDrag(e, "front")}
+                    onDragLeave={(e) => handleAddressDrag(e, "front")}
+                    onDragOver={(e) => handleAddressDrag(e, "front")}
+                    onDrop={(e) => handleAddressDrop(e, "front")}
+                    onClick={() => addrFileInputRef.current?.click()}
+                    className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveAddrFront
+                        ? "border-brand bg-brand/5"
+                        : addressFile
+                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          : "border-border hover:border-brand/50 hover:bg-accent/50"
+                      }`}
+                  >
+                    <input
+                      ref={addrFileInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleAddressFile(e.target.files[0], "front");
+                      }}
+                    />
+                    {addressFile ? (
+                      <>
+                        {addressPreview ? (
+                          <img src={addressPreview} alt="Front Preview" className="max-h-32 rounded-lg object-contain mb-2" />
+                        ) : (
+                          <IconFile className="h-10 w-10 text-muted-foreground mb-2" />
+                        )}
+                        <p className="text-sm font-medium text-center break-all px-2">{addressFile.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{(addressFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setAddressFile(null); setAddressPreview(null); }} className="mt-2 text-xs text-destructive hover:text-destructive">Remove</Button>
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload className="h-10 w-10 text-muted-foreground/40 mb-2" />
+                        <p className="text-sm text-muted-foreground text-center">Drag & drop or <span className="text-brand font-medium">browse</span></p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">Front side — PNG, JPG, PDF up to 5MB</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Address Proof — Back</Label>
+                  <div
+                    onDragEnter={(e) => handleAddressDrag(e, "back")}
+                    onDragLeave={(e) => handleAddressDrag(e, "back")}
+                    onDragOver={(e) => handleAddressDrag(e, "back")}
+                    onDrop={(e) => handleAddressDrop(e, "back")}
+                    onClick={() => addrFileInputRefBack.current?.click()}
+                    className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveAddrBack
+                        ? "border-brand bg-brand/5"
+                        : addressFileBack
+                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          : "border-border hover:border-brand/50 hover:bg-accent/50"
+                      }`}
+                  >
+                    <input
+                      ref={addrFileInputRefBack}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleAddressFile(e.target.files[0], "back");
+                      }}
+                    />
+                    {addressFileBack ? (
+                      <>
+                        {addressPreviewBack ? (
+                          <img src={addressPreviewBack} alt="Back Preview" className="max-h-32 rounded-lg object-contain mb-2" />
+                        ) : (
+                          <IconFile className="h-10 w-10 text-muted-foreground mb-2" />
+                        )}
+                        <p className="text-sm font-medium text-center break-all px-2">{addressFileBack.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{(addressFileBack.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setAddressFileBack(null); setAddressPreviewBack(null); }} className="mt-2 text-xs text-destructive hover:text-destructive">Remove</Button>
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload className="h-10 w-10 text-muted-foreground/40 mb-2" />
+                        <p className="text-sm text-muted-foreground text-center">Drag & drop or <span className="text-brand font-medium">browse</span></p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">Back side — PNG, JPG, PDF up to 5MB</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={() => setStep(3)} className="sm:w-auto">
+                    <IconArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (!addressProofType || !addressFile || !addressFileBack) {
+                        setError("Please select document type and upload both front and back of your address proof");
+                        return;
+                      }
+                      setError("");
+                      setStep(5);
                     }}
                     className="flex-1 btn-glow btn-glow-hover border-0"
                   >
@@ -1307,8 +1615,8 @@ export default function KycPage() {
               </div>
             )}
 
-            {/* Step 4: Review & Submit */}
-            {step === 4 && (
+            {/* Step 5: Review & Submit */}
+            {step === 5 && (
               <div className="space-y-5">
                 <div className="rounded-lg border p-4 space-y-3">
                   <h3 className="text-sm font-semibold">Personal Information</h3>
@@ -1344,9 +1652,43 @@ export default function KycPage() {
                   </div>
                   {documentFile && (
                     <div>
-                      <span className="text-muted-foreground text-xs">Document</span>
+                      <span className="text-muted-foreground text-xs">Document (Front)</span>
                       <p className="font-medium text-sm break-all">
                         {documentFile.name}
+                      </p>
+                    </div>
+                  )}
+                  {documentFileBack && (
+                    <div>
+                      <span className="text-muted-foreground text-xs">Document (Back)</span>
+                      <p className="font-medium text-sm break-all">
+                        {documentFileBack.name}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-lg border p-4 space-y-3">
+                  <h3 className="text-sm font-semibold">Address Proof</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground text-xs">Document Type</span>
+                      <p className="font-medium">{addressProofType}</p>
+                    </div>
+                  </div>
+                  {addressFile && (
+                    <div>
+                      <span className="text-muted-foreground text-xs">Address Proof (Front)</span>
+                      <p className="font-medium text-sm break-all">
+                        {addressFile.name}
+                      </p>
+                    </div>
+                  )}
+                  {addressFileBack && (
+                    <div>
+                      <span className="text-muted-foreground text-xs">Address Proof (Back)</span>
+                      <p className="font-medium text-sm break-all">
+                        {addressFileBack.name}
                       </p>
                     </div>
                   )}
@@ -1374,7 +1716,7 @@ export default function KycPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   className="w-full"
                 >
                   <IconArrowLeft className="mr-2 h-4 w-4" />

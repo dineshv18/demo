@@ -98,8 +98,7 @@ router.delete("/:id", async (req, res) => {
     await getPrisma().referral.deleteMany({ where: { referredUserId: user.id } });
     await getPrisma().transaction.deleteMany({ where: { wallet: { userId: user.id } } });
     await getPrisma().wallet.deleteMany({ where: { userId: user.id } });
-    await getPrisma().kycRequest.deleteMany({ where: { userId: user.id } });
-    await getPrisma().supportTicket.deleteMany({ where: { userId: user.id } });
+    await getPrisma().kyc.deleteMany({ where: { userId: user.id } });
     await getPrisma().user.delete({ where: { id: user.id } });
 
     return res.status(200).json({ message: `User ${user.email} deleted` });

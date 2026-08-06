@@ -14,6 +14,7 @@ import {
   IconUserCheck,
   IconWallet,
   IconHeadset,
+  IconChartLine,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const allNavItems = [
   { slug: "users", to: "/dashboard/users", label: "Users", icon: IconUsers },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconUserCheck },
   { slug: "payments", to: "/dashboard/payments", label: "Payment Requests", icon: IconWallet },
+  { slug: "index-settings", to: "/dashboard/index-settings", label: "Index Settings", icon: IconChartLine },
   { slug: "support", to: "/dashboard/support", label: "Support Team", icon: IconHeadset },
   { slug: "activity", to: "/dashboard/activity", label: "Activity Logs", icon: IconActivity },
   { slug: "referrals", to: "/dashboard/referrals", label: "Referral Settings", icon: IconUsers },

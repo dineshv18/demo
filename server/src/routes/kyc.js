@@ -17,6 +17,11 @@ router.use(authenticate);
 router.get("/status", getKycStatus);
 router.post("/email-otp", sendEmailOtp);
 router.post("/verify-email-otp", verifyEmailOtp);
-router.post("/submit", upload.single("document"), submitKyc);
+router.post("/submit", upload.fields([
+  { name: "documentFront", maxCount: 1 },
+  { name: "documentBack", maxCount: 1 },
+  { name: "addressFront", maxCount: 1 },
+  { name: "addressBack", maxCount: 1 },
+]), submitKyc);
 
 export default router;

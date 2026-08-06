@@ -105,6 +105,10 @@ export interface KycSubmission {
   country: string;
   governmentIdType: string;
   documentUrl: string;
+  documentUrlBack?: string;
+  addressProofType?: string;
+  addressDocUrl?: string;
+  addressDocUrlBack?: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string;
   reviewedBy?: string;
@@ -211,6 +215,8 @@ export const usersAPI = {
     request<{ message: string; user: AdminUser }>(`/users/${id}/toggle-active`, { method: "POST" }),
   setCurrency: (id: string, currency: "USD") =>
     request<{ message: string; wallet: { userId: string; currency: string } }>(`/users/${id}/currency`, { method: "POST", body: JSON.stringify({ currency }) }),
+  delete: (id: string) =>
+    request<{ message: string }>(`/users/${id}`, { method: "DELETE" }),
 };
 
 // ─── Referral Types ───
@@ -246,4 +252,59 @@ export const referralAPI = {
     const qs = query.toString();
     return request<{ referrals: AdminReferral[]; total: number }>(`/admin/referrals${qs ? `?${qs}` : ""}`);
   },
+};
+
+// ─── Index Types ───
+export interface IndexTier {
+  id: string;
+  minAmount: string;
+  maxAmount: string;
+  label: string;
+  weeklyReturn: string;
+  monthlyReturn: string;
+  halfYearlyReturn: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface IndexPriceEntry {
+  id: string;
+  price: string;
+  changePercent: string;
+  changeAmount: string;
+  dateLabel: string | null;
+  recordedAt: string;
+  createdAt: string;
+}
+
+export interface IndexManager {
+  id: string;
+  name: string;
+  title: string;
+  bio: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+}
+
+// ─── Index API ───
+export const indexAPI = {
+  getTiers: () => request<{ tiers: IndexTier[] }>("/admin/index/tiers"),
+  createTier: (data: { minAmount: number; maxAmount: number; label: string; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number }) =>
+    request<{ message: string; tier: IndexTier }>("/admin/index/tiers", { method: "POST", body: JSON.stringify(data) }),
+  updateTier: (id: string, data: Partial<IndexTier>) =>
+    request<{ message: string; tier: IndexTier }>(`/admin/index/tiers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteTier: (id: string) =>
+    request<{ message: string }>(`/admin/index/tiers/${id}`, { method: "DELETE" }),
+
+  getPrices: () => request<{ prices: IndexPriceEntry[] }>("/admin/index/prices"),
+  createPrice: (data: { price: number; changePercent?: number; changeAmount?: number; dateLabel?: string }) =>
+    request<{ message: string; price: IndexPriceEntry }>("/admin/index/prices", { method: "POST", body: JSON.stringify(data) }),
+  updatePrice: (id: string, data: Partial<IndexPriceEntry>) =>
+    request<{ message: string; price: IndexPriceEntry }>(`/admin/index/prices/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deletePrice: (id: string) =>
+    request<{ message: string }>(`/admin/index/prices/${id}`, { method: "DELETE" }),
+
+  getManager: () => request<{ manager: IndexManager | null }>("/admin/index/manager"),
+  upsertManager: (data: { name: string; title: string; bio?: string; imageUrl?: string }) =>
+    request<{ message: string; manager: IndexManager }>("/admin/index/manager", { method: "POST", body: JSON.stringify(data) }),
 };

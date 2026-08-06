@@ -20,17 +20,24 @@ export const getKycStatus = async (req, res) => {
 
 export const submitKyc = async (req, res) => {
   try {
-    const { fullName, phone, countryCode, gender, dateOfBirth, country, governmentIdType } = req.body;
-    const file = req.file;
+    const { fullName, phone, countryCode, gender, dateOfBirth, country, governmentIdType, addressProofType } = req.body;
 
-    if (!fullName || !phone || !countryCode || !gender || !dateOfBirth || !country || !governmentIdType) {
+    if (!fullName || !phone || !countryCode || !gender || !dateOfBirth || !country || !governmentIdType || !addressProofType) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (!file) return res.status(400).json({ message: "Document image is required" });
-    if (file.size > 5 * 1024 * 1024) return res.status(400).json({ message: "File size must be under 5MB" });
+    const govtIdFront = req.files?.documentFront?.[0];
+    const govtIdBack = req.files?.documentBack?.[0];
+    const addressFront = req.files?.addressFront?.[0];
+    const addressBack = req.files?.addressBack?.[0];
+
+    if (!govtIdFront || !govtIdBack) return res.status(400).json({ message: "Government ID front and back images are required" });
+    if (!addressFront || !addressBack) return res.status(400).json({ message: "Address proof front and back images are required" });
+
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-    if (!allowedTypes.includes(file.mimetype)) return res.status(400).json({ message: "File must be JPEG, PNG, WebP, or PDF" });
+    for (const f of [govtIdFront, govtIdBack, addressFront, addressBack]) {
+      if (!allowedTypes.includes(f.mimetype)) return res.status(400).json({ message: `${f.fieldname} must be JPEG, PNG, WebP, or PDF` });
+    }
 
     let kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
     if (!kyc) kyc = await getPrisma().kyc.create({ data: { userId: req.user.id } });
@@ -43,7 +50,10 @@ export const submitKyc = async (req, res) => {
     }
 
     const { uploadToR2 } = await import("../config/r2.js");
-    const doc = await uploadToR2(file, "kyc-documents");
+    const govtFrontDoc = await uploadToR2(govtIdFront, "kyc-documents");
+    const govtBackDoc = await uploadToR2(govtIdBack, "kyc-documents");
+    const addrFrontDoc = await uploadToR2(addressFront, "kyc-documents");
+    const addrBackDoc = await uploadToR2(addressBack, "kyc-documents");
 
     const age = Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
@@ -59,8 +69,15 @@ export const submitKyc = async (req, res) => {
         age,
         country,
         governmentIdType,
-        documentUrl: doc.url,
-        documentFileName: file.originalname,
+        documentUrl: govtFrontDoc.url,
+        documentFileName: govtIdFront.originalname,
+        documentUrlBack: govtBackDoc.url,
+        documentFileNameBack: govtIdBack.originalname,
+        addressProofType,
+        addressDocUrl: addrFrontDoc.url,
+        addressDocFileName: addressFront.originalname,
+        addressDocUrlBack: addrBackDoc.url,
+        addressDocFileNameBack: addressBack.originalname,
         status: "PENDING",
         rejectionReason: null,
         reviewedBy: null,

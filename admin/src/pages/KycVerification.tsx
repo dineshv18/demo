@@ -395,7 +395,7 @@ export default function KycVerification() {
                   {/* Document Preview */}
                   {selected.documentUrl && (
                     <section>
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Document</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Government ID (Front)</h3>
                       <a
                         href={selected.documentUrl}
                         target="_blank"
@@ -408,9 +408,78 @@ export default function KycVerification() {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
-                              View Document
+                              View Front
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{selected.governmentIdType}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{selected.governmentIdType} — Front Side</p>
+                          </div>
+                        </div>
+                      </a>
+                    </section>
+                  )}
+                  {selected.documentUrlBack && (
+                    <section>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Government ID (Back)</h3>
+                      <a
+                        href={selected.documentUrlBack}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                              View Back
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{selected.governmentIdType} — Back Side</p>
+                          </div>
+                        </div>
+                      </a>
+                    </section>
+                  )}
+                  {selected.addressDocUrl && (
+                    <section>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Address Proof (Front)</h3>
+                      <a
+                        href={selected.addressDocUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                              View Front
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{selected.addressProofType} — Front Side</p>
+                          </div>
+                        </div>
+                      </a>
+                    </section>
+                  )}
+                  {selected.addressDocUrlBack && (
+                    <section>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Address Proof (Back)</h3>
+                      <a
+                        href={selected.addressDocUrlBack}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                              View Back
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{selected.addressProofType} — Back Side</p>
                           </div>
                         </div>
                       </a>

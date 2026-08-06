@@ -65,6 +65,13 @@ export interface KycData {
   governmentIdType: string | null;
   documentUrl: string | null;
   documentFileName: string | null;
+  documentUrlBack: string | null;
+  documentFileNameBack: string | null;
+  addressProofType: string | null;
+  addressDocUrl: string | null;
+  addressDocFileName: string | null;
+  addressDocUrlBack: string | null;
+  addressDocFileNameBack: string | null;
   rejectionReason: string | null;
   reviewedBy: string | null;
   reviewedAt: string | null;
@@ -287,4 +294,45 @@ export const referralAPI = {
   getMyReferrals: () => request<{ referrals: Referral[]; stats: ReferralStats }>("/referral/my-referrals"),
   getMyStats: () => request<{ stats: ReferralDashboardStats }>("/referral/stats"),
   getHierarchy: () => request<{ hierarchy: HierarchyItem[] }>("/referral/hierarchy"),
+};
+
+// ─── Index Types ───
+export interface IndexTier {
+  id: string;
+  minAmount: string;
+  maxAmount: string;
+  label: string;
+  weeklyReturn: string;
+  monthlyReturn: string;
+  halfYearlyReturn: string;
+  isActive: boolean;
+}
+
+export interface IndexPriceEntry {
+  price: number;
+  changePercent: number;
+  changeAmount: number;
+  dateLabel: string;
+  recordedAt: string;
+}
+
+export interface IndexManager {
+  name: string;
+  title: string;
+  bio: string | null;
+  imageUrl: string | null;
+}
+
+export interface IndexData {
+  tiers: IndexTier[];
+  activeTier: IndexTier | null;
+  walletBalance: number;
+  priceHistory: IndexPriceEntry[];
+  currentPrice: { price: number; changePercent: number; changeAmount: number };
+  manager: IndexManager | null;
+}
+
+// ─── Index API ───
+export const indexAPI = {
+  getData: () => request<IndexData>("/index"),
 };

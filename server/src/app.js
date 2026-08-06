@@ -16,6 +16,8 @@ import adminKycRoutes from "./routes/adminKyc.js";
 import adminPaymentsRoutes from "./routes/adminPayments.js";
 import referralRoutes from "./routes/referral.js";
 import adminReferralRoutes from "./routes/adminReferral.js";
+import indexRoutes from "./routes/index.js";
+import adminIndexRoutes from "./routes/adminIndex.js";
 
 const app = express();
 
@@ -107,6 +109,8 @@ app.use("/api/admin/kyc", adminLimiter, adminKycRoutes);
 app.use("/api/admin/payments", adminLimiter, adminPaymentsRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/admin/referrals", adminLimiter, adminReferralRoutes);
+app.use("/api/index", indexRoutes);
+app.use("/api/admin/index", adminLimiter, adminIndexRoutes);
 
 // ─── Health Check ───
 app.get("/api/health", (req, res) => {

@@ -170,9 +170,20 @@ model Kyc {
   dateOfBirth       DateTime?
   age               Int?
   country           String?
+
+  // Government ID (Step 1)
   governmentIdType  String?
   documentUrl       String?
   documentFileName  String?
+  documentUrlBack   String?
+  documentFileNameBack String?
+
+  // Address Proof (Step 2)
+  addressProofType  String?
+  addressDocUrl     String?
+  addressDocFileName String?
+  addressDocUrlBack String?
+  addressDocFileNameBack String?
 
   rejectionReason   String?
   reviewedBy        String?
@@ -251,4 +262,42 @@ model ReferralCommission {
 
   @@index([referralId])
   @@index([status])
+}
+
+model IndexTier {
+  id                String   @id @default(uuid())
+  minAmount         Decimal  @db.Decimal(18, 2)
+  maxAmount         Decimal  @db.Decimal(18, 2)
+  label             String
+  weeklyReturn      Decimal  @db.Decimal(8, 4)
+  monthlyReturn     Decimal  @db.Decimal(8, 4)
+  halfYearlyReturn  Decimal  @db.Decimal(8, 4)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model IndexPrice {
+  id            String   @id @default(uuid())
+  price         Decimal  @db.Decimal(18, 6)
+  changePercent Decimal  @db.Decimal(8, 4) @default(0)
+  changeAmount  Decimal  @db.Decimal(18, 6) @default(0)
+  dateLabel     String?
+  recordedAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@index([recordedAt])
+}
+
+model IndexManager {
+  id          String   @id @default(uuid())
+  name        String
+  title       String
+  bio         String?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

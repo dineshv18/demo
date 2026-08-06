@@ -7,6 +7,7 @@ import {
   IconCheck,
   IconX,
   IconLoader2,
+  IconTrash,
 } from "@tabler/icons-react";
 import { usersAPI, type AdminUser } from "../services/api";
 
@@ -16,6 +17,8 @@ export default function Users() {
   const [search, setSearch] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<AdminUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -46,6 +49,21 @@ export default function Users() {
       showToast("error", err.message || "Failed to update user");
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal) return;
+    setDeleting(true);
+    try {
+      await usersAPI.delete(deleteModal.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteModal.id));
+      showToast("success", `User ${deleteModal.email} deleted`);
+      setDeleteModal(null);
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to delete user");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -129,10 +147,16 @@ export default function Users() {
                     </td>
                     <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">{fmtDate(u.createdAt)}</td>
                     <td className="px-5 py-4 text-right">
-                      <button onClick={() => toggleActive(u.id)} disabled={updating === u.id}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50">
-                        {updating === u.id ? <IconLoader2 className="h-3.5 w-3.5 animate-spin inline" /> : u.isActive ? "Deactivate" : "Activate"}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => toggleActive(u.id)} disabled={updating === u.id}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50">
+                          {updating === u.id ? <IconLoader2 className="h-3.5 w-3.5 animate-spin inline" /> : u.isActive ? "Deactivate" : "Activate"}
+                        </button>
+                        <button onClick={() => setDeleteModal(u)} disabled={u.role === "SUPER_ADMIN"}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                          <IconTrash className="h-3.5 w-3.5 inline" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -141,6 +165,30 @@ export default function Users() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => !deleting && setDeleteModal(null)} />
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Delete User</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Are you sure you want to permanently delete <strong>{deleteModal.email}</strong>? This action cannot be undone. All their data including wallet, transactions, and KYC will be removed.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button onClick={handleDelete} disabled={deleting}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                {deleting ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconTrash size={16} />}
+                {deleting ? "Deleting..." : "Delete Permanently"}
+              </button>
+              <button onClick={() => setDeleteModal(null)} disabled={deleting}
+                className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -51,6 +51,7 @@ import { ThemeToggleButton } from "./ThemeToggle";
 const allNavItems = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main" },
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main" },
+  { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main" },
   { slug: "trading", to: "/dashboard/trading", label: "Live Trading", icon: IconChartLine, group: "main" },
   { slug: "exchange", to: "/dashboard/exchange", label: "Exchange", icon: IconExchange, group: "main" },
   { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main" },

@@ -25,6 +25,8 @@ const DEFAULT_PAGES = [
   { slug: "exchange", name: "Exchange", icon: "IconExchange", category: "finance" },
   { slug: "news", name: "News", icon: "IconNews", category: "content" },
   { slug: "blog", name: "Blog", icon: "IconSpeakerphone", category: "content" },
+  { slug: "index", name: "Index", icon: "IconChartLine", category: "finance" },
+  { slug: "index-settings", name: "Index Settings", icon: "IconSettings", category: "management" },
 ];
 
 const DEFAULT_ROLES = [
@@ -130,7 +132,7 @@ async function main() {
     include: { pages: true },
   });
   if (userRole && userRole.pages.length === 0) {
-    const userPages = ["dashboard", "wallet", "trading", "exchange", "news", "blog", "settings"];
+    const userPages = ["dashboard", "wallet", "trading", "exchange", "news", "blog", "settings", "index"];
     const pagesToAssign = allPages.filter((p) => userPages.includes(p.slug));
     await prisma.rolePage.createMany({
       data: pagesToAssign.map((p) => ({
@@ -158,10 +160,63 @@ async function main() {
     console.log("  ✔ Super Admin role has all pages\n");
   }
 
-  // 5. Ensure support role has dashboard + kyc pages
+  // 5. Seed Index Tiers
+  console.log("Seeding index tiers...");
+  const defaultTiers = [
+    { minAmount: 100, maxAmount: 500, label: "$100 - $500", weeklyReturn: 0.50, monthlyReturn: 2.00, halfYearlyReturn: 12.00 },
+    { minAmount: 500, maxAmount: 1000, label: "$500 - $1,000", weeklyReturn: 0.75, monthlyReturn: 3.00, halfYearlyReturn: 18.00 },
+    { minAmount: 1000, maxAmount: 2000, label: "$1,000 - $2,000", weeklyReturn: 1.00, monthlyReturn: 4.00, halfYearlyReturn: 24.00 },
+    { minAmount: 2000, maxAmount: 5000, label: "$2,000 - $5,000", weeklyReturn: 1.25, monthlyReturn: 5.00, halfYearlyReturn: 30.00 },
+  ];
+  const existingTierCount = await prisma.indexTier.count();
+  if (existingTierCount === 0) {
+    await prisma.indexTier.createMany({ data: defaultTiers });
+    console.log(`  ✔ ${defaultTiers.length} index tiers created`);
+  } else {
+    console.log(`  ⚠ Index tiers already exist — skipping`);
+  }
+
+  // Seed Index Manager
+  console.log("Seeding index manager...");
+  const existingManager = await prisma.indexManager.findFirst();
+  if (!existingManager) {
+    await prisma.indexManager.create({
+      data: { name: "Orla Steenbakkers", title: "Index Manager", bio: "Senior portfolio manager specializing in diversified index strategies." },
+    });
+    console.log("  ✔ Index manager created");
+  } else {
+    console.log("  ⚠ Index manager already exists — skipping");
+  }
+
+  // Seed Index Prices (sample data for chart)
+  console.log("Seeding index price history...");
+  const existingPriceCount = await prisma.indexPrice.count();
+  if (existingPriceCount === 0) {
+    const samplePrices = [
+      { dateLabel: "29 Jul", price: 0.018, changePercent: 0.0, changeAmount: 0.0 },
+      { dateLabel: "30 Jul", price: 0.019, changePercent: 5.56, changeAmount: 0.001 },
+      { dateLabel: "31 Jul", price: 0.0185, changePercent: -2.63, changeAmount: -0.0005 },
+      { dateLabel: "01 Aug", price: 0.020, changePercent: 8.11, changeAmount: 0.0015 },
+      { dateLabel: "02 Aug", price: 0.021, changePercent: 5.0, changeAmount: 0.001 },
+      { dateLabel: "03 Aug", price: 0.0195, changePercent: -7.14, changeAmount: -0.0015 },
+      { dateLabel: "04 Aug", price: 0.02, changePercent: 2.56, changeAmount: 0.0005 },
+    ];
+    const now = new Date();
+    await prisma.indexPrice.createMany({
+      data: samplePrices.map((p, i) => ({
+        ...p,
+        recordedAt: new Date(now.getTime() - (samplePrices.length - 1 - i) * 86400000),
+      })),
+    });
+    console.log(`  ✔ ${samplePrices.length} price entries created`);
+  } else {
+    console.log("  ⚠ Price history already exists — skipping");
+  }
+
+  // 6. Ensure support role has dashboard + kyc pages
   const supportRole = await prisma.role.findUnique({ where: { name: "support" } });
   if (supportRole) {
-    const supportPages = allPages.filter((p) => ["dashboard", "kyc", "payments", "support", "users"].includes(p.slug));
+    const supportPages = allPages.filter((p) => ["dashboard", "kyc", "payments", "support", "users", "index"].includes(p.slug));
     for (const p of supportPages) {
       await prisma.rolePage.upsert({
         where: { roleId_pageId: { roleId: supportRole.id, pageId: p.id } },
