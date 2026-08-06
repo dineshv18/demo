@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import {
-  IconPlus, IconEdit, IconTrash, IconCheck, IconX,
+  IconPlus, IconEdit, IconTrash, IconCheck,
   IconChartLine, IconUser, IconCoin,
 } from "@tabler/icons-react";
 import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager } from "../services/api";

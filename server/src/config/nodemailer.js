@@ -14,10 +14,21 @@ export function getTransporter() {
         user: env.BREVO_SMTP_USER,
         pass: env.BREVO_SMTP_PASS,
       },
+      tls: { rejectUnauthorized: false },
     });
   }
   return transporter;
 }
+
+const getBaseHeaders = () => {
+  const env = getEnv();
+  return {
+    "Reply-To": env.BREVO_SENDER_EMAIL,
+    "List-Unsubscribe": `<mailto:${env.BREVO_SENDER_EMAIL}?subject=unsubscribe>`,
+    "X-Mailer": "Ovantra Financial",
+    "Precedence": "bulk",
+  };
+};
 
 // ─── OTP Email ───
 export const sendOTP = async (email, otp) => {
@@ -25,6 +36,7 @@ export const sendOTP = async (email, otp) => {
     from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
     subject: "Your OTP for Ovantra Financial",
+    headers: getBaseHeaders(),
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -60,6 +72,7 @@ export const sendWelcomeEmail = async (email, name) => {
     from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
     subject: "Welcome to Ovantra Financial!",
+    headers: getBaseHeaders(),
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -105,7 +118,8 @@ export const sendResetPasswordEmail = async (email, name, resetToken) => {
   return getTransporter().sendMail({
     from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: email,
-    subject: "Reset Your Password - Ovantra Financial",
+    subject: "Reset Your Password — Ovantra Financial",
+    headers: getBaseHeaders(),
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -141,6 +155,7 @@ export const sendReferralNotification = async (referrerEmail, referrerName, newU
     from: `"${getEnv().BREVO_SENDER_NAME}" <${getEnv().BREVO_SENDER_EMAIL}>`,
     to: referrerEmail,
     subject: "New Referral Sign-Up on Ovantra Financial!",
+    headers: getBaseHeaders(),
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
