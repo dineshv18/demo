@@ -10,6 +10,16 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { indexAPI, kycAPI, type IndexData, type KycData } from "@/lib/api";
 
+function ChartTooltipContent({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-xl">
+      <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+      <p className="text-sm font-bold text-foreground">${Number(payload[0].value).toFixed(4)}</p>
+    </div>
+  );
+}
+
 export default function IndexPage() {
   const [data, setData] = useState<IndexData | null>(null);
   const [kyc, setKyc] = useState<KycData | null>(null);
@@ -52,7 +62,7 @@ export default function IndexPage() {
           <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">MetaYield Index</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and returns</p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <div className="flex items-start sm:items-center gap-3 flex-1">
             <IconAlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
             <div>
@@ -82,7 +92,7 @@ export default function IndexPage() {
   if (error) {
     return (
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
         <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent transition-colors">
@@ -95,12 +105,10 @@ export default function IndexPage() {
   const { tiers, activeTier, walletBalance, priceHistory, currentPrice, manager } = data || {};
   const priceUp = (currentPrice?.changePercent ?? 0) >= 0;
   const balance = walletBalance || 0;
-
-  // Calculate actual dollar returns based on wallet balance
   const calcReturn = (pct: string) => balance * (parseFloat(pct) / 100);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -121,7 +129,7 @@ export default function IndexPage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
@@ -151,7 +159,7 @@ export default function IndexPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-border px-4 py-3 text-center">
+            <div className="rounded-xl border border-dashed border-border px-4 py-3 text-center">
               <p className="text-xs text-muted-foreground">Deposit funds to unlock returns</p>
               <Link href="/dashboard/wallet" className="text-xs font-semibold text-brand hover:underline mt-1 inline-block">
                 Add Funds →
@@ -161,17 +169,15 @@ export default function IndexPage() {
         </div>
       </div>
 
-      {/* Index Price Card */}
+      {/* Index Price Card + Chart */}
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 sm:gap-3">
               <h2 className="font-display text-lg sm:text-xl font-bold">MetaYield Index</h2>
-              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground tracking-wider uppercase">MYLD</span>
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground tracking-wider uppercase bg-muted px-2 py-0.5 rounded-md">MYLD</span>
             </div>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-xs sm:text-sm text-muted-foreground">CURRENT INDEX PRICE</span>
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">CURRENT INDEX PRICE</p>
             <div className="flex items-center gap-2 sm:gap-3 mt-1">
               <span className="font-display text-xl sm:text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
               <span className={`inline-flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
@@ -186,81 +192,34 @@ export default function IndexPage() {
           </span>
         </div>
 
-        {/* Chart */}
+        {/* Chart — uses var(--brand) directly, no hsl() wrapper */}
         <div className="h-[200px] sm:h-[280px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={priceHistory || []}>
+            <AreaChart data={priceHistory || []} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="indexGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--brand))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--brand))" stopOpacity={0} />
+                <linearGradient id="idxGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#c9a84c" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#c9a84c" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="dateLabel"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) => `$${v.toFixed(2)}`}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  color: "hsl(var(--foreground))",
-                }}
-                formatter={(value) => [`$${Number(value).toFixed(4)}`, "Price"]}
-              />
-              <Area
-                type="monotone"
-                dataKey="price"
-                stroke="hsl(var(--brand))"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#indexGradient)"
-                dot={{ r: 4, fill: "hsl(var(--brand))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
-                activeDot={{ r: 6, fill: "hsl(var(--brand))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" vertical={false} />
+              <XAxis dataKey="dateLabel" fontSize={11} tickLine={false} axisLine={false} tick={{ fill: "rgba(128,128,128,0.7)" }} />
+              <YAxis fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v.toFixed(2)}`} tick={{ fill: "rgba(128,128,128,0.7)" }} />
+              <Tooltip content={<ChartTooltipContent />} />
+              <Area type="monotone" dataKey="price" stroke="#c9a84c" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "#c9a84c", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "#c9a84c", strokeWidth: 2, stroke: "var(--card)" }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Your Returns - Dollar + Percentage */}
+      {/* Your Returns */}
       {activeTier && balance > 0 ? (
         <div>
           <h2 className="font-display text-base sm:text-lg font-semibold mb-3">Your Returns</h2>
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            <ReturnCard
-              label="1W Return"
-              percent={`${parseFloat(activeTier.weeklyReturn).toFixed(2)}%`}
-              dollar={calcReturn(activeTier.weeklyReturn)}
-              balance={balance}
-              color="from-blue-600 to-blue-800"
-            />
-            <ReturnCard
-              label="1M Return"
-              percent={`${parseFloat(activeTier.monthlyReturn).toFixed(2)}%`}
-              dollar={calcReturn(activeTier.monthlyReturn)}
-              balance={balance}
-              color="from-blue-600 to-blue-800"
-            />
-            <ReturnCard
-              label="6M Return"
-              percent={`${parseFloat(activeTier.halfYearlyReturn).toFixed(2)}%`}
-              dollar={calcReturn(activeTier.halfYearlyReturn)}
-              balance={balance}
-              color="from-blue-600 to-blue-800"
-            />
+            <ReturnCard label="1W Return" percent={`${parseFloat(activeTier.weeklyReturn).toFixed(2)}%`} dollar={calcReturn(activeTier.weeklyReturn)} balance={balance} gradient="from-amber-500 to-orange-600" />
+            <ReturnCard label="1M Return" percent={`${parseFloat(activeTier.monthlyReturn).toFixed(2)}%`} dollar={calcReturn(activeTier.monthlyReturn)} balance={balance} gradient="from-blue-500 to-indigo-600" />
+            <ReturnCard label="6M Return" percent={`${parseFloat(activeTier.halfYearlyReturn).toFixed(2)}%`} dollar={calcReturn(activeTier.halfYearlyReturn)} balance={balance} gradient="from-emerald-500 to-teal-600" />
           </div>
         </div>
       ) : (
@@ -271,47 +230,38 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* Tier Comparison Table */}
+      {/* Investment Tiers Table */}
       {tiers && tiers.length > 0 && (
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
           <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Investment Tiers</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="pb-3 font-medium text-xs uppercase tracking-wider">Tier</th>
-                  <th className="pb-3 font-medium text-xs uppercase tracking-wider text-right">1 Week</th>
-                  <th className="pb-3 font-medium text-xs uppercase tracking-wider text-right">1 Month</th>
-                  <th className="pb-3 font-medium text-xs uppercase tracking-wider text-right">6 Months</th>
-                  {balance > 0 && <th className="pb-3 font-medium text-xs uppercase tracking-wider text-right">Your Est. 6M</th>}
+                <tr className="border-b border-border text-left">
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Tier</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider text-right text-muted-foreground">1 Week</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider text-right text-muted-foreground">1 Month</th>
+                  <th className="pb-3 font-semibold text-xs uppercase tracking-wider text-right text-muted-foreground">6 Months</th>
+                  {balance > 0 && <th className="pb-3 font-semibold text-xs uppercase tracking-wider text-right text-muted-foreground">Est. 6M</th>}
                 </tr>
               </thead>
               <tbody>
                 {tiers.map((tier) => {
                   const isYourTier = activeTier?.id === tier.id;
                   return (
-                    <tr
-                      key={tier.id}
-                      className={`border-b border-border/50 last:border-0 transition-colors ${
-                        isYourTier ? "bg-brand/5" : "hover:bg-accent/50"
-                      }`}
-                    >
-                      <td className="py-3 font-medium">
+                    <tr key={tier.id} className={`border-b border-border/50 last:border-0 transition-colors ${isYourTier ? "bg-brand/5" : "hover:bg-muted/50"}`}>
+                      <td className="py-3.5">
                         <div className="flex items-center gap-2">
-                          {isYourTier && (
-                            <span className="h-2 w-2 rounded-full bg-brand shrink-0" />
-                          )}
-                          <span>{tier.label}</span>
-                          {isYourTier && (
-                            <span className="text-[10px] font-bold text-brand bg-brand/10 px-1.5 py-0.5 rounded">YOUR TIER</span>
-                          )}
+                          {isYourTier && <span className="h-2 w-2 rounded-full bg-brand shrink-0" />}
+                          <span className="font-semibold text-foreground">{tier.label}</span>
+                          {isYourTier && <span className="text-[10px] font-bold text-brand bg-brand/10 px-1.5 py-0.5 rounded">YOUR TIER</span>}
                         </div>
                       </td>
-                      <td className="py-3 text-right text-emerald-500 font-medium">{parseFloat(tier.weeklyReturn).toFixed(2)}%</td>
-                      <td className="py-3 text-right text-emerald-500 font-medium">{parseFloat(tier.monthlyReturn).toFixed(2)}%</td>
-                      <td className="py-3 text-right text-emerald-500 font-medium">{parseFloat(tier.halfYearlyReturn).toFixed(2)}%</td>
+                      <td className="py-3.5 text-right font-semibold text-emerald-500">{parseFloat(tier.weeklyReturn).toFixed(2)}%</td>
+                      <td className="py-3.5 text-right font-semibold text-emerald-500">{parseFloat(tier.monthlyReturn).toFixed(2)}%</td>
+                      <td className="py-3.5 text-right font-semibold text-emerald-500">{parseFloat(tier.halfYearlyReturn).toFixed(2)}%</td>
                       {balance > 0 && (
-                        <td className="py-3 text-right font-medium text-foreground">
+                        <td className="py-3.5 text-right font-bold text-foreground">
                           ${(balance * parseFloat(tier.halfYearlyReturn) / 100).toFixed(2)}
                         </td>
                       )}
@@ -327,35 +277,28 @@ export default function IndexPage() {
       {/* Index Manager */}
       {manager && (
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-base sm:text-lg font-semibold">Index Manager</h2>
-          </div>
+          <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Index Manager</h2>
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-brand/10 shrink-0">
-              <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-brand" />
+            <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-2 shrink-0">
+              <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <div>
-              <p className="font-semibold text-sm sm:text-base">{manager.name}</p>
+              <p className="font-semibold text-sm sm:text-base text-foreground">{manager.name}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">{manager.title}</p>
-              {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{manager.bio}</p>}
+              {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-relaxed">{manager.bio}</p>}
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
-function ReturnCard({ label, percent, dollar, balance, color }: {
-  label: string;
-  percent: string;
-  dollar: number;
-  balance: number;
-  color: string;
+function ReturnCard({ label, percent, dollar, balance, gradient }: {
+  label: string; percent: string; dollar: number; balance: number; gradient: string;
 }) {
   return (
-    <div className={`rounded-xl sm:rounded-2xl bg-gradient-to-br ${color} p-3 sm:p-5`}>
+    <div className={`rounded-xl sm:rounded-2xl bg-gradient-to-br ${gradient} p-3 sm:p-5 text-white`}>
       <p className="text-[10px] sm:text-sm font-medium text-white/90">{label}</p>
       <p className="font-display text-base sm:text-2xl font-bold mt-0.5 sm:mt-1 text-white">{percent}</p>
       <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
@@ -368,12 +311,12 @@ function ReturnCard({ label, percent, dollar, balance, color }: {
 
 function ReturnCardEmpty({ label }: { label: string }) {
   return (
-    <div className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-3 sm:p-5 text-white/50">
+    <div className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-500 to-slate-700 p-3 sm:p-5 text-white/50">
       <p className="text-[10px] sm:text-sm font-medium text-white/70">{label}</p>
-      <p className="font-display text-base sm:text-2xl font-bold mt-0.5 sm:mt-1">--</p>
-      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
-        <p className="text-[10px] sm:text-xs text-white/50">Deposit to see returns</p>
-        <p className="font-display text-sm sm:text-lg font-bold text-white/30 mt-0.5">$0.00</p>
+      <p className="font-display text-base sm:text-2xl font-bold mt-0.5 sm:mt-1 text-white/40">--</p>
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/15">
+        <p className="text-[10px] sm:text-xs text-white/40">Deposit to see returns</p>
+        <p className="font-display text-sm sm:text-lg font-bold text-white/25 mt-0.5">$0.00</p>
       </div>
     </div>
   );
