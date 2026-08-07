@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Ovantra Financial",
+  title: "Dashboard — ORVANTA Financial",
   description: "Your trading dashboard",
 };
 

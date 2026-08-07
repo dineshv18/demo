@@ -1,4 +1,4 @@
-# OVANTRA FINANCIAL — COMPLETE PROJECT SUMMARY
+# ORVANTA FINANCIAL — COMPLETE PROJECT SUMMARY
 
 ## PROJECT OVERVIEW
 
@@ -308,20 +308,20 @@ BREVO_SMTP_HOST="smtp-relay.brevo.com"
 BREVO_SMTP_PORT=587
 BREVO_SMTP_USER="your-brevo-login-email@example.com"
 BREVO_SMTP_PASS="your-brevo-smtp-key"
-BREVO_SENDER_EMAIL="noreply@ovantra.com"
-BREVO_SENDER_NAME="Ovantra Financial"
+BREVO_SENDER_EMAIL="noreply@orvanta.com"
+BREVO_SENDER_NAME="ORVANTA Financial"
 ```
 
 ### admin/.env
 ```
 VITE_API_URL=http://localhost:4000/api
-VITE_APP_NAME=Ovantra Financial
+VITE_APP_NAME=ORVANTA Financial
 ```
 
 ### client/.env
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
-NEXT_PUBLIC_APP_NAME=Ovantra Financial
+NEXT_PUBLIC_APP_NAME=ORVANTA Financial
 ```
 
 ---
@@ -330,11 +330,11 @@ NEXT_PUBLIC_APP_NAME=Ovantra Financial
 
 | Role | Email | Password |
 |------|-------|----------|
-| SUPER_ADMIN | superadmin@ovantra.com | SuperAdmin@123 |
-| ADMIN | admin@ovantra.com | Admin@123 |
-| ADMIN | manager@ovantra.com | Manager@123 |
+| SUPER_ADMIN | superadmin@orvanta.com | SuperAdmin@123 |
+| ADMIN | admin@orvanta.com | Admin@123 |
+| ADMIN | manager@orvanta.com | Manager@123 |
 | USER | riteshtest@gmail.com | Ritesh@123 |
-| USER | client@ovantra.com | Client@123 |
+| USER | client@orvanta.com | Client@123 |
 
 ---
 

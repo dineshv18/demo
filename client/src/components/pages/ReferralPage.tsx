@@ -84,7 +84,7 @@ export default function ReferralPage() {
   };
 
   const shareWhatsApp = () => {
-    const text = `Join Ovantra Financial using my referral link and start trading!\n\n${link}`;
+    const text = `Join ORVANTA Financial using my referral link and start trading!\n\n${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 

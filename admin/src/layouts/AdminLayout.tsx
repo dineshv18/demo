@@ -75,7 +75,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
                   O
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold tracking-tight">Ovantra</span>
+                  <span className="truncate font-bold tracking-tight">ORVANTA</span>
                   <span className="truncate text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     Admin Panel
                   </span>

@@ -108,9 +108,9 @@ export default function ResetPasswordPage() {
         </div>
         <div className="flex justify-center">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra" width={40} height={40} className="h-10 w-auto dark:hidden" />
-            <Image src="/dark-Photoroom.png" alt="Ovantra" width={40} height={40} className="h-10 w-auto hidden dark:block" />
-            <span className="font-display text-xl font-semibold tracking-tight">Ovantra <span className="text-gradient">Financial</span></span>
+            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={40} height={40} className="h-10 w-auto dark:hidden" />
+            <Image src="/dark-Photoroom.png" alt="ORVANTA" width={40} height={40} className="h-10 w-auto hidden dark:block" />
+            <span className="font-display text-xl font-semibold tracking-tight">ORVANTA <span className="text-gradient">Financial</span></span>
           </Link>
         </div>
         <Suspense fallback={<div className="flex justify-center py-8"><IconLoader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>

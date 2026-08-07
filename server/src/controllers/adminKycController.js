@@ -104,7 +104,7 @@ export const approveKyc = async (req, res) => {
         await getTransporter().sendMail({
           from: `"${env.BREVO_SENDER_NAME}" <${env.BREVO_SENDER_EMAIL}>`,
           to: user.email,
-          subject: "KYC Verification Approved - Ovantra Financial",
+          subject: "KYC Verification Approved - ORVANTA Financial",
           html: `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;"><tr><td align="center">
               <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
@@ -174,7 +174,7 @@ export const rejectKyc = async (req, res) => {
         await getTransporter().sendMail({
           from: `"${env.BREVO_SENDER_NAME}" <${env.BREVO_SENDER_EMAIL}>`,
           to: user.email,
-          subject: "KYC Verification Rejected - Ovantra Financial",
+          subject: "KYC Verification Rejected - ORVANTA Financial",
           html: `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;"><tr><td align="center">
               <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">

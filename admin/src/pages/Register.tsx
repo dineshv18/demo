@@ -335,7 +335,7 @@ export default function Register() {
               Create Your<br />Admin Account
             </h1>
             <p className="text-white/70 text-base max-w-sm leading-relaxed">
-              Register as an admin to manage the Ovantra Financial platform, users, and trading operations.
+              Register as an admin to manage the ORVANTA Financial platform, users, and trading operations.
             </p>
           </div>
         </div>
@@ -350,7 +350,7 @@ export default function Register() {
                 O
               </div>
               <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Ovantra <span className="text-indigo-600">Financial</span>
+                ORVANTA <span className="text-indigo-600">Financial</span>
               </span>
             </div>
           </div>
@@ -397,7 +397,7 @@ export default function Register() {
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: undefined })); }}
-                  placeholder="admin@ovantra.com"
+                  placeholder="admin@orvanta.com"
                   className={`${inputClass(!!errors.email)} pl-10`}
                 />
               </div>

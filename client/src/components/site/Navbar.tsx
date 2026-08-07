@@ -39,8 +39,8 @@ export function Navbar() {
                 <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
                     <div className="flex w-full justify-between lg:w-auto">
                         <Link href="/" className="flex items-center gap-2.5 group">
-                            <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra Financial" width={100} height={100} className="h-16 w-auto transition-all dark:hidden" priority />
-                            <Image src="/dark-Photoroom.png" alt="Ovantra Financial" width={100} height={100} className="h-16 w-auto transition-all hidden dark:block" priority />
+                            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto transition-all dark:hidden" priority />
+                            <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto transition-all hidden dark:block" priority />
                         </Link>
 
                         <button

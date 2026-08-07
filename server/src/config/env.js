@@ -11,7 +11,7 @@ function getEnv() {
     BREVO_SMTP_USER: process.env.BREVO_SMTP_USER,
     BREVO_SMTP_PASS: process.env.BREVO_SMTP_PASS,
     BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL,
-    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "Ovantra Financial",
+    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "ORVANTA Financial",
 
     R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || "",
     R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || "",
@@ -20,17 +20,17 @@ function getEnv() {
     R2_PUBLIC_URL: process.env.R2_PUBLIC_URL || "",
 
     // Receiving UPI for QR-based deposits (INR)
-    OVANTRA_UPI_ID: process.env.OVANTRA_UPI_ID || "rforritesh@pingpay",
+    ORVANTA_UPI_ID: process.env.ORVANTA_UPI_ID || "rforritesh@pingpay",
 
     CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
 
     // USD Payment Details (placeholder — update when ready)
-    OVANTRA_USD_PAYMENT_METHOD: process.env.OVANTRA_USD_PAYMENT_METHOD || "Bank Transfer",
-    OVANTRA_USD_ACCOUNT_NAME: process.env.OVANTRA_USD_ACCOUNT_NAME || "Ovantra Financial",
-    OVANTRA_USD_ACCOUNT_NUMBER: process.env.OVANTRA_USD_ACCOUNT_NUMBER || "XXXXXXXXXXXX",
-    OVANTRA_USD_ROUTING_NUMBER: process.env.OVANTRA_USD_ROUTING_NUMBER || "XXXXXXXXX",
-    OVANTRA_USD_SWIFT_CODE: process.env.OVANTRA_USD_SWIFT_CODE || "XXXXXXXX",
-    OVANTRA_USD_BANK_NAME: process.env.OVANTRA_USD_BANK_NAME || "Your Bank Name",
+    ORVANTA_USD_PAYMENT_METHOD: process.env.ORVANTA_USD_PAYMENT_METHOD || "Bank Transfer",
+    ORVANTA_USD_ACCOUNT_NAME: process.env.ORVANTA_USD_ACCOUNT_NAME || "ORVANTA Financial",
+    ORVANTA_USD_ACCOUNT_NUMBER: process.env.ORVANTA_USD_ACCOUNT_NUMBER || "XXXXXXXXXXXX",
+    ORVANTA_USD_ROUTING_NUMBER: process.env.ORVANTA_USD_ROUTING_NUMBER || "XXXXXXXXX",
+    ORVANTA_USD_SWIFT_CODE: process.env.ORVANTA_USD_SWIFT_CODE || "XXXXXXXX",
+    ORVANTA_USD_BANK_NAME: process.env.ORVANTA_USD_BANK_NAME || "Your Bank Name",
 
     CORS_ORIGINS: [
       process.env.ADMIN_URL || "http://localhost:5173",

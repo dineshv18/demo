@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Register — Ovantra Financial",
-  description: "Create your Ovantra Financial trading account.",
+  title: "Register — ORVANTA Financial",
+  description: "Create your ORVANTA Financial trading account.",
 };
 
 export default function RegisterLayout({ children }: { children: React.ReactNode }) {

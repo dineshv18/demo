@@ -103,14 +103,14 @@ export default function PlatformPage() {
                             <div className="space-y-6">
                                 <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-4 py-1.5 text-sm font-medium">
                                     <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse-glow" />
-                                    Ovantra Financial
+                                    ORVANTA Financial
                                 </div>
                                 <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                                     The platform<br />
                                     <span className="text-gradient">professionals</span> use.
                                 </h1>
                                 <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-lg">
-                                    MT5 powers every Ovantra Financial account. It&apos;s the world&apos;s most popular
+                                    MT5 powers every ORVANTA Financial account. It&apos;s the world&apos;s most popular
                                     trading platform — and for good reason. Industry-standard charting, automated
                                     trading, and lightning-fast execution across desktop, web and mobile.
                                 </p>
@@ -129,7 +129,7 @@ export default function PlatformPage() {
                             <div className="relative rounded-2xl overflow-hidden bg-muted/50 aspect-[4/3] border border-border/40">
                                 <Image
                                     src="/platform/mt5-hero.jpg"
-                                    alt="Ovantra Financial Trading Platform"
+                                    alt="ORVANTA Financial Trading Platform"
                                     fill
                                     className="object-cover"
                                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -150,7 +150,7 @@ export default function PlatformPage() {
                             Everything you need.<br />Nothing in your way.
                         </h2>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base leading-relaxed">
-                            MT5 was built for professional traders — and stripped of bloat by Ovantra Financial.
+                            MT5 was built for professional traders — and stripped of bloat by ORVANTA Financial.
                             The result: a platform that gets out of your way and lets you focus on trading.
                         </p>
                     </div>
@@ -184,7 +184,7 @@ export default function PlatformPage() {
                             Two paths. One engine.<br />Pick your starting point.
                         </h2>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base leading-relaxed">
-                            Whether you&apos;re learning the basics or scaling a live portfolio, every Ovantra
+                            Whether you&apos;re learning the basics or scaling a live portfolio, every ORVANTA
                             account runs on the same MT5 infrastructure.
                         </p>
                     </div>

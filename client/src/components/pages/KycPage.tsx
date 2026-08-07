@@ -350,12 +350,14 @@ const ID_TYPES: Record<string, string[]> = {
 const DEFAULT_ID_TYPES = ["Passport", "National ID", "Driver's License"];
 
 const ADDRESS_PROOF_TYPES = [
+  "Aadhaar Card",
   "Utility Bill",
   "Bank Statement",
   "Rent Agreement",
   "Insurance Policy",
   "Government Letter",
   "Voter Registration",
+  "Passport",
 ];
 
 const STEP_TITLES: Record<Step, string> = {
@@ -689,7 +691,7 @@ export default function KycPage() {
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !phone || !gender || !dob || !country || !idType || !documentFile || !documentFileBack || !addressProofType || !addressFile || !addressFileBack) {
+    if (!fullName || !phone || !gender || !dob || !country || !idType || !documentFile || !documentFileBack || !addressProofType || !addressFile) {
       setError("Please fill all fields and upload all required documents");
       return;
     }
@@ -708,7 +710,7 @@ export default function KycPage() {
       formData.append("documentFront", documentFile);
       formData.append("documentBack", documentFileBack);
       formData.append("addressFront", addressFile);
-      formData.append("addressBack", addressFileBack);
+      if (addressFileBack) formData.append("addressBack", addressFileBack);
       await kycAPI.submit(formData);
       setSubmitted(true);
     } catch (err) {
@@ -742,7 +744,7 @@ export default function KycPage() {
           {submitted
             ? "Your documents have been submitted for review"
             : showForm
-              ? `Step ${step} of 4 — ${STEP_TITLES[step]}`
+              ? `Step ${Math.min(step, 4)} of 4 — ${STEP_TITLES[step]}`
               : "Track your verification status"}
         </p>
       </div>
@@ -1331,7 +1333,7 @@ export default function KycPage() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*,.pdf"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) handleFile(e.target.files[0], "front");
@@ -1401,7 +1403,7 @@ export default function KycPage() {
                     <input
                       ref={fileInputRefBack}
                       type="file"
-                      accept="image/*,.pdf"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) handleFile(e.target.files[0], "back");
@@ -1519,7 +1521,7 @@ export default function KycPage() {
                     <input
                       ref={addrFileInputRef}
                       type="file"
-                      accept="image/*,.pdf"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) handleAddressFile(e.target.files[0], "front");
@@ -1564,7 +1566,7 @@ export default function KycPage() {
                     <input
                       ref={addrFileInputRefBack}
                       type="file"
-                      accept="image/*,.pdf"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) handleAddressFile(e.target.files[0], "back");
@@ -1599,8 +1601,8 @@ export default function KycPage() {
                   <Button
                     type="button"
                     onClick={() => {
-                      if (!addressProofType || !addressFile || !addressFileBack) {
-                        setError("Please select document type and upload both front and back of your address proof");
+                      if (!addressProofType || !addressFile) {
+                        setError("Please select document type and upload address proof front");
                         return;
                       }
                       setError("");

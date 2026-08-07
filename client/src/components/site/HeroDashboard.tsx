@@ -74,7 +74,7 @@ export function HeroDashboard() {
                         </div>
                         <div className="mt-4 pt-3 border-t border-border/40 dark:border-white/5 flex items-center justify-between text-[11px] text-muted-foreground">
                             <span>Slippage: <span className="font-semibold text-foreground">0.1 pips</span></span>
-                            <span>Broker: <span className="font-semibold text-foreground">Ovantra</span></span>
+                            <span>Broker: <span className="font-semibold text-foreground">ORVANTA</span></span>
                         </div>
                     </div>
 

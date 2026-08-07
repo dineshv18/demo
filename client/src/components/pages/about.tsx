@@ -43,7 +43,7 @@ export default function AboutPage() {
                     </Reveal>
                     <Reveal delay={0.05}>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                            Ovantra Financial was founded on a simple belief: independent traders deserve the same
+                            ORVANTA Financial was founded on a simple belief: independent traders deserve the same
                             infrastructure, pricing and safeguards as institutional desks. We spent years engineering that reality.
                         </p>
                     </Reveal>
@@ -83,7 +83,7 @@ export default function AboutPage() {
                     <Reveal delay={0.08}>
                         <div className="grid sm:grid-cols-2 gap-6 text-sm text-muted-foreground leading-relaxed">
                             <p>
-                                Ovantra Financial was built by traders, for traders. We saw how institutional desks
+                                ORVANTA Financial was built by traders, for traders. We saw how institutional desks
                                 had access to better pricing, faster execution, and deeper liquidity — and we
                                 built the bridge to bring that to independent professionals.
                             </p>
@@ -122,7 +122,7 @@ export default function AboutPage() {
                             {/* Quote card */}
                             <div className="absolute -bottom-6 left-6 right-6 md:right-auto md:left-6 md:max-w-xs rounded-lg bg-white dark:bg-card border border-border/60 shadow-xl p-5">
                                 <p className="text-sm font-semibold">&ldquo;Making an impact, together&rdquo;</p>
-                                <p className="text-xs text-muted-foreground mt-1">Ovantra Founder</p>
+                                <p className="text-xs text-muted-foreground mt-1">ORVANTA Founder</p>
                             </div>
                         </div>
                     </Reveal>
@@ -140,7 +140,7 @@ export default function AboutPage() {
                             </p>
                             <div className="rounded-lg border-l-4 border-primary bg-primary/5 p-5">
                                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                                    &ldquo;Ovantra Financial was built on the belief that every serious trader deserves
+                                    &ldquo;ORVANTA Financial was built on the belief that every serious trader deserves
                                     transparent pricing, lightning-fast execution, and a platform they can trust.
                                     That belief drives everything we build.&rdquo;
                                 </p>

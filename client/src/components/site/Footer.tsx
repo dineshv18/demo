@@ -34,7 +34,7 @@ const socialIcons = [
 
 const cols = [
     { title: "Company", links: [["About", "/about"], ["Blog", "/blog"], ["Contact", "/contact"], ["Careers", "/about"]] },
-    { title: "Platform", links: [["Ovantra Financial", "/platform"], ["Desktop", "/platform"], ["Web Trader", "/platform"], ["Mobile", "/platform"]] },
+    { title: "Platform", links: [["ORVANTA Financial", "/platform"], ["Desktop", "/platform"], ["Web Trader", "/platform"], ["Mobile", "/platform"]] },
     { title: "Trading", links: [["Forex CFDs", "/#accounts"], ["Crypto CFDs", "/#accounts"], ["Spreads", "/#accounts"], ["Leverage", "/#accounts"]] },
     { title: "Legal", links: [["Terms", "/about"], ["Privacy", "/about"], ["Risk Disclosure", "/about"], ["Regulation", "/about"]] },
 ] as const;
@@ -49,8 +49,8 @@ export function Footer() {
                     <div className="grid gap-12 lg:grid-cols-6">
                         <div className="lg:col-span-2">
                             <Link href="/" className="flex items-center gap-2.5">
-                                <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra Financial" width={100} height={100} className="h-20 w-auto dark:hidden" />
-                                <Image src="/dark-Photoroom.png" alt="Ovantra Financial" width={100} height={100} className="h-20 w-auto hidden dark:block" />
+                                <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-20 w-auto dark:hidden" />
+                                <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-20 w-auto hidden dark:block" />
                             </Link>
                             <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">
                                 Institutional-grade Forex and Crypto CFD trading.
@@ -87,7 +87,7 @@ export function Footer() {
                     </div>
 
                     <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-                        <div>&copy; {new Date().getFullYear()} Ovantra Financial. All rights reserved.</div>
+                        <div>&copy; {new Date().getFullYear()} ORVANTA Financial. All rights reserved.</div>
                         <div className="flex gap-5">
                             <Link href="/about">Terms</Link>
                             <Link href="/about">Privacy</Link>

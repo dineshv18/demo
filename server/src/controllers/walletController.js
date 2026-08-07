@@ -13,14 +13,14 @@ export const getWallet = async (req, res) => {
     const env = (await import("../config/env.js")).default();
     return res.status(200).json({
       wallet,
-      upiId: env.OVANTRA_UPI_ID,
+      upiId: env.ORVANTA_UPI_ID,
       usdPayment: {
-        method: env.OVANTRA_USD_PAYMENT_METHOD,
-        accountName: env.OVANTRA_USD_ACCOUNT_NAME,
-        accountNumber: env.OVANTRA_USD_ACCOUNT_NUMBER,
-        routingNumber: env.OVANTRA_USD_ROUTING_NUMBER,
-        swiftCode: env.OVANTRA_USD_SWIFT_CODE,
-        bankName: env.OVANTRA_USD_BANK_NAME,
+        method: env.ORVANTA_USD_PAYMENT_METHOD,
+        accountName: env.ORVANTA_USD_ACCOUNT_NAME,
+        accountNumber: env.ORVANTA_USD_ACCOUNT_NUMBER,
+        routingNumber: env.ORVANTA_USD_ROUTING_NUMBER,
+        swiftCode: env.ORVANTA_USD_SWIFT_CODE,
+        bankName: env.ORVANTA_USD_BANK_NAME,
       },
       pendingRequest: await getPendingRequest(req.user.id),
       currencyLocked,

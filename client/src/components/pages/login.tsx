@@ -214,10 +214,10 @@ export default function LoginPage() {
                         {/* Logo */}
                         <div className="flex justify-center">
                             <Link href="/" className="flex items-center gap-2.5 group">
-                                <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra Financial" width={40} height={40} className="h-10 w-auto dark:hidden" />
-                                <Image src="/dark-Photoroom.png" alt="Ovantra Financial" width={40} height={40} className="h-10 w-auto hidden dark:block" />
+                                <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={40} height={40} className="h-10 w-auto dark:hidden" />
+                                <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={40} height={40} className="h-10 w-auto hidden dark:block" />
                                 <span className="font-display text-xl font-semibold tracking-tight">
-                                    Ovantra <span className="text-gradient">Financial</span>
+                                    ORVANTA <span className="text-gradient">Financial</span>
                                 </span>
                             </Link>
                         </div>
@@ -372,7 +372,7 @@ export default function LoginPage() {
                             <p className="text-white/70 text-base max-w-sm leading-relaxed">
                                 {mode === "login"
                                     ? "Redirecting you to your trading dashboard..."
-                                    : "Your account has been created. Start exploring Ovantra Financial."}
+                                    : "Your account has been created. Start exploring ORVANTA Financial."}
                             </p>
                         </div>
                     </div>
@@ -486,10 +486,10 @@ export default function LoginPage() {
                     {/* Logo */}
                     <div className="flex justify-center -mt-2">
                         <Link href="/" className="flex items-center gap-2.5 group">
-                            <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra Financial" width={40} height={40} className="h-10 w-auto dark:hidden" />
-                            <Image src="/dark-Photoroom.png" alt="Ovantra Financial" width={40} height={40} className="h-10 w-auto hidden dark:block" />
+                            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={40} height={40} className="h-10 w-auto dark:hidden" />
+                            <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={40} height={40} className="h-10 w-auto hidden dark:block" />
                             <span className="font-display text-xl font-semibold tracking-tight">
-                                Ovantra <span className="text-gradient">Financial</span>
+                                ORVANTA <span className="text-gradient">Financial</span>
                             </span>
                         </Link>
                     </div>

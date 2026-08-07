@@ -31,8 +31,9 @@ export const submitKyc = async (req, res) => {
     const addressFront = req.files?.addressFront?.[0];
     const addressBack = req.files?.addressBack?.[0];
 
-    if (!govtIdFront || !govtIdBack) return res.status(400).json({ message: "Government ID front and back images are required" });
-    if (!addressFront || !addressBack) return res.status(400).json({ message: "Address proof front and back images are required" });
+    if (!govtIdFront) return res.status(400).json({ message: "Government ID front image is required" });
+    if (!govtIdBack) return res.status(400).json({ message: "Government ID back image is required" });
+    if (!addressFront) return res.status(400).json({ message: "Address proof front image is required" });
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
     for (const f of [govtIdFront, govtIdBack, addressFront, addressBack]) {
@@ -53,7 +54,7 @@ export const submitKyc = async (req, res) => {
     const govtFrontDoc = await uploadToR2(govtIdFront, "kyc-documents");
     const govtBackDoc = await uploadToR2(govtIdBack, "kyc-documents");
     const addrFrontDoc = await uploadToR2(addressFront, "kyc-documents");
-    const addrBackDoc = await uploadToR2(addressBack, "kyc-documents");
+    const addrBackDoc = addressBack ? await uploadToR2(addressBack, "kyc-documents") : null;
 
     const age = Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
@@ -76,8 +77,8 @@ export const submitKyc = async (req, res) => {
         addressProofType,
         addressDocUrl: addrFrontDoc.url,
         addressDocFileName: addressFront.originalname,
-        addressDocUrlBack: addrBackDoc.url,
-        addressDocFileNameBack: addressBack.originalname,
+        addressDocUrlBack: addrBackDoc?.url || null,
+        addressDocFileNameBack: addressBack?.originalname || null,
         status: "PENDING",
         rejectionReason: null,
         reviewedBy: null,

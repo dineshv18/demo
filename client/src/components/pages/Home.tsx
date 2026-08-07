@@ -23,7 +23,7 @@ import { DotGrid } from "../site/DotGrid";
 
 const features = [
     { icon: TablerBolt, title: "Ultra-Fast Execution", desc: "Sub-25ms average order execution on our tier-1 institutional infrastructure." },
-    { icon: TablerChartBar, title: "Ovantra Financial Engine", desc: "The world's most advanced multi-asset platform with 21 timeframes and 38 indicators." },
+    { icon: TablerChartBar, title: "ORVANTA Financial Engine", desc: "The world's most advanced multi-asset platform with 21 timeframes and 38 indicators." },
     { icon: TablerTrendingUp, title: "Institutional Spreads", desc: "Raw pricing streamed from top-tier liquidity providers, starting from 0.0 pips." },
     { icon: TablerShieldCheck, title: "Negative Balance Protection", desc: "You will never lose more than you deposit. Full account safeguards, always on." },
     { icon: TablerStack, title: "Forex & Crypto CFDs", desc: "70+ FX pairs and 30+ digital assets under one unified MT5 account." },
@@ -112,7 +112,7 @@ export default function Home() {
                         </Reveal>
                         <Reveal delay={0.12}>
                             <p className="mt-6 max-w-xl mx-auto text-lg text-muted-foreground leading-relaxed">
-                                Ovantra Financial gives serious traders institutional-grade Forex and Crypto CFDs
+                                ORVANTA Financial gives serious traders institutional-grade Forex and Crypto CFDs
                                 — with raw spreads, deep liquidity, and the execution
                                 infrastructure of a global prime broker.
                             </p>
@@ -163,7 +163,7 @@ export default function Home() {
                         My Specialization
                     </div>
                     <h2 className="mt-6 font-display text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">
-                        Why <span className="text-amber-600 dark:text-amber-500">Ovantra Financial</span>
+                        Why <span className="text-amber-600 dark:text-amber-500">ORVANTA Financial</span>
                     </h2>
                     <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
                         Every layer of our stack — from liquidity to execution to security — is engineered for professionals who take markets seriously.

@@ -54,7 +54,7 @@ export function HeroSection() {
                   className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
                 >
                   <span className="text-foreground text-sm">
-                    Introducing Ovantra Financial
+                    Introducing ORVANTA Financial
                   </span>
                   <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700" />
                   <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -154,7 +154,7 @@ export function HeroSection() {
           </p>
           <div className="grid max-w-2xl grid-cols-4 gap-x-12 gap-y-8 sm:gap-x-16 sm:gap-y-14">
             {[
-              { name: "Ovantra Financial", h: "h-5" },
+              { name: "ORVANTA Financial", h: "h-5" },
               { name: "Tier-1 Banks", h: "h-4" },
               { name: "Deep Liquidity", h: "h-4" },
               { name: "SOC 2", h: "h-5" },

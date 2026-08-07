@@ -76,7 +76,7 @@ export default function Login() {
           </div>
           <div>
             <h1 className="text-5xl xl:text-6xl font-bold leading-tight mb-6 font-sans">
-              Ovantra<br />Financial
+              ORVANTA<br />Financial
             </h1>
             <p className="text-white/70 text-base max-w-sm leading-relaxed">
               Access the admin dashboard to manage your trading platform, users, and settings.
@@ -95,7 +95,7 @@ export default function Login() {
                 O
               </div>
               <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Ovantra <span className="text-indigo-600">Financial</span>
+                ORVANTA <span className="text-indigo-600">Financial</span>
               </span>
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function Login() {
                     setEmail(e.target.value);
                     if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
                   }}
-                  placeholder="admin@ovantra.com"
+                  placeholder="admin@orvanta.com"
                   className={`w-full rounded-lg border px-4 py-3 pl-10 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-gray-50 dark:bg-gray-800/50 ${
                     errors.email
                       ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"

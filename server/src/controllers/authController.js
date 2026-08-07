@@ -22,7 +22,7 @@ const generateOTP = () => {
 const generateToken = (user) =>
   jwt.sign({ id: user.id, role: user.role, v: 1 }, getEnv().JWT_SECRET, {
     expiresIn: getEnv().JWT_EXPIRES_IN,
-    issuer: "ovantra-financial",
+    issuer: "orvanta-financial",
     audience: user.role.toLowerCase(),
   });
 

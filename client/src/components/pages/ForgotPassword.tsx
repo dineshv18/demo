@@ -40,10 +40,10 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-6 text-center">
           <div className="flex justify-center">
             <Link href="/" className="flex items-center gap-3">
-              <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra" width={44} height={44} className="h-11 w-auto dark:hidden" />
-              <Image src="/dark-Photoroom.png" alt="Ovantra" width={44} height={44} className="h-11 w-auto hidden dark:block" />
+              <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto dark:hidden" />
+              <Image src="/dark-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto hidden dark:block" />
               <span className="font-display text-xl font-bold tracking-tight">
-                Ovantra <span className="text-gradient">Financial</span>
+                ORVANTA <span className="text-gradient">Financial</span>
               </span>
             </Link>
           </div>
@@ -110,7 +110,7 @@ export default function ForgotPassword() {
           </div>
           <div>
             <h1 className="font-display text-5xl xl:text-6xl font-bold leading-tight mb-6">
-              Ovantra<br />Financial
+              ORVANTA<br />Financial
             </h1>
             <p className="text-white/60 text-base max-w-sm leading-relaxed">
               Institutional-grade Forex and Crypto CFD trading. Deep liquidity, transparent pricing, and enterprise security.
@@ -124,10 +124,10 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-8">
           <div className="flex justify-center">
             <Link href="/" className="flex items-center gap-3">
-              <Image src="/WhiteBlack-Photoroom.png" alt="Ovantra" width={44} height={44} className="h-11 w-auto dark:hidden" />
-              <Image src="/dark-Photoroom.png" alt="Ovantra" width={44} height={44} className="h-11 w-auto hidden dark:block" />
+              <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto dark:hidden" />
+              <Image src="/dark-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto hidden dark:block" />
               <span className="font-display text-xl font-bold tracking-tight">
-                Ovantra <span className="text-gradient">Financial</span>
+                ORVANTA <span className="text-gradient">Financial</span>
               </span>
             </Link>
           </div>

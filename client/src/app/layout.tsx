@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ovantra Financial — Institutional Forex & Crypto CFDs",
+  title: "ORVANTA Financial — Institutional Forex & Crypto CFDs",
   description:
     "Institutional-grade Forex and Crypto CFD trading. Deep liquidity, transparent pricing, and enterprise security.",
 };

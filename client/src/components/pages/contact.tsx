@@ -15,8 +15,8 @@ const contactInfo = [
     {
         icon: Mail,
         label: "Email",
-        value: "hello@ovantrafinancial.com",
-        href: "mailto:hello@ovantrafinancial.com",
+        value: "hello@orvantafinancial.com",
+        href: "mailto:hello@orvantafinancial.com",
     },
     {
         icon: MapPin,

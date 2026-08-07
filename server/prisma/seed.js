@@ -39,16 +39,16 @@ const DEFAULT_ROLES = [
 ];
 
 const TEST_USERS = [
-  { name: "Super Admin", email: "superadmin@ovantra.com", password: "SuperAdmin@123", role: "SUPER_ADMIN", isVerified: true, assignedRoleName: "super_admin" },
-  { name: "Admin User", email: "admin@ovantra.com", password: "Admin@123", role: "ADMIN", isVerified: true, assignedRoleName: "admin" },
-  { name: "Manager User", email: "manager@ovantra.com", password: "Manager@123", role: "ADMIN", isVerified: true, assignedRoleName: "manager" },
-  { name: "Support User", email: "support@ovantra.com", password: "Support@123", role: "ADMIN", isVerified: true, assignedRoleName: "support" },
+  { name: "Super Admin", email: "superadmin@orvanta.com", password: "SuperAdmin@123", role: "SUPER_ADMIN", isVerified: true, assignedRoleName: "super_admin" },
+  { name: "Admin User", email: "admin@orvanta.com", password: "Admin@123", role: "ADMIN", isVerified: true, assignedRoleName: "admin" },
+  { name: "Manager User", email: "manager@orvanta.com", password: "Manager@123", role: "ADMIN", isVerified: true, assignedRoleName: "manager" },
+  { name: "Support User", email: "support@orvanta.com", password: "Support@123", role: "ADMIN", isVerified: true, assignedRoleName: "support" },
   { name: "Ritesh Kumar", email: "riteshtest@gmail.com", password: "Ritesh@123", role: "USER", isVerified: true, assignedRoleName: "user" },
-  { name: "Client User", email: "client@ovantra.com", password: "Client@123", role: "USER", isVerified: true, assignedRoleName: "user" },
+  { name: "Client User", email: "client@orvanta.com", password: "Client@123", role: "USER", isVerified: true, assignedRoleName: "user" },
 ];
 
 async function main() {
-  console.log("=== Ovantra Financial Database Seed ===\n");
+  console.log("=== ORVANTA Financial Database Seed ===\n");
 
   // 1. Seed pages
   console.log("Seeding pages...");
