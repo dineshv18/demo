@@ -9,12 +9,8 @@ import {
   IconLayoutDashboard,
   IconWallet,
   IconChartLine,
-  IconExchange,
-  IconSettings,
   IconLogout,
   IconChevronUp,
-  IconNews,
-  IconSpeakerphone,
   IconShield,
   IconSun,
   IconMoon,
@@ -48,22 +44,17 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggleButton } from "./ThemeToggle";
 
-// All possible nav items — filtered by RBAC
+// All possible nav items — filtered by RBAC. alwaysVisible = skip RBAC check
 const allNavItems = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main" },
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main" },
   { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main" },
-  { slug: "trading", to: "/dashboard/trading", label: "Live Trading", icon: IconChartLine, group: "main" },
-  { slug: "exchange", to: "/dashboard/exchange", label: "Exchange", icon: IconExchange, group: "main" },
   { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main" },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other" },
-  { slug: "news", to: "/dashboard/news", label: "News", icon: IconNews, group: "other" },
-  { slug: "blog", to: "/dashboard/blog", label: "Blog", icon: IconSpeakerphone, group: "other" },
-  { slug: "settings", to: "/dashboard/settings", label: "Settings", icon: IconSettings, group: "other" },
-  { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other" },
+  { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other", alwaysVisible: true },
 ];
 
-type NavItem = (typeof allNavItems)[number];
+type NavItem = (typeof allNavItems)[number] & { alwaysVisible?: boolean };
 
 function AppSidebar() {
   const pathname = usePathname();
@@ -78,8 +69,8 @@ function AppSidebar() {
     window.location.href = "/login";
   };
 
-  // Filter nav items by RBAC
-  const visibleNavItems = allNavItems.filter((item) => canView(item.slug));
+  // Filter nav items by RBAC (alwaysVisible bypasses check)
+  const visibleNavItems = allNavItems.filter((item) => (item as NavItem & { alwaysVisible?: boolean }).alwaysVisible || canView(item.slug));
   const mainNav = visibleNavItems.filter((item) => item.group === "main");
   const otherNav = visibleNavItems.filter((item) => item.group === "other");
 

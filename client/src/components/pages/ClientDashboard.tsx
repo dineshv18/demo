@@ -168,8 +168,8 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: User Card + Stats */}
         <div className="space-y-4">
-          {/* User Profile Card */}
-          <div className="bg-card rounded-2xl border border-border p-6">
+          {/* User Profile Card — clickable → Profile */}
+          <Link href="/dashboard/profile" className="block bg-card rounded-2xl border border-border p-6 hover:border-brand/30 transition-colors cursor-pointer">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-14 w-14 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
@@ -204,7 +204,10 @@ export default function ClientDashboard() {
                 </span>
               </div>
             </div>
-          </div>
+            <div className="mt-4 pt-3 border-t border-border text-center">
+              <span className="text-xs font-medium text-brand hover:text-brand/80 transition-colors">View Profile →</span>
+            </div>
+          </Link>
 
           {/* Quick Stats */}
           <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
