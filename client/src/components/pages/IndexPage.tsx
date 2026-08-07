@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
-  IconTrendingUp, IconTrendingDown, IconChartLine, IconUser,
+  IconTrendingUp, IconTrendingDown, IconUser,
   IconRefresh, IconWallet, IconCoin,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -47,10 +47,10 @@ export default function IndexPage() {
 
   if (!kycApproved) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">MetaYield Index</h1>
-          <p className="text-muted-foreground text-sm mt-1">Track index performance and returns</p>
+          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">MetaYield Index</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and returns</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <div className="flex items-start sm:items-center gap-3 flex-1">
@@ -81,7 +81,7 @@ export default function IndexPage() {
 
   if (error) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
@@ -100,18 +100,21 @@ export default function IndexPage() {
   const calcReturn = (pct: string) => balance * (parseFloat(pct) / 100);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">MetaYield Index</h1>
-          <p className="text-muted-foreground text-sm mt-1">Track index performance and returns</p>
+          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">MetaYield Index</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and returns</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
             <IconShieldCheck className="h-3.5 w-3.5" /> KYC Verified
           </span>
-          <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors">
+          <span className="sm:hidden inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
+            <IconShieldCheck className="h-3 w-3" /> Verified
+          </span>
+          <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-2.5 sm:px-3 py-2 text-sm font-medium hover:bg-accent transition-colors">
             <IconRefresh className="h-4 w-4" />
           </button>
         </div>
@@ -124,15 +127,15 @@ export default function IndexPage() {
       )}
 
       {/* Wallet Balance + Tier Banner */}
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shrink-0">
-              <IconWallet className="h-7 w-7 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shrink-0">
+              <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Your Wallet Balance</p>
-              <p className="font-display text-3xl font-bold tracking-tight mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
+              <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">
                 <span className="text-gradient">${balance.toFixed(2)}</span>
               </p>
             </div>
@@ -159,32 +162,32 @@ export default function IndexPage() {
       </div>
 
       {/* Index Price Card */}
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="font-display text-xl font-bold">MetaYield Index</h2>
-              <span className="text-xs font-medium text-muted-foreground tracking-wider uppercase">MYLD</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h2 className="font-display text-lg sm:text-xl font-bold">MetaYield Index</h2>
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground tracking-wider uppercase">MYLD</span>
             </div>
             <div className="flex items-center gap-3 mt-2">
-              <span className="text-sm text-muted-foreground">CURRENT INDEX PRICE</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">CURRENT INDEX PRICE</span>
             </div>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="font-display text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
-              <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
+            <div className="flex items-center gap-2 sm:gap-3 mt-1">
+              <span className="font-display text-xl sm:text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
+              <span className={`inline-flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
                 {priceUp ? <IconTrendingUp className="h-3 w-3" /> : <IconTrendingDown className="h-3 w-3" />}
                 ${Math.abs(currentPrice?.changeAmount || 0).toFixed(2)} ({Math.abs(currentPrice?.changePercent || 0).toFixed(2)}%)
               </span>
             </div>
           </div>
-          <span className="relative inline-flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white">
+          <span className="relative inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-bold text-white shrink-0">
             <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-400 animate-pulse" />
             SOLD OUT
           </span>
         </div>
 
         {/* Chart */}
-        <div className="h-[280px] mt-4">
+        <div className="h-[200px] sm:h-[280px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={priceHistory || []}>
               <defs>
@@ -235,8 +238,8 @@ export default function IndexPage() {
       {/* Your Returns - Dollar + Percentage */}
       {activeTier && balance > 0 ? (
         <div>
-          <h2 className="font-display text-lg font-semibold mb-3">Your Returns</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <h2 className="font-display text-base sm:text-lg font-semibold mb-3">Your Returns</h2>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <ReturnCard
               label="1W Return"
               percent={`${parseFloat(activeTier.weeklyReturn).toFixed(2)}%`}
@@ -261,7 +264,7 @@ export default function IndexPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <ReturnCardEmpty label="1W Return" />
           <ReturnCardEmpty label="1M Return" />
           <ReturnCardEmpty label="6M Return" />
@@ -270,8 +273,8 @@ export default function IndexPage() {
 
       {/* Tier Comparison Table */}
       {tiers && tiers.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-lg font-semibold mb-4">Investment Tiers</h2>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+          <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Investment Tiers</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -321,44 +324,25 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* Digital Assets */}
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <IconChartLine className="h-5 w-5 text-muted-foreground" />
-            <h2 className="font-display text-lg font-semibold">Digital Assets</h2>
-          </div>
-        </div>
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">No digital assets in your portfolio yet.</p>
-        </div>
-      </div>
-
       {/* Index Manager */}
       {manager && (
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-lg font-semibold">Index Manager</h2>
+            <h2 className="font-display text-base sm:text-lg font-semibold">Index Manager</h2>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="grid h-14 w-14 place-items-center rounded-full bg-brand/10 shrink-0">
-              <IconUser className="h-7 w-7 text-brand" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-brand/10 shrink-0">
+              <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-brand" />
             </div>
             <div>
-              <p className="font-semibold">{manager.name}</p>
-              <p className="text-sm text-muted-foreground">{manager.title}</p>
-              {manager.bio && <p className="text-xs text-muted-foreground mt-1">{manager.bio}</p>}
+              <p className="font-semibold text-sm sm:text-base">{manager.name}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{manager.title}</p>
+              {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{manager.bio}</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* View All Tiers */}
-      <div className="text-center pb-4">
-        <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-2.5 text-sm font-medium hover:bg-accent transition-colors">
-          View All <span className="text-brand">+</span>
-        </button>
-      </div>
     </div>
   );
 }
@@ -371,12 +355,12 @@ function ReturnCard({ label, percent, dollar, balance, color }: {
   color: string;
 }) {
   return (
-    <div className={`rounded-2xl bg-gradient-to-br ${color} p-5 text-white`}>
-      <p className="text-sm font-medium text-white/80">{label}</p>
-      <p className="font-display text-2xl font-bold mt-1">{percent}</p>
-      <div className="mt-3 pt-3 border-t border-white/20">
-        <p className="text-xs text-white/60">You earn on ${balance.toFixed(0)}</p>
-        <p className="font-display text-lg font-bold text-emerald-300 mt-0.5">+${dollar.toFixed(2)}</p>
+    <div className={`rounded-xl sm:rounded-2xl bg-gradient-to-br ${color} p-3 sm:p-5`}>
+      <p className="text-[10px] sm:text-sm font-medium text-white/90">{label}</p>
+      <p className="font-display text-base sm:text-2xl font-bold mt-0.5 sm:mt-1 text-white">{percent}</p>
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
+        <p className="text-[10px] sm:text-xs text-white/70">You earn on ${balance.toFixed(0)}</p>
+        <p className="font-display text-sm sm:text-lg font-bold text-emerald-200 mt-0.5">+${dollar.toFixed(2)}</p>
       </div>
     </div>
   );
@@ -384,12 +368,12 @@ function ReturnCard({ label, percent, dollar, balance, color }: {
 
 function ReturnCardEmpty({ label }: { label: string }) {
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-5 text-white opacity-60">
-      <p className="text-sm font-medium text-white/80">{label}</p>
-      <p className="font-display text-2xl font-bold mt-1">--</p>
-      <div className="mt-3 pt-3 border-t border-white/20">
-        <p className="text-xs text-white/60">Deposit to see returns</p>
-        <p className="font-display text-lg font-bold text-white/40 mt-0.5">$0.00</p>
+    <div className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-3 sm:p-5 text-white/50">
+      <p className="text-[10px] sm:text-sm font-medium text-white/70">{label}</p>
+      <p className="font-display text-base sm:text-2xl font-bold mt-0.5 sm:mt-1">--</p>
+      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
+        <p className="text-[10px] sm:text-xs text-white/50">Deposit to see returns</p>
+        <p className="font-display text-sm sm:text-lg font-bold text-white/30 mt-0.5">$0.00</p>
       </div>
     </div>
   );
