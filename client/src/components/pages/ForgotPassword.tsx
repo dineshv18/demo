@@ -1,16 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, type FormEvent } from "react";
 import { authAPI } from "@/lib/api";
+import { useAuth } from "@/lib/AuthContext";
 import { IconMail, IconLoader2, IconAlertCircle, IconArrowLeft, IconSend, IconCheck } from "@tabler/icons-react";
 import Image from "next/image";
 
 export default function ForgotPassword() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/dashboard");
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (ev: FormEvent) => {
     ev.preventDefault();

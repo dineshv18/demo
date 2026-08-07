@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent, useCallback } from "react";
+import { useState, useEffect, type FormEvent, useCallback } from "react";
 import { authAPI } from "@/lib/api";
+import { useAuth } from "@/lib/AuthContext";
 import {
   IconMail, IconLock, IconUser, IconArrowRight, IconLoader2, IconAlertCircle,
   IconCircleCheck, IconShield, IconArrowLeft, IconEye, IconEyeOff,
@@ -24,6 +25,7 @@ type View = "register" | "otp" | "success";
 export default function ClientRegister() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const refCode = searchParams.get("ref");
   const [view, setView] = useState<View>("register");
   const [name, setName] = useState("");
@@ -37,6 +39,10 @@ export default function ClientRegister() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/dashboard");
+  }, [user, authLoading, router]);
 
   const startResendTimer = () => {
     setResendTimer(60);

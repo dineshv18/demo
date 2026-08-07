@@ -134,28 +134,28 @@ export default function ClientDashboard() {
     <div className="space-y-6">
       {/* KYC Banners */}
       {(kycStatus === "NOT_STARTED" || kycStatus === "REJECTED") && (
-        <div className="flex items-center gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5">
           <div className="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
             <IconShield className="h-5 w-5 text-amber-500" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground">Complete Your KYC Verification</h3>
-            <p className="text-sm text-muted-foreground">You need to complete KYC to deposit and withdraw funds.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">You need to complete KYC to deposit and withdraw funds.</p>
           </div>
-          <Link href="/dashboard/kyc" className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors btn-glow btn-glow-hover">
+          <Link href="/dashboard/kyc" className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors btn-glow btn-glow-hover w-full sm:w-auto text-center">
             Complete KYC
           </Link>
         </div>
       )}
 
       {kycStatus === "PENDING" && (
-        <div className="flex items-center gap-4 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 sm:p-5">
           <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0">
             <IconClock className="h-5 w-5 text-blue-500" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground">KYC Under Review</h3>
-            <p className="text-sm text-muted-foreground">Your identity verification is being reviewed. This usually takes 12-24 working hours.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Your identity verification is being reviewed. This usually takes 12-24 working hours.</p>
           </div>
         </div>
       )}
@@ -165,17 +165,17 @@ export default function ClientDashboard() {
         <p className="mt-1 text-sm text-muted-foreground">Here&apos;s your account overview</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column: User Card + Stats */}
         <div className="space-y-4">
           {/* User Profile Card — clickable → Profile */}
-          <Link href="/dashboard/profile" className="block bg-card rounded-2xl border border-border p-6 hover:border-brand/30 transition-colors cursor-pointer">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-14 w-14 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand">
+          <Link href="/dashboard/profile" className="block bg-card rounded-2xl border border-border p-4 sm:p-6 hover:border-brand/30 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3 sm:gap-4 mb-4">
+              <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand shrink-0">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-display text-base font-bold text-foreground truncate">{user?.name || "User"}</h3>
+                <h3 className="font-display text-sm sm:text-base font-bold text-foreground truncate">{user?.name || "User"}</h3>
                 <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function ClientDashboard() {
           </Link>
 
           {/* Quick Stats */}
-          <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
+          <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-3">
             <h3 className="text-sm font-semibold text-foreground mb-2">Quick Stats</h3>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Total Deposits</span>
@@ -235,7 +235,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Referral Stats */}
-          <Link href="/dashboard/referral" className="block bg-card rounded-2xl border border-border p-5 space-y-3 hover:border-brand/30 transition-colors">
+          <Link href="/dashboard/referral" className="block bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-3 hover:border-brand/30 transition-colors">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <IconUserPlus className="h-4 w-4 text-brand" /> Referrals
@@ -263,21 +263,21 @@ export default function ClientDashboard() {
         {/* Right Column: Balance + Chart + Recent Transactions */}
         <div className="lg:col-span-2 space-y-4">
           {/* Balance Card */}
-          <div className="bg-card rounded-2xl border border-border p-6">
+          <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
             <div className="flex items-end justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Balance</p>
-                <p className="font-display text-4xl font-bold tracking-tight mt-1">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Balance</p>
+                <p className="font-display text-3xl sm:text-4xl font-bold tracking-tight mt-1">
                   <span className="text-gradient">{sym}{balance.toFixed(2)}</span>
                 </p>
               </div>
-              <Link href="/dashboard/wallet" className="flex items-center gap-2 rounded-lg btn-glow btn-glow-hover px-4 py-2 text-sm font-semibold text-white transition-all">
+              <Link href="/dashboard/wallet" className="flex items-center gap-2 rounded-lg btn-glow btn-glow-hover px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white transition-all">
                 <IconWallet className="h-4 w-4" /> Wallet
               </Link>
             </div>
 
             {/* Balance Chart */}
-            <div className="h-48">
+            <div className="h-40 sm:h-48">
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>
@@ -305,9 +305,9 @@ export default function ClientDashboard() {
           </div>
 
           {/* Recent Transactions */}
-          <div className="bg-card rounded-2xl border border-border p-6">
+          <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Recent Transactions</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">Recent Transactions</h2>
               <Link href="/dashboard/wallet" className="text-xs font-medium text-brand hover:underline">View All</Link>
             </div>
             {recentTx.length === 0 ? (

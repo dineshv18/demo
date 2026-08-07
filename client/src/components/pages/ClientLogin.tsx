@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import {
   IconMail, IconLock, IconArrowRight, IconLoader2, IconAlertCircle,
@@ -18,12 +18,16 @@ interface FormErrors {
 
 export default function ClientLogin() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/dashboard");
+  }, [user, authLoading, router]);
 
   const clearFieldError = (field: keyof FormErrors) => {
     if (errors[field]) setErrors((p) => ({ ...p, [field]: undefined }));

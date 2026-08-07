@@ -46,11 +46,11 @@ import { ThemeToggleButton } from "./ThemeToggle";
 
 // All possible nav items — filtered by RBAC. alwaysVisible = skip RBAC check
 const allNavItems = [
-  { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main" },
-  { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main" },
-  { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main" },
-  { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main" },
-  { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other" },
+  { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main", alwaysVisible: true },
+  { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main", alwaysVisible: true },
+  { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main", alwaysVisible: true },
+  { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main", alwaysVisible: true },
+  { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other", alwaysVisible: true },
   { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other", alwaysVisible: true },
 ];
 
@@ -245,7 +245,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-6" />
           <h1 className="text-sm font-semibold tracking-tight truncate">
@@ -254,7 +254,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1" />
           <ThemeToggleButton className="!h-8 !w-8" />
         </header>
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
