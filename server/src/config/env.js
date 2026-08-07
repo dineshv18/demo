@@ -22,6 +22,8 @@ function getEnv() {
     // Receiving UPI for QR-based deposits (INR)
     OVANTRA_UPI_ID: process.env.OVANTRA_UPI_ID || "rforritesh@pingpay",
 
+    CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
+
     // USD Payment Details (placeholder — update when ready)
     OVANTRA_USD_PAYMENT_METHOD: process.env.OVANTRA_USD_PAYMENT_METHOD || "Bank Transfer",
     OVANTRA_USD_ACCOUNT_NAME: process.env.OVANTRA_USD_ACCOUNT_NAME || "Ovantra Financial",
