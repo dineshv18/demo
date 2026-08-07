@@ -5,16 +5,18 @@ import Link from "next/link";
 import {
   IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
   IconTrendingUp, IconTrendingDown, IconUser,
-  IconRefresh, IconWallet, IconCoin, IconX, IconInfoCircle,
+  IconRefresh, IconWallet, IconCoin, IconInfoCircle,
+  IconClock,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { indexAPI, kycAPI, type IndexData, type KycData } from "@/lib/api";
+import InvestmentBasePopup from "@/components/site/InvestmentBasePopup";
 
 const INVESTMENT_BASE = [
-  { num: 1, name: "NOVA INDEX", range: "$100 - $500", returnRange: "3% to 5%", duration: "18 months" },
-  { num: 2, name: "PRIME INDEX", range: "$501 - $2000", returnRange: "5% to 7%", duration: "18 months" },
-  { num: 3, name: "VERTEX INDEX", range: "$2001 - $10000", returnRange: "7% to 9%", duration: "24 months" },
-  { num: 4, name: "IMPERIUM INDEX", range: "$10001 above", returnRange: "9% to 11%", duration: "30 months" },
+  { num: 1, name: "NOVA INDEX", range: "$100 - $500", returnRange: "3% to 5%", duration: "18 months", color: "from-blue-500 to-cyan-400", icon: "✦" },
+  { num: 2, name: "PRIME INDEX", range: "$501 - $2,000", returnRange: "5% to 7%", duration: "18 months", color: "from-purple-500 to-pink-400", icon: "◆" },
+  { num: 3, name: "VERTEX INDEX", range: "$2,001 - $10,000", returnRange: "7% to 9%", duration: "24 months", color: "from-amber-500 to-orange-400", icon: "★" },
+  { num: 4, name: "IMPERIUM INDEX", range: "$10,001 & above", returnRange: "9% to 11%", duration: "30 months", color: "from-emerald-500 to-teal-400", icon: "♛" },
 ];
 
 function ChartTooltipContent({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -38,7 +40,7 @@ export default function IndexPage() {
     fetchData();
     const seen = localStorage.getItem("orvanta_investment_base_seen");
     if (!seen) {
-      const timer = setTimeout(() => setShowPopup(true), 800);
+      const timer = setTimeout(() => setShowPopup(true), 1000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -233,31 +235,32 @@ export default function IndexPage() {
           </div>
         </div>
 
-        {/* Investment Base Section */}
+        {/* Investment Base Section — On Page */}
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
           <div className="text-center mb-6">
-            <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight italic">Investment base</h2>
-            <div className="w-24 h-0.5 bg-brand mx-auto mt-2" />
+            <p className="text-xs text-brand font-semibold uppercase tracking-widest mb-1">ORVANTA Financial</p>
+            <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Investment Base</h2>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-brand to-brand-2 mx-auto mt-3" />
           </div>
 
-          <div className="space-y-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {INVESTMENT_BASE.map((item) => (
-              <div key={item.num} className="flex items-start gap-3 sm:gap-4 py-5 border-b border-border/50 last:border-0">
-                <div className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-foreground/80 flex items-center justify-center text-xs sm:text-sm font-bold text-foreground mt-0.5">
-                  {item.num}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
-                    <p className="font-display text-sm sm:text-base font-bold tracking-wide text-foreground">{item.name}</p>
-                    <p className="text-sm sm:text-base font-semibold text-foreground">${item.range.replace("$", "")}</p>
+              <div key={item.num} className="group relative rounded-xl border border-border bg-background/50 p-4 hover:border-brand/40 hover:bg-brand/5 transition-all duration-300">
+                <div className="flex items-start gap-3">
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
+                    {item.num}
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 mt-1">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Return</p>
-                    <p className="text-sm sm:text-base font-bold text-brand">{item.returnRange}</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 mt-1">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Holding Duration</p>
-                    <p className="text-sm sm:text-base font-semibold text-foreground">{item.duration}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-sm font-bold tracking-wide text-foreground">{item.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{item.range}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-brand">
+                        <IconTrendingUp className="h-3 w-3" /> {item.returnRange}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <IconClock className="h-3 w-3" /> {item.duration}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -286,91 +289,5 @@ export default function IndexPage() {
       {/* Investment Base Popup */}
       {showPopup && <InvestmentBasePopup onClose={() => { setShowPopup(false); localStorage.setItem("orvanta_investment_base_seen", "1"); }} />}
     </>
-  );
-}
-
-function InvestmentBasePopup({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card rounded-2xl border border-border shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-muted/80 hover:bg-muted flex items-center justify-center transition-colors"
-        >
-          <IconX className="h-4 w-4" />
-        </button>
-
-        {/* Header */}
-        <div className="text-center pt-8 pb-4 px-6">
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight italic">Investment base</h2>
-          <div className="w-20 h-0.5 bg-brand mx-auto mt-3" />
-        </div>
-
-        {/* Tiers */}
-        <div className="px-6 pb-4">
-          <div className="space-y-0">
-            {INVESTMENT_BASE.map((item) => (
-              <div key={item.num} className="py-4 border-b border-border/40 last:border-0">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 border-foreground/80 flex items-center justify-center text-xs font-bold text-foreground">
-                    {item.num}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-display text-sm font-bold tracking-wide text-foreground">{item.name}</p>
-                    <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-xs text-muted-foreground">{item.range}</span>
-                      <span className="text-xs font-bold text-brand">{item.returnRange}</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-muted-foreground">Duration</span>
-                      <span className="text-xs font-semibold text-foreground">{item.duration}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Notes */}
-        <div className="mx-6 mb-4 rounded-xl border border-border bg-muted/30 p-4">
-          <span className="inline-block bg-foreground text-card text-[10px] font-bold px-2 py-0.5 rounded mb-2 uppercase tracking-wider">Notes</span>
-          <ul className="space-y-1.5">
-            <li className="flex items-start gap-2 text-xs text-muted-foreground">
-              <span className="text-brand mt-0.5">★</span>
-              All returns are percentage per holding duration.
-            </li>
-            <li className="flex items-start gap-2 text-xs text-muted-foreground">
-              <span className="text-brand mt-0.5">★</span>
-              Holding duration starts from the date of activation.
-            </li>
-            <li className="flex items-start gap-2 text-xs text-muted-foreground">
-              <span className="text-brand mt-0.5">★</span>
-              TD (Trade Duration) conditions apply as mentioned.
-            </li>
-            <li className="flex items-start gap-2 text-xs text-muted-foreground">
-              <span className="text-brand mt-0.5">★</span>
-              Please read all terms &amp; conditions carefully.
-            </li>
-          </ul>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center pb-6 px-6">
-          <p className="font-display text-lg font-semibold italic text-muted-foreground">Thank You!</p>
-          <button
-            onClick={onClose}
-            className="mt-4 rounded-xl bg-gradient-to-r from-brand to-brand-2 px-8 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-          >
-            Got it
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }

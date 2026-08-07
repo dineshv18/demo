@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/AuthContext";
+import InvestmentBasePopup, { useInvestmentBasePopup } from "@/components/site/InvestmentBasePopup";
 import {
   IconLayoutDashboard,
   IconWallet,
@@ -224,6 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { user, loading } = useAuth();
   const currentNav = allNavItems.find((item) => item.to === pathname);
+  const { show: showInvestmentPopup, close: closeInvestmentPopup } = useInvestmentBasePopup();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -242,6 +244,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   return (
+    <>
     <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
       <SidebarInset>
@@ -257,5 +260,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
+    {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}
+    </>
   );
 }
