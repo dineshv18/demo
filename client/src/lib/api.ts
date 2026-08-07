@@ -35,6 +35,7 @@ export interface User {
   assignedRoleId: string | null;
   assignedRole: AssignedRole | null;
   theme: string | null;
+  createdAt?: string;
 }
 
 export interface AuthResponse {
@@ -163,6 +164,12 @@ export const authAPI = {
 
   getMe: () =>
     request<{ user: User }>("/auth/me"),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<ApiResponse>("/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) }),
+
+  deactivateAccount: () =>
+    request<ApiResponse>("/auth/deactivate-account", { method: "POST" }),
 };
 
 export interface UsdPaymentInfo {

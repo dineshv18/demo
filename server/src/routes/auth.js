@@ -2,7 +2,7 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import {
   register, adminRegister, login, sendOTPHandler, verifyOTP,
-  forgotPassword, resetPassword, getMe, logout,
+  forgotPassword, resetPassword, getMe, logout, changePassword, deactivateAccount,
 } from "../controllers/authController.js";
 import { authenticate } from "../middleware/auth.js";
 import { bruteForceProtection } from "../middleware/bruteForce.js";
@@ -77,5 +77,7 @@ router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
 router.post("/reset-password", resetPasswordLimiter, resetPassword);
 router.post("/logout", authenticate, logout);
 router.get("/me", authenticate, getMe);
+router.post("/change-password", authenticate, changePassword);
+router.post("/deactivate-account", authenticate, deactivateAccount);
 
 export default router;

@@ -19,6 +19,7 @@ import {
   IconSun,
   IconMoon,
   IconUserPlus,
+  IconUser,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -59,6 +60,7 @@ const allNavItems = [
   { slug: "news", to: "/dashboard/news", label: "News", icon: IconNews, group: "other" },
   { slug: "blog", to: "/dashboard/blog", label: "Blog", icon: IconSpeakerphone, group: "other" },
   { slug: "settings", to: "/dashboard/settings", label: "Settings", icon: IconSettings, group: "other" },
+  { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other" },
 ];
 
 type NavItem = (typeof allNavItems)[number];
@@ -200,6 +202,14 @@ function AppSidebar() {
                     <IconMoon className="h-4 w-4" />
                   )}
                   <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : "Dark Mode"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => { window.location.href = "/dashboard/profile"; }}
+                  className="cursor-pointer gap-2"
+                >
+                  <IconUser className="h-4 w-4" />
+                  My Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

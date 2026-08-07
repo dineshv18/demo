@@ -442,3 +442,57 @@ export const logout = async (req, res) => {
   res.clearCookie("token", { path: "/" });
   return res.status(200).json({ message: "Logged out successfully" });
 };
+
+// ─── CHANGE PASSWORD (logged-in user) ───
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password are required" });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "New password must be at least 8 characters" });
+    }
+
+    const user = await getPrisma().user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const bcrypt = await import("bcryptjs");
+    const valid = await bcrypt.default.compare(currentPassword, user.password);
+    if (!valid) return res.status(400).json({ message: "Current password is incorrect" });
+
+    const samePassword = await bcrypt.default.compare(newPassword, user.password);
+    if (samePassword) return res.status(400).json({ message: "New password must be different from current password" });
+
+    const hashed = await bcrypt.default.hash(newPassword, 12);
+    await getPrisma().user.update({
+      where: { id: req.user.id },
+      data: { password: hashed },
+    });
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ─── DEACTIVATE ACCOUNT (self-service) ───
+export const deactivateAccount = async (req, res) => {
+  try {
+    const user = await getPrisma().user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.role === "SUPER_ADMIN") return res.status(400).json({ message: "Super admin cannot deactivate their account" });
+
+    await getPrisma().user.update({
+      where: { id: req.user.id },
+      data: { isActive: false },
+    });
+
+    res.clearCookie("token", { path: "/" });
+    return res.status(200).json({ message: "Account deactivated successfully" });
+  } catch (error) {
+    console.error("Deactivate account error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
