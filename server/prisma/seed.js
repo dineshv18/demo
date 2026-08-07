@@ -163,10 +163,10 @@ async function main() {
   // 5. Seed Index Tiers
   console.log("Seeding index tiers...");
   const defaultTiers = [
-    { minAmount: 100, maxAmount: 500, label: "$100 - $500", weeklyReturn: 0.50, monthlyReturn: 2.00, halfYearlyReturn: 12.00 },
-    { minAmount: 500, maxAmount: 1000, label: "$500 - $1,000", weeklyReturn: 0.75, monthlyReturn: 3.00, halfYearlyReturn: 18.00 },
-    { minAmount: 1000, maxAmount: 2000, label: "$1,000 - $2,000", weeklyReturn: 1.00, monthlyReturn: 4.00, halfYearlyReturn: 24.00 },
-    { minAmount: 2000, maxAmount: 5000, label: "$2,000 - $5,000", weeklyReturn: 1.25, monthlyReturn: 5.00, halfYearlyReturn: 30.00 },
+    { minAmount: 100, maxAmount: 500, label: "NOVA INDEX", weeklyReturn: 3.00, monthlyReturn: 5.00, halfYearlyReturn: 18 },
+    { minAmount: 501, maxAmount: 2000, label: "PRIME INDEX", weeklyReturn: 5.00, monthlyReturn: 7.00, halfYearlyReturn: 18 },
+    { minAmount: 2001, maxAmount: 10000, label: "VERTEX INDEX", weeklyReturn: 7.00, monthlyReturn: 9.00, halfYearlyReturn: 24 },
+    { minAmount: 10001, maxAmount: 999999999, label: "IMPERIUM INDEX", weeklyReturn: 9.00, monthlyReturn: 11.00, halfYearlyReturn: 30 },
   ];
   const existingTierCount = await prisma.indexTier.count();
   if (existingTierCount === 0) {

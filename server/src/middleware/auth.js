@@ -12,11 +12,15 @@ export const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await getPrisma().user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, name: true, email: true, role: true, isVerified: true },
+      select: { id: true, name: true, email: true, role: true, isVerified: true, isActive: true },
     });
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
+    }
+
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Your account has been deactivated. Please contact support." });
     }
 
     req.user = user;

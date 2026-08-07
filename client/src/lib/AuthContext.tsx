@@ -37,7 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       try {
         const data = await authAPI.getMe();
-        if (!cancelled) setUser(data.user);
+        if (!cancelled) {
+          if (data.user.isActive === false) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setUser(null);
+          } else {
+            setUser(data.user);
+          }
+        }
       } catch {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -53,6 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await authAPI.login({ email, password });
+    if (data.user.isActive === false) {
+      throw new Error("Your account has been deactivated. Please contact support.");
+    }
     localStorage.setItem("token", data.token);
     setUser(data.user);
   }, []);

@@ -32,6 +32,7 @@ export interface User {
   email: string;
   role: string;
   isVerified: boolean;
+  isActive: boolean;
   assignedRoleId: string | null;
   assignedRole: AssignedRole | null;
   theme: string | null;

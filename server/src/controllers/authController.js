@@ -220,6 +220,11 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Check if account is deactivated
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Your account has been deactivated. Please contact support." });
+    }
+
     // Check account lockout
     if (user.lockedUntil && new Date() < user.lockedUntil) {
       const remainingMs = user.lockedUntil.getTime() - Date.now();
@@ -279,7 +284,7 @@ export const login = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful",
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified, assignedRoleId: user.assignedRoleId, assignedRole: user.assignedRole ?? null },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified, isActive: user.isActive, assignedRoleId: user.assignedRoleId, assignedRole: user.assignedRole ?? null },
       token,
     });
   } catch (error) {
