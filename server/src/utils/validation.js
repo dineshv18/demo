@@ -55,12 +55,12 @@ export function validatePassword(password) {
     errors.push("Password contains too many repeated characters");
   }
 
-  // Check for sequential characters
+  // Check for sequential characters (4+ in a row)
   const lower = password.toLowerCase();
   const sequences = ["abcdefghijklmnopqrstuvwxyz", "0123456789", "qwertyuiop", "asdfghjkl"];
   for (const seq of sequences) {
-    for (let i = 0; i <= lower.length - 3; i++) {
-      const chunk = lower.substring(i, i + 3);
+    for (let i = 0; i <= lower.length - 4; i++) {
+      const chunk = lower.substring(i, i + 4);
       if (seq.includes(chunk)) {
         errors.push("Password contains sequential characters");
         break;
