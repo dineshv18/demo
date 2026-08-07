@@ -92,10 +92,9 @@ router.delete("/:id", async (req, res) => {
     if (user.role === "SUPER_ADMIN") return res.status(400).json({ message: "Cannot delete super admin" });
 
     // Delete related records first
-    await getPrisma().referralCommission.deleteMany({ where: { referrerId: user.id } });
-    await getPrisma().referralCommission.deleteMany({ where: { referredUserId: user.id } });
+    await getPrisma().referralCommission.deleteMany({ where: { userId: user.id } });
     await getPrisma().referral.deleteMany({ where: { referrerId: user.id } });
-    await getPrisma().referral.deleteMany({ where: { referredUserId: user.id } });
+    await getPrisma().referral.deleteMany({ where: { referredId: user.id } });
     await getPrisma().transaction.deleteMany({ where: { wallet: { userId: user.id } } });
     await getPrisma().wallet.deleteMany({ where: { userId: user.id } });
     await getPrisma().kyc.deleteMany({ where: { userId: user.id } });
