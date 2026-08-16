@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/AuthContext";
 import InvestmentBasePopup, { useInvestmentBasePopup } from "@/components/site/InvestmentBasePopup";
+import ProfileMenu from "@/components/site/ProfileMenu";
 import {
   IconLayoutDashboard,
   IconWallet,
@@ -13,10 +13,11 @@ import {
   IconLogout,
   IconChevronUp,
   IconShield,
-  IconSun,
-  IconMoon,
-  IconUserPlus,
+  // IconUserPlus,
   IconUser,
+  IconGift,
+  IconArrowsExchange,
+  IconHelpCircle,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -43,16 +44,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { ThemeToggleButton } from "./ThemeToggle";
 
 // All possible nav items — filtered by RBAC. alwaysVisible = skip RBAC check
 const allNavItems = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main", alwaysVisible: true },
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main", alwaysVisible: true },
   { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main", alwaysVisible: true },
-  { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main", alwaysVisible: true },
+  // { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main", alwaysVisible: true },
+  { slug: "transactions", to: "/dashboard/transactions", label: "Transactions", icon: IconArrowsExchange, group: "main", alwaysVisible: true },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other", alwaysVisible: true },
   { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other", alwaysVisible: true },
+  { slug: "support", to: "/dashboard/support", label: "Support", icon: IconHelpCircle, group: "other", alwaysVisible: true },
 ];
 
 type NavItem = (typeof allNavItems)[number] & { alwaysVisible?: boolean };
@@ -60,10 +62,7 @@ type NavItem = (typeof allNavItems)[number] & { alwaysVisible?: boolean };
 function AppSidebar() {
   const pathname = usePathname();
   const { user, logout, canView, assignedRole, roleColor } = useAuth();
-  const { theme, setTheme } = useTheme();
   const { setOpenMobile } = useSidebar();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const handleLogout = async () => {
     await logout();
@@ -140,11 +139,37 @@ function AppSidebar() {
         {visibleNavItems.length === 0 && (
           <SidebarGroup>
             <SidebarGroupContent>
-              <p className="px-2 text-sm text-muted-foreground">No pages assigned</p>
+              <p className="px-2 text-sm text-sidebar-foreground/60">No pages assigned</p>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
+
+      {/* Invite & Earn promo */}
+      <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
+        <Link
+          href="/dashboard/referral"
+          onClick={() => setOpenMobile(false)}
+          className="block rounded-xl p-4 transition-colors hover:brightness-110"
+          style={{ background: `linear-gradient(135deg, ${roleColor}33, ${roleColor}14)`, border: `1px solid ${roleColor}40` }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="grid h-7 w-7 place-items-center rounded-lg shrink-0" style={{ backgroundColor: `${roleColor}30` }}>
+              <IconGift className="h-4 w-4" style={{ color: roleColor }} />
+            </div>
+            <span className="text-sm font-semibold text-sidebar-foreground">Invite & Earn</span>
+          </div>
+          <p className="text-xs text-sidebar-foreground/60 leading-relaxed mb-3">
+            Refer your friends and earn attractive rewards.
+          </p>
+          <span
+            className="block text-center rounded-lg px-3 py-2 text-xs font-semibold text-white"
+            style={{ backgroundColor: roleColor }}
+          >
+            Refer Now
+          </span>
+        </Link>
+      </div>
 
       {/* User */}
       <SidebarFooter>
@@ -164,7 +189,7 @@ function AppSidebar() {
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user?.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate text-xs text-sidebar-foreground/60">
                       {assignedRole?.displayName || user?.role}
                     </span>
                   </div>
@@ -183,18 +208,6 @@ function AppSidebar() {
                     <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="cursor-pointer gap-2"
-                >
-                  {mounted ? (
-                    theme === "dark" ? <IconSun className="h-4 w-4 text-amber-400" /> : <IconMoon className="h-4 w-4 text-blue-400" />
-                  ) : (
-                    <IconMoon className="h-4 w-4" />
-                  )}
-                  <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : "Dark Mode"}</span>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => { window.location.href = "/dashboard/profile"; }}
@@ -245,22 +258,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <>
-    <SidebarProvider className="h-svh overflow-hidden">
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-6" />
-          <h1 className="text-sm font-semibold tracking-tight truncate">
-            {currentNav?.label || "Dashboard"}
-          </h1>
-          <div className="flex-1" />
-          <ThemeToggleButton className="!h-8 !w-8" />
-        </header>
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
-    {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}
+      <SidebarProvider className="h-svh overflow-hidden">
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-6" />
+            <h1 className="text-sm font-semibold tracking-tight truncate">
+              {currentNav?.label || "Dashboard"}
+            </h1>
+            <div className="flex-1" />
+            <ProfileMenu />
+          </header>
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
+      {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}
     </>
   );
 }

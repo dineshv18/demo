@@ -162,7 +162,7 @@ export default function Support() {
         <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900 self-start">
           {tabs.map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
               {t === "PENDING" ? "Pending Review" : "All Payments"}
             </button>
           ))}
@@ -171,7 +171,7 @@ export default function Support() {
           <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input type="text" placeholder="Search by name, email, transaction ID..." value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500" />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500" />
         </div>
       </div>
 
@@ -179,7 +179,7 @@ export default function Support() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         {loading ? (
           <div className="p-6 text-center text-sm text-gray-500 flex items-center justify-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" /> Loading...
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" /> Loading...
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -240,7 +240,7 @@ export default function Support() {
           <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto">
             {detailLoading ? (
               <div className="p-6 text-sm text-gray-500 flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" /> Loading details...
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" /> Loading details...
               </div>
             ) : selected ? (
               <>
@@ -284,9 +284,9 @@ export default function Support() {
                   {selected.type === "DEPOSIT" && selected.screenshotUrl && (
                     <section>
                       <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Payment Screenshot</h3>
-                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-amber-400 transition-colors group">
+                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-violet-400 transition-colors group">
                         <img src={selected.screenshotUrl} alt="Payment proof" className="w-full object-contain max-h-80 bg-gray-50 dark:bg-gray-800" />
-                        <div className="px-4 py-2 text-xs text-gray-500 flex items-center gap-1 group-hover:text-amber-600">
+                        <div className="px-4 py-2 text-xs text-gray-500 flex items-center gap-1 group-hover:text-violet-600">
                           <IconEye size={14} /> Click to open full size
                         </div>
                       </a>
@@ -302,9 +302,9 @@ export default function Support() {
 
                   {/* Verification Checklist for Deposits */}
                   {selected.type === "DEPOSIT" && selected.status === "PENDING" && (
-                    <section className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10 p-4">
-                      <h3 className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider mb-2">Verification Checklist</h3>
-                      <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1.5">
+                    <section className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 p-4">
+                      <h3 className="text-xs font-semibold text-violet-700 dark:text-violet-300 uppercase tracking-wider mb-2">Verification Checklist</h3>
+                      <ul className="text-sm text-violet-700 dark:text-violet-300 space-y-1.5">
                         <li className="flex items-start gap-2">
                           <IconCheck size={14} className="mt-0.5 shrink-0" />
                           Check screenshot matches the UPI ID / amount
@@ -326,7 +326,7 @@ export default function Support() {
                     <section>
                       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Internal Note (optional)</label>
                       <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note for the record..." rows={2}
-                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none" />
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" />
                     </section>
                   )}
 

@@ -7,7 +7,6 @@ import {
   IconSettings,
   IconLogout,
   IconShield,
-  IconMail,
   IconUserCircle,
   IconActivity,
   IconFile,
@@ -33,6 +32,7 @@ import {
   useSidebar,
 } from "../components/ui/sidebar";
 import { Separator } from "../components/ui/separator";
+import ProfileMenu from "../components/ProfileMenu";
 
 const allNavItems = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard },
@@ -44,12 +44,14 @@ const allNavItems = [
   { slug: "payments", to: "/dashboard/payments", label: "Payment Requests", icon: IconWallet },
   { slug: "index-settings", to: "/dashboard/index-settings", label: "Index Settings", icon: IconChartLine },
   { slug: "support", to: "/dashboard/support", label: "Support Team", icon: IconHeadset },
+  { slug: "support-tickets", to: "/dashboard/support-tickets", label: "Support Tickets", icon: IconHeadset },
+  { slug: "platform-wallet", to: "/dashboard/platform-wallet", label: "Platform Wallet", icon: IconWallet },
   { slug: "activity", to: "/dashboard/activity", label: "Activity Logs", icon: IconActivity },
   { slug: "referrals", to: "/dashboard/referrals", label: "Referral Settings", icon: IconUsers },
   { slug: "settings", to: "/dashboard/settings", label: "Settings", icon: IconSettings },
 ];
 
-function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments: number } }) {
+function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments: number; supportTickets: number } }) {
   const { user, logout, canView } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,7 +73,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <NavLink to="/dashboard" onClick={() => setOpenMobile(false)}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-600 to-yellow-600 text-white font-bold text-sm shadow-lg shadow-amber-500/25">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 text-white font-bold text-sm shadow-lg shadow-violet-500/25">
                   O
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -94,14 +96,15 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
             <SidebarMenu>
               {navItems.map((item) => {
                 const pendingCount = item.slug === "kyc" ? pendingCounts.kyc
-                  : item.slug === "payments" ? pendingCounts.payments : 0;
+                  : item.slug === "payments" ? pendingCounts.payments
+                  : item.slug === "support-tickets" ? pendingCounts.supportTickets : 0;
                 return (
                 <SidebarMenuItem key={item.to}>
                   <SidebarMenuButton
                     asChild
                     isActive={location.pathname === item.to}
                     tooltip={item.label}
-                    className="h-9 data-[active=true]:bg-amber-50 data-[active=true]:text-amber-600 data-[active=true]:font-semibold dark:data-[active=true]:bg-amber-500/10 dark:data-[active=true]:text-amber-400"
+                    className="h-9 data-[active=true]:bg-violet-50 data-[active=true]:text-violet-600 data-[active=true]:font-semibold dark:data-[active=true]:bg-violet-500/10 dark:data-[active=true]:text-violet-400"
                   >
                     <NavLink to={item.to} onClick={() => setOpenMobile(false)}>
                       <item.icon />
@@ -129,7 +132,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-3 rounded-md px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-white text-xs font-bold">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xs font-bold">
                 {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
@@ -155,10 +158,9 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
 }
 
 export default function AdminLayout() {
-  const { user } = useAuth();
   const location = useLocation();
   const currentNav = allNavItems.find((item) => item.to === location.pathname);
-  const [pendingCounts, setPendingCounts] = useState({ kyc: 0, payments: 0 });
+  const [pendingCounts, setPendingCounts] = useState({ kyc: 0, payments: 0, supportTickets: 0 });
 
   const fetchPendingCounts = useCallback(async () => {
     try {
@@ -167,16 +169,18 @@ export default function AdminLayout() {
       if (token) headers.Authorization = `Bearer ${token}`;
       const base = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-      const [kycRes, payRes] = await Promise.allSettled([
+      const [kycRes, payRes, supportRes] = await Promise.allSettled([
         fetch(`${base}/admin/kyc?status=PENDING&limit=1`, { headers, credentials: "include" }).then(r => r.json()),
         fetch(`${base}/admin/payments?status=PENDING&limit=1`, { headers, credentials: "include" }).then(r => r.json()),
+        fetch(`${base}/admin/support-tickets?status=OPEN&limit=1`, { headers, credentials: "include" }).then(r => r.json()),
       ]);
 
       const kyc = kycRes.status === "fulfilled" ? (kycRes.value?.counts?.pending ?? 0) : 0;
       const payments = payRes.status === "fulfilled"
         ? ((payRes.value?.counts?.pendingDeposits ?? 0) + (payRes.value?.counts?.pendingWithdrawals ?? 0))
         : 0;
-      setPendingCounts({ kyc, payments });
+      const supportTickets = supportRes.status === "fulfilled" ? (supportRes.value?.counts?.open ?? 0) : 0;
+      setPendingCounts({ kyc, payments, supportTickets });
     } catch { /* ignore */ }
   }, []);
 
@@ -197,14 +201,7 @@ export default function AdminLayout() {
             {currentNav?.label || "Dashboard"}
           </h1>
           <div className="flex-1" />
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs">
-            <IconShield className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="font-medium">{user?.role}</span>
-          </div>
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs">
-            <IconMail className="h-3.5 w-3.5 text-amber-500" />
-            <span className="font-medium max-w-[160px] truncate">{user?.email}</span>
-          </div>
+          <ProfileMenu />
         </header>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <Outlet />

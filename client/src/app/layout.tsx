@@ -15,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ORVANTA Financial — Institutional Forex & Crypto CFDs",
+  title: "ORVANTA Financial — Institutional-Grade Index Investing",
   description:
-    "Institutional-grade Forex and Crypto CFD trading. Deep liquidity, transparent pricing, and enterprise security.",
+    "Institutional-grade Index investing. Transparent tiers, KYC-verified security, and real-time performance tracking.",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;r.style.setProperty("--brand","oklch(0.72 0.14 85)");r.style.setProperty("--brand-2","oklch(0.64 0.15 78)");r.style.setProperty("--brand-glow","oklch(0.80 0.13 90)");r.style.setProperty("--ring","oklch(0.72 0.14 85)")}catch(e){}})();`,
+            __html: `(function(){try{var r=document.documentElement;r.style.setProperty("--brand","oklch(0.58 0.19 293)");r.style.setProperty("--brand-2","oklch(0.52 0.20 286)");r.style.setProperty("--brand-glow","oklch(0.68 0.17 298)");r.style.setProperty("--ring","oklch(0.58 0.19 293)")}catch(e){}})();`,
           }}
         />
       </head>

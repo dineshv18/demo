@@ -1,5 +1,111 @@
 import getPrisma from "../config/db.js";
 
+async function getIndexSettings(prisma) {
+  let settings = await prisma.indexSettings.findFirst();
+  if (!settings) {
+    settings = await prisma.indexSettings.create({ data: {} });
+  }
+  return settings;
+}
+
+async function getPlatformWallet(prisma) {
+  let wallet = await prisma.platformWallet.findFirst();
+  if (!wallet) {
+    wallet = await prisma.platformWallet.create({ data: {} });
+  }
+  return wallet;
+}
+
+async function creditPlatformWallet(prisma, amount, description, investmentId) {
+  if (amount <= 0) return;
+  const platformWallet = await getPlatformWallet(prisma);
+  await prisma.platformWallet.update({
+    where: { id: platformWallet.id },
+    data: { balance: { increment: amount } },
+  });
+  await prisma.platformLedgerEntry.create({
+    data: {
+      platformWalletId: platformWallet.id,
+      type: "FEE_CREDIT",
+      amount,
+      description,
+      indexInvestmentId: investmentId,
+    },
+  });
+}
+
+// Walks the referral chain up to 5 levels from the investor and pays each
+// ancestor their configured cut of the maintenance fee. Whatever the fee
+// doesn't cover — a chain shorter than 5, or no referrer at all — is
+// credited to the platform wallet instead of silently disappearing.
+async function distributeIndexCommission(prisma, investment, feeAmount) {
+  const settings = await getIndexSettings(prisma);
+  const levelPercents = [
+    parseFloat(settings.level1Percent),
+    parseFloat(settings.level2Percent),
+    parseFloat(settings.level3Percent),
+    parseFloat(settings.level4Percent),
+    parseFloat(settings.level5Percent),
+  ];
+
+  let distributedAmount = 0;
+  let currentUserId = investment.userId;
+  let level = 1;
+  for (; level <= 5; level++) {
+    const referral = await prisma.referral.findUnique({ where: { referredId: currentUserId } });
+    if (!referral) break;
+
+    const percent = levelPercents[level - 1];
+    const commissionAmount = (feeAmount * percent) / 100;
+
+    if (commissionAmount > 0) {
+      const referrerWallet = await prisma.wallet.findUnique({ where: { userId: referral.referrerId } });
+      if (referrerWallet) {
+        await prisma.wallet.update({
+          where: { id: referrerWallet.id },
+          data: { bonusBalance: { increment: commissionAmount } },
+        });
+        await prisma.transaction.create({
+          data: {
+            walletId: referrerWallet.id,
+            type: "BONUS_CREDIT",
+            status: "COMPLETED",
+            amount: commissionAmount,
+            description: `Referral commission (Level ${level}) from Index investment`,
+          },
+        });
+        await prisma.referralCommission.create({
+          data: {
+            referralId: referral.id,
+            userId: referral.referrerId,
+            amount: commissionAmount,
+            percentage: percent,
+            status: "PAID",
+            source: "INDEX_INVESTMENT",
+            level,
+            indexInvestmentId: investment.id,
+          },
+        });
+        distributedAmount += commissionAmount;
+      }
+    }
+
+    currentUserId = referral.referrerId;
+  }
+
+  const leftover = feeAmount - distributedAmount;
+  if (leftover > 0) {
+    await creditPlatformWallet(
+      prisma,
+      leftover,
+      level === 1
+        ? "Maintenance fee — investor has no referrer"
+        : `Maintenance fee — referral chain ended at level ${level - 1}`,
+      investment.id
+    );
+  }
+}
+
 // ─── User-facing ───
 
 export const getIndexData = async (req, res) => {
@@ -31,10 +137,22 @@ export const getIndexData = async (req, res) => {
       where: { isActive: true },
     });
 
+    const settings = await getIndexSettings(prisma);
+
     return res.status(200).json({
       tiers,
       activeTier,
       walletBalance: balance,
+      maintenanceFeePercent: parseFloat(settings.maintenanceFeePercent),
+      earlyWithdrawalPercent: parseFloat(settings.earlyWithdrawalPercent),
+      maturityWithdrawalFee: parseFloat(settings.maturityWithdrawalFee),
+      referralLevels: [
+        parseFloat(settings.level1Percent),
+        parseFloat(settings.level2Percent),
+        parseFloat(settings.level3Percent),
+        parseFloat(settings.level4Percent),
+        parseFloat(settings.level5Percent),
+      ],
       priceHistory: prices.reverse().map((p) => ({
         price: parseFloat(p.price),
         changePercent: parseFloat(p.changePercent),
@@ -59,6 +177,227 @@ export const getIndexData = async (req, res) => {
   }
 };
 
+export const investInIndex = async (req, res) => {
+  try {
+    const { amount, tierId } = req.body;
+    const parsedAmount = parseFloat(amount);
+
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+    if (!tierId) {
+      return res.status(400).json({ message: "Please select an investment tier" });
+    }
+
+    const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
+    if (!kyc || kyc.status !== "APPROVED") {
+      return res.status(403).json({ message: "KYC verification required before investing. Please complete your KYC verification first." });
+    }
+
+    const wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
+    if (!wallet || parseFloat(wallet.balance) < parsedAmount) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
+
+    const existingActive = await getPrisma().indexInvestment.findFirst({
+      where: { userId: req.user.id, status: "ACTIVE" },
+    });
+    if (existingActive) {
+      return res.status(400).json({ message: "You already have an active index investment. Wait for it to mature before investing again." });
+    }
+
+    const tier = await getPrisma().indexTier.findUnique({ where: { id: tierId } });
+    if (!tier || !tier.isActive) {
+      return res.status(400).json({ message: "Selected tier is not available" });
+    }
+    if (parsedAmount < parseFloat(tier.minAmount) || parsedAmount > parseFloat(tier.maxAmount)) {
+      return res.status(400).json({ message: `Amount must be between $${tier.minAmount} and $${tier.maxAmount} for this tier` });
+    }
+
+    const settings = await getIndexSettings(getPrisma());
+    const feePercent = parseFloat(settings.maintenanceFeePercent);
+    const feeAmount = (parsedAmount * feePercent) / 100;
+    const netAmount = parsedAmount - feeAmount;
+
+    const activatedAt = new Date();
+    const maturesAt = new Date(activatedAt);
+    maturesAt.setMonth(maturesAt.getMonth() + tier.durationMonths);
+
+    const [, investment] = await getPrisma().$transaction([
+      getPrisma().wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { decrement: parsedAmount } },
+      }),
+      getPrisma().indexInvestment.create({
+        data: {
+          userId: req.user.id,
+          tierId: tier.id,
+          amount: parsedAmount,
+          feeAmount,
+          netAmount,
+          status: "ACTIVE",
+          activatedAt,
+          maturesAt,
+        },
+        include: { tier: true },
+      }),
+    ]);
+
+    await distributeIndexCommission(getPrisma(), investment, feeAmount);
+
+    return res.status(201).json({
+      message: `Investment activated successfully. A ${feePercent}% maintenance fee ($${feeAmount.toFixed(2)}) was applied.`,
+      investment,
+    });
+  } catch (error) {
+    console.error("Invest in index error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Add funds to the user's existing active investment — same tier, same
+// maturity date. The tier is locked at first investment (investInIndex
+// blocks a second investInIndex call while one is ACTIVE); this is the only
+// way to grow it afterwards. The added amount goes through the identical
+// fee-cut + referral-commission pipeline as a fresh investment.
+export const topUpInvestment = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const parsedAmount = parseFloat(amount);
+
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+
+    const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
+    if (!kyc || kyc.status !== "APPROVED") {
+      return res.status(403).json({ message: "KYC verification required before investing. Please complete your KYC verification first." });
+    }
+
+    const wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
+    if (!wallet || parseFloat(wallet.balance) < parsedAmount) {
+      return res.status(400).json({ message: "Insufficient wallet balance" });
+    }
+
+    const existingActive = await getPrisma().indexInvestment.findFirst({
+      where: { userId: req.user.id, status: "ACTIVE" },
+      include: { tier: true },
+    });
+    if (!existingActive) {
+      return res.status(400).json({ message: "You don't have an active index investment to add funds to." });
+    }
+
+    const settings = await getIndexSettings(getPrisma());
+    const feePercent = parseFloat(settings.maintenanceFeePercent);
+    const feeAmount = (parsedAmount * feePercent) / 100;
+    const netAmount = parsedAmount - feeAmount;
+
+    const [, investment] = await getPrisma().$transaction([
+      getPrisma().wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { decrement: parsedAmount } },
+      }),
+      getPrisma().indexInvestment.update({
+        where: { id: existingActive.id },
+        data: {
+          amount: { increment: parsedAmount },
+          feeAmount: { increment: feeAmount },
+          netAmount: { increment: netAmount },
+        },
+        include: { tier: true },
+      }),
+    ]);
+
+    await distributeIndexCommission(getPrisma(), investment, feeAmount);
+
+    return res.status(200).json({
+      message: `$${parsedAmount.toFixed(2)} added to your investment. A ${feePercent}% maintenance fee ($${feeAmount.toFixed(2)}) was applied.`,
+      investment,
+    });
+  } catch (error) {
+    console.error("Top up investment error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const withdrawInvestment = async (req, res) => {
+  try {
+    const investment = await getPrisma().indexInvestment.findFirst({
+      where: { userId: req.user.id, status: "ACTIVE" },
+      include: { tier: true },
+    });
+    if (!investment) {
+      return res.status(400).json({ message: "No active investment to withdraw" });
+    }
+
+    const isMature = investment.maturesAt && new Date() >= investment.maturesAt;
+    const settings = await getIndexSettings(getPrisma());
+    const netAmount = parseFloat(investment.netAmount);
+
+    const withdrawalFee = isMature
+      ? parseFloat(settings.maturityWithdrawalFee)
+      : (netAmount * parseFloat(settings.earlyWithdrawalPercent)) / 100;
+    const payoutAmount = Math.max(netAmount - withdrawalFee, 0);
+
+    const wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
+    if (!wallet) return res.status(400).json({ message: "Wallet not found" });
+
+    await getPrisma().$transaction([
+      getPrisma().wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: payoutAmount } },
+      }),
+      getPrisma().indexInvestment.update({
+        where: { id: investment.id },
+        data: {
+          status: isMature ? "MATURED" : "CANCELLED",
+          withdrawnAt: new Date(),
+          withdrawalFee,
+          payoutAmount,
+        },
+      }),
+    ]);
+
+    // Withdrawal fee (early-exit % or flat maturity fee) goes entirely to the
+    // platform — unlike the invest-time maintenance fee, it is never split
+    // across the referral chain.
+    await creditPlatformWallet(
+      getPrisma(),
+      withdrawalFee,
+      isMature
+        ? `Maturity withdrawal fee — ${investment.tier.label}`
+        : `Early withdrawal fee (${parseFloat(settings.earlyWithdrawalPercent).toFixed(2)}%) — ${investment.tier.label}`,
+      investment.id
+    );
+
+    return res.status(200).json({
+      message: isMature
+        ? `Investment matured and withdrawn. A $${withdrawalFee.toFixed(2)} withdrawal fee was applied.`
+        : `Investment withdrawn early. A ${parseFloat(settings.earlyWithdrawalPercent).toFixed(2)}% early-withdrawal fee ($${withdrawalFee.toFixed(2)}) was applied.`,
+      payoutAmount,
+      withdrawalFee,
+      wasMature: isMature,
+    });
+  } catch (error) {
+    console.error("Withdraw investment error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getMyInvestments = async (req, res) => {
+  try {
+    const investments = await getPrisma().indexInvestment.findMany({
+      where: { userId: req.user.id },
+      include: { tier: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return res.status(200).json({ investments });
+  } catch (error) {
+    console.error("Get my investments error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // ─── Admin ───
 
 export const adminGetTiers = async (req, res) => {
@@ -73,7 +412,7 @@ export const adminGetTiers = async (req, res) => {
 
 export const adminCreateTier = async (req, res) => {
   try {
-    const { minAmount, maxAmount, label, weeklyReturn, monthlyReturn, halfYearlyReturn } = req.body;
+    const { minAmount, maxAmount, label, durationMonths, weeklyReturn, monthlyReturn, halfYearlyReturn } = req.body;
     if (!minAmount || !maxAmount || !label) {
       return res.status(400).json({ message: "minAmount, maxAmount, and label are required" });
     }
@@ -83,6 +422,7 @@ export const adminCreateTier = async (req, res) => {
         minAmount: parseFloat(minAmount),
         maxAmount: parseFloat(maxAmount),
         label,
+        durationMonths: parseInt(durationMonths || 18),
         weeklyReturn: parseFloat(weeklyReturn || 0),
         monthlyReturn: parseFloat(monthlyReturn || 0),
         halfYearlyReturn: parseFloat(halfYearlyReturn || 0),
@@ -99,7 +439,7 @@ export const adminCreateTier = async (req, res) => {
 export const adminUpdateTier = async (req, res) => {
   try {
     const { id } = req.params;
-    const { minAmount, maxAmount, label, weeklyReturn, monthlyReturn, halfYearlyReturn, isActive } = req.body;
+    const { minAmount, maxAmount, label, durationMonths, weeklyReturn, monthlyReturn, halfYearlyReturn, isActive } = req.body;
 
     const existing = await getPrisma().indexTier.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: "Tier not found" });
@@ -110,6 +450,7 @@ export const adminUpdateTier = async (req, res) => {
         ...(minAmount !== undefined && { minAmount: parseFloat(minAmount) }),
         ...(maxAmount !== undefined && { maxAmount: parseFloat(maxAmount) }),
         ...(label !== undefined && { label }),
+        ...(durationMonths !== undefined && { durationMonths: parseInt(durationMonths) }),
         ...(weeklyReturn !== undefined && { weeklyReturn: parseFloat(weeklyReturn) }),
         ...(monthlyReturn !== undefined && { monthlyReturn: parseFloat(monthlyReturn) }),
         ...(halfYearlyReturn !== undefined && { halfYearlyReturn: parseFloat(halfYearlyReturn) }),
@@ -246,6 +587,64 @@ export const adminUpsertManager = async (req, res) => {
     return res.status(200).json({ message: "Manager updated", manager });
   } catch (error) {
     console.error("Admin upsert manager error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Investments
+export const adminGetInvestments = async (req, res) => {
+  try {
+    const investments = await getPrisma().indexInvestment.findMany({
+      include: {
+        tier: true,
+        user: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+    return res.status(200).json({ investments });
+  } catch (error) {
+    console.error("Admin get investments error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Fee / Commission Settings
+export const adminGetIndexSettings = async (req, res) => {
+  try {
+    const settings = await getIndexSettings(getPrisma());
+    return res.status(200).json({ settings });
+  } catch (error) {
+    console.error("Admin get index settings error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const adminUpdateIndexSettings = async (req, res) => {
+  try {
+    const {
+      maintenanceFeePercent, level1Percent, level2Percent, level3Percent, level4Percent, level5Percent,
+      earlyWithdrawalPercent, maturityWithdrawalFee,
+    } = req.body;
+    const settings = await getIndexSettings(getPrisma());
+
+    const updated = await getPrisma().indexSettings.update({
+      where: { id: settings.id },
+      data: {
+        ...(maintenanceFeePercent !== undefined && { maintenanceFeePercent: parseFloat(maintenanceFeePercent) }),
+        ...(level1Percent !== undefined && { level1Percent: parseFloat(level1Percent) }),
+        ...(level2Percent !== undefined && { level2Percent: parseFloat(level2Percent) }),
+        ...(level3Percent !== undefined && { level3Percent: parseFloat(level3Percent) }),
+        ...(level4Percent !== undefined && { level4Percent: parseFloat(level4Percent) }),
+        ...(level5Percent !== undefined && { level5Percent: parseFloat(level5Percent) }),
+        ...(earlyWithdrawalPercent !== undefined && { earlyWithdrawalPercent: parseFloat(earlyWithdrawalPercent) }),
+        ...(maturityWithdrawalFee !== undefined && { maturityWithdrawalFee: parseFloat(maturityWithdrawalFee) }),
+      },
+    });
+
+    return res.status(200).json({ message: "Settings updated", settings: updated });
+  } catch (error) {
+    console.error("Admin update index settings error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

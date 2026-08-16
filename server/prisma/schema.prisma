@@ -24,6 +24,9 @@ enum KycStatus {
 enum TransactionType {
   DEPOSIT
   WITHDRAWAL
+  BONUS_CREDIT
+  BONUS_WITHDRAWAL
+  BONUS_TRANSFER
 }
 
 enum TransactionStatus {
@@ -69,6 +72,8 @@ model User {
   referrals    Referral[] @relation("Referrer")
   referred     Referral? @relation("Referred")
   commissions  ReferralCommission[] @relation("UserCommissions")
+  indexInvestments IndexInvestment[]
+  supportTickets   SupportTicket[]
 }
 
 model Role {
@@ -117,13 +122,14 @@ model RolePage {
 }
 
 model Wallet {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  balance   Decimal  @default(0) @db.Decimal(18, 2)
-  frozen    Decimal  @default(0) @db.Decimal(18, 2)
-  currency  String   @default("USD")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  balance      Decimal  @default(0) @db.Decimal(18, 2)
+  bonusBalance Decimal  @default(0) @db.Decimal(18, 2)
+  frozen       Decimal  @default(0) @db.Decimal(18, 2)
+  currency     String   @default("USD")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
@@ -254,6 +260,9 @@ model ReferralCommission {
   percentage    Decimal  @db.Decimal(5, 2)
   status        String   @default("PENDING")
   depositTxId   String?
+  source        String   @default("DEPOSIT")
+  level         Int      @default(1)
+  indexInvestmentId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -262,6 +271,7 @@ model ReferralCommission {
 
   @@index([referralId])
   @@index([status])
+  @@index([source])
 }
 
 model IndexTier {
@@ -269,12 +279,15 @@ model IndexTier {
   minAmount         Decimal  @db.Decimal(18, 2)
   maxAmount         Decimal  @db.Decimal(18, 2)
   label             String
+  durationMonths    Int      @default(18)
   weeklyReturn      Decimal  @db.Decimal(8, 4)
   monthlyReturn     Decimal  @db.Decimal(8, 4)
   halfYearlyReturn  Decimal  @db.Decimal(8, 4)
   isActive          Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  investments       IndexInvestment[]
 
   @@index([isActive])
 }
@@ -291,6 +304,20 @@ model IndexPrice {
   @@index([recordedAt])
 }
 
+model IndexSettings {
+  id                String   @id @default(uuid())
+  maintenanceFeePercent Decimal @default(5) @db.Decimal(5, 2)
+  level1Percent     Decimal  @default(2) @db.Decimal(5, 2)
+  level2Percent     Decimal  @default(0.5) @db.Decimal(5, 2)
+  level3Percent     Decimal  @default(0.5) @db.Decimal(5, 2)
+  level4Percent     Decimal  @default(0.5) @db.Decimal(5, 2)
+  level5Percent     Decimal  @default(0.5) @db.Decimal(5, 2)
+  earlyWithdrawalPercent Decimal @default(17) @db.Decimal(5, 2)
+  maturityWithdrawalFee  Decimal @default(2) @db.Decimal(18, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 model IndexManager {
   id          String   @id @default(uuid())
   name        String
@@ -300,4 +327,127 @@ model IndexManager {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+enum IndexInvestmentStatus {
+  ACTIVE
+  MATURED
+  CANCELLED
+}
+
+model IndexInvestment {
+  id          String                 @id @default(uuid())
+  userId      String
+  tierId      String
+  amount      Decimal                @db.Decimal(18, 2)
+  feeAmount   Decimal                @default(0) @db.Decimal(18, 2)
+  netAmount   Decimal                @default(0) @db.Decimal(18, 2)
+  status      IndexInvestmentStatus  @default(ACTIVE)
+  activatedAt DateTime               @default(now())
+  maturesAt   DateTime?
+  withdrawnAt DateTime?
+  withdrawalFee   Decimal?           @db.Decimal(18, 2)
+  payoutAmount    Decimal?           @db.Decimal(18, 2)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier        IndexTier @relation(fields: [tierId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum SupportCategory {
+  TECHNICAL
+  BILLING
+  KYC
+  ACCOUNT
+  OTHER
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model SupportTicket {
+  id          String               @id @default(uuid())
+  userId      String
+  category    SupportCategory
+  subject     String
+  message     String
+  phone       String?
+  status      SupportTicketStatus  @default(OPEN)
+  adminNote   String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum PlatformLedgerType {
+  FEE_CREDIT
+  WITHDRAWAL
+}
+
+enum PlatformWithdrawalStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+// Singleton row — accumulates the leftover share of the Index maintenance
+// fee whenever an investor's referral chain doesn't cover all 5 levels
+// (including a chain of zero, i.e. the investor has no referrer at all).
+model PlatformWallet {
+  id        String   @id @default(uuid())
+  balance   Decimal  @default(0) @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ledger      PlatformLedgerEntry[]
+  withdrawals PlatformWithdrawal[]
+}
+
+model PlatformLedgerEntry {
+  id                String             @id @default(uuid())
+  platformWalletId  String
+  type              PlatformLedgerType
+  amount            Decimal            @db.Decimal(18, 2)
+  description       String?
+  indexInvestmentId String?
+  createdAt         DateTime           @default(now())
+
+  platformWallet    PlatformWallet     @relation(fields: [platformWalletId], references: [id], onDelete: Cascade)
+
+  @@index([platformWalletId])
+  @@index([createdAt])
+}
+
+model PlatformWithdrawal {
+  id               String                   @id @default(uuid())
+  platformWalletId String
+  amount           Decimal                  @db.Decimal(18, 2)
+  status           PlatformWithdrawalStatus @default(PENDING)
+  destination      String
+  note             String?
+  requestedBy      String
+  processedBy      String?
+  processedAt      DateTime?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  platformWallet   PlatformWallet           @relation(fields: [platformWalletId], references: [id], onDelete: Cascade)
+
+  @@index([platformWalletId])
+  @@index([status])
 }

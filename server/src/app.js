@@ -18,6 +18,9 @@ import referralRoutes from "./routes/referral.js";
 import adminReferralRoutes from "./routes/adminReferral.js";
 import indexRoutes from "./routes/index.js";
 import adminIndexRoutes from "./routes/adminIndex.js";
+import supportRoutes from "./routes/support.js";
+import adminSupportRoutes from "./routes/adminSupport.js";
+import adminPlatformWalletRoutes from "./routes/adminPlatformWallet.js";
 
 const app = express();
 
@@ -111,6 +114,9 @@ app.use("/api/referral", referralRoutes);
 app.use("/api/admin/referrals", adminLimiter, adminReferralRoutes);
 app.use("/api/index", indexRoutes);
 app.use("/api/admin/index", adminLimiter, adminIndexRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/admin/support-tickets", adminLimiter, adminSupportRoutes);
+app.use("/api/admin/platform-wallet", adminLimiter, adminPlatformWalletRoutes);
 
 // ─── Health Check ───
 app.get("/api/health", (req, res) => {

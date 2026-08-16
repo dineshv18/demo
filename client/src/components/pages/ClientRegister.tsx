@@ -9,7 +9,7 @@ import {
   IconMail, IconLock, IconUser, IconArrowRight, IconLoader2, IconAlertCircle,
   IconCircleCheck, IconShield, IconArrowLeft, IconEye, IconEyeOff,
 } from "@tabler/icons-react";
-import Image from "next/image";
+import AuthShell, { AuthLogo } from "@/components/site/AuthShell";
 
 interface FormErrors { name?: string; email?: string; password?: string; confirmPassword?: string; otp?: string; general?: string }
 
@@ -125,22 +125,25 @@ export default function ClientRegister() {
   if (view === "success") {
     return (
       <div className="flex min-h-screen w-full bg-background items-center justify-center px-6">
-        <div className="w-full max-w-md space-y-8 text-center">
-          <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <IconCircleCheck className="h-10 w-10 text-emerald-500" />
+        <div className="w-full max-w-md space-y-6 text-center">
+          <AuthLogo />
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm space-y-5">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
+              <IconCircleCheck className="h-9 w-9 text-emerald-500" />
+            </div>
+            <div>
+              <h2 className="font-display text-2xl font-bold tracking-tight">Account Verified!</h2>
+              <p className="mt-2 text-muted-foreground text-sm">
+                Your email has been verified. You can now sign in to your account.
+              </p>
+            </div>
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white"
+            >
+              Go to Sign In
+            </button>
           </div>
-          <div>
-            <h2 className="font-display text-3xl font-bold tracking-tight">Account Verified!</h2>
-            <p className="mt-3 text-muted-foreground text-sm">
-              Your email has been verified. You can now sign in to your account.
-            </p>
-          </div>
-          <button
-            onClick={() => router.push("/login")}
-            className="w-full rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white"
-          >
-            Go to Sign In
-          </button>
         </div>
       </div>
     );
@@ -149,70 +152,30 @@ export default function ClientRegister() {
   // ─── OTP VIEW ───
   if (view === "otp") {
     return (
-      <div className="flex min-h-screen w-full bg-background">
-        {/* Left Panel */}
-        <div className="relative hidden lg:flex lg:w-[55%] overflow-hidden rounded-r-[1.5rem]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1f3a] via-[#2a2040] to-[#1a2540]" />
-          <div className="absolute inset-0 opacity-40">
-            <svg viewBox="0 0 800 600" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="gl-otp" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#c9a84c" />
-                  <stop offset="50%" stopColor="#d4af37" />
-                  <stop offset="100%" stopColor="#b8942e" />
-                </linearGradient>
-              </defs>
-              <path d="M0,300 Q200,100 400,300 T800,300 L800,600 L0,600 Z" fill="url(#gl-otp)" opacity="0.25" />
-              <circle cx="400" cy="280" r="150" fill="none" stroke="rgba(201,168,76,0.08)" strokeWidth="1" />
-              <circle cx="400" cy="280" r="220" fill="none" stroke="rgba(201,168,76,0.05)" strokeWidth="1" />
-            </svg>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-            <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 backdrop-blur-sm px-3.5 py-1.5 text-xs font-medium tracking-wide uppercase w-fit">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Live Trading
-            </div>
-            <div>
-              <h1 className="font-display text-5xl xl:text-6xl font-bold leading-tight mb-6">
-                ORVANTA<br />Financial
-              </h1>
-              <p className="text-white/60 text-base max-w-sm leading-relaxed">
-                Institutional-grade Forex and Crypto CFD trading. Deep liquidity, transparent pricing, and enterprise security.
-              </p>
-            </div>
-          </div>
-        </div>
+      <AuthShell
+        brandEyebrow="Almost There"
+        brandTitle={<>Verify your<br />email address</>}
+        brandDescription="One last step — confirm it's really you so we can secure your new ORVANTA account."
+      >
+        <div className="space-y-6">
+          <AuthLogo />
 
-        {/* Right Panel - OTP */}
-        <div className="flex flex-1 items-center justify-center px-6 py-12 lg:px-16">
-          <div className="w-full max-w-md space-y-6">
-            <div className="flex justify-center">
-              <Link href="/" className="flex items-center gap-3">
-                <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto dark:hidden" />
-                <Image src="/dark-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto hidden dark:block" />
-                <span className="font-display text-xl font-bold tracking-tight">
-                  ORVANTA <span className="text-gradient">Financial</span>
-                </span>
-              </Link>
-            </div>
-
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-5">
             <button onClick={() => setView("register")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <IconArrowLeft className="h-4 w-4" /> Back to registration
             </button>
 
             <div className="text-center">
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20 mb-4">
-                <IconShield className="h-8 w-8 text-brand" />
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20 mb-4">
+                <IconShield className="h-7 w-7 text-brand" />
               </div>
-              <h2 className="font-display text-3xl font-bold tracking-tight">Verify Your Email</h2>
+              <h2 className="font-display text-2xl font-bold tracking-tight">Verify Your Email</h2>
               <p className="mt-2 text-muted-foreground text-sm">
                 Enter the 6-digit code sent to<br />
                 <span className="font-medium text-foreground">{email}</span>
               </p>
             </div>
 
-            {/* Error Banner */}
             {errors.general && (
               <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                 <IconAlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -220,13 +183,12 @@ export default function ClientRegister() {
               </div>
             )}
 
-            {/* OTP Inputs */}
-            <div className="flex justify-center gap-3">
+            <div className="flex justify-center gap-2 sm:gap-3">
               {otp.map((d, i) => (
                 <input
                   key={i} id={`otp-${i}`} type="text" inputMode="numeric" maxLength={1} value={d}
                   onChange={(e) => { handleOTPChange(i, e.target.value.replace(/\D/g, "")); if (errors.otp) clearFieldError("otp"); }}
-                  className={`h-14 w-12 text-center text-xl font-bold rounded-lg border transition-all focus:outline-none focus:ring-2 ${
+                  className={`h-13 w-11 sm:h-14 sm:w-12 text-center text-xl font-bold rounded-lg border transition-all focus:outline-none focus:ring-2 ${
                     errors.otp
                       ? "border-destructive focus:ring-destructive/30"
                       : "border-border focus:ring-brand/40 focus:border-brand/50"
@@ -268,75 +230,34 @@ export default function ClientRegister() {
             </p>
           </div>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   // ─── REGISTER VIEW ───
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      {/* Left Panel */}
-      <div className="relative hidden lg:flex lg:w-[55%] overflow-hidden rounded-r-[1.5rem]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1f3a] via-[#2a2040] to-[#1a2540]" />
-        <div className="absolute inset-0 opacity-40">
-          <svg viewBox="0 0 800 600" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="gl-reg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#c9a84c" />
-                <stop offset="50%" stopColor="#d4af37" />
-                <stop offset="100%" stopColor="#b8942e" />
-              </linearGradient>
-            </defs>
-            <path d="M0,300 Q200,100 400,300 T800,300 L800,600 L0,600 Z" fill="url(#gl-reg)" opacity="0.25" />
-            <circle cx="400" cy="280" r="150" fill="none" stroke="rgba(201,168,76,0.08)" strokeWidth="1" />
-            <circle cx="400" cy="280" r="220" fill="none" stroke="rgba(201,168,76,0.05)" strokeWidth="1" />
-          </svg>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-          <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 backdrop-blur-sm px-3.5 py-1.5 text-xs font-medium tracking-wide uppercase w-fit">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Get Started
-          </div>
-          <div>
-            <h1 className="font-display text-5xl xl:text-6xl font-bold leading-tight mb-6">
-              Create Your<br />Trading Account
-            </h1>
-            <p className="text-white/60 text-base max-w-sm leading-relaxed">
-              Join thousands of traders on our institutional-grade platform.
-            </p>
-          </div>
-        </div>
-      </div>
+    <AuthShell
+      brandEyebrow="Get Started"
+      brandTitle={<>Create your<br />trading account</>}
+      brandDescription="Join thousands of traders on our institutional-grade platform. Free to register, KYC-verified in hours."
+    >
+      <div className="space-y-6">
+        <AuthLogo />
 
-      {/* Right Panel - Form */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12 lg:px-16">
-        <div className="w-full max-w-md space-y-8">
-          <div className="flex justify-center">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto dark:hidden" />
-              <Image src="/dark-Photoroom.png" alt="ORVANTA" width={44} height={44} className="h-11 w-auto hidden dark:block" />
-              <span className="font-display text-xl font-bold tracking-tight">
-                ORVANTA <span className="text-gradient">Financial</span>
-              </span>
-            </Link>
-          </div>
-
-          <div className="text-center space-y-2">
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+          <div className="text-center space-y-1.5 mb-6">
             <h2 className="font-display text-2xl font-bold tracking-tight">Create Account</h2>
             <p className="text-muted-foreground text-sm">Fill in the details to get started</p>
           </div>
 
-          {/* Error Banner */}
           {errors.general && (
-            <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mb-5">
               <IconAlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{errors.general}</span>
             </div>
           )}
 
           <form className="space-y-4" onSubmit={handleRegister} noValidate>
-            {/* Name */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Full Name</label>
               <div className="relative">
@@ -351,7 +272,6 @@ export default function ClientRegister() {
               {errors.name && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.name}</p>}
             </div>
 
-            {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Email</label>
               <div className="relative">
@@ -366,7 +286,6 @@ export default function ClientRegister() {
               {errors.email && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.email}</p>}
             </div>
 
-            {/* Password */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Password</label>
               <div className="relative">
@@ -400,7 +319,6 @@ export default function ClientRegister() {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Confirm Password</label>
               <div className="relative">
@@ -432,13 +350,13 @@ export default function ClientRegister() {
               )}
             </button>
           </form>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-brand hover:underline">Sign in</Link>
-          </p>
         </div>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-brand hover:underline">Sign in</Link>
+        </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

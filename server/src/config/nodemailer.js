@@ -192,3 +192,95 @@ export const sendReferralNotification = async (referrerEmail, referrerName, newU
     `,
   });
 };
+
+const CATEGORY_LABELS = {
+  TECHNICAL: "Technical",
+  BILLING: "Billing / Payment",
+  KYC: "KYC",
+  ACCOUNT: "Account",
+  OTHER: "Other",
+};
+
+// ─── Support Ticket: notify admins ───
+export const sendSupportTicketAdminNotification = async (adminEmails, ticket, user) => {
+  if (!adminEmails.length) return;
+  const categoryLabel = CATEGORY_LABELS[ticket.category] || ticket.category;
+  const adminUrl = `${getEnv().ADMIN_URL || "http://localhost:5173"}/dashboard/support-tickets`;
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: adminEmails,
+    subject: `New Support Ticket [${categoryLabel}]: ${ticket.subject}`,
+    headers: getBaseHeaders(),
+    text: `New support ticket submitted.\n\nFrom: ${user.name} (${user.email})\nPhone: ${ticket.phone || "Not provided"}\nCategory: ${categoryLabel}\nSubject: ${ticket.subject}\n\nMessage:\n${ticket.message}\n\nView in admin panel: ${adminUrl}\n\nORVANTA Financial`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <tr><td style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:20px;font-weight:700;">New Support Ticket</h1>
+                <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;">${categoryLabel}</p>
+              </td></tr>
+              <tr><td style="padding:36px 40px;">
+                <div style="background:#f9fafb;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>From:</strong> ${user.name} (${user.email})</p>
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>Phone:</strong> ${ticket.phone || "Not provided"}</p>
+                  <p style="color:#374151;font-size:13px;margin:0;"><strong>User ID:</strong> ${user.id}</p>
+                </div>
+                <p style="color:#111827;font-size:15px;font-weight:600;margin:0 0 8px;">${ticket.subject}</p>
+                <p style="color:#4b5563;font-size:14px;margin:0 0 24px;line-height:1.6;white-space:pre-wrap;">${ticket.message}</p>
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${adminUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View Ticket</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Support Ticket: confirmation to user ───
+export const sendSupportTicketConfirmation = async (userEmail, userName, ticket) => {
+  const categoryLabel = CATEGORY_LABELS[ticket.category] || ticket.category;
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: userEmail,
+    subject: "We've received your support request",
+    headers: getBaseHeaders(),
+    text: `Hello ${userName},\n\nWe've received your support request and our team will get back to you within 2-3 working hours.\n\nCategory: ${categoryLabel}\nSubject: ${ticket.subject}\n\nYour message:\n${ticket.message}\n\nORVANTA Financial Team`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <tr><td style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Request Received</h1>
+                <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;">We're on it</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#374151;font-size:15px;margin:0 0 8px;">Hello ${userName},</p>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.6;">Thanks for reaching out. Our support team will contact you within <strong>2-3 working hours</strong>.</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#9ca3af;font-size:11px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">${categoryLabel}</p>
+                  <p style="color:#111827;font-size:14px;font-weight:600;margin:0 0 8px;">${ticket.subject}</p>
+                  <p style="color:#6b7280;font-size:13px;margin:0;line-height:1.6;white-space:pre-wrap;">${ticket.message}</p>
+                </div>
+                <p style="color:#9ca3af;font-size:12px;margin:0;">If you gave a phone number, our team may also call you directly.</p>
+              </td></tr>
+              <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};

@@ -76,7 +76,7 @@ export default function ReferralSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <IconLoader2 className="h-6 w-6 animate-spin text-amber-500" />
+        <IconLoader2 className="h-6 w-6 animate-spin text-violet-500" />
       </div>
     );
   }
@@ -96,8 +96,8 @@ export default function ReferralSettings() {
 
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-amber-500/10">
-            <IconSettings className="h-5 w-5 text-amber-500" />
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-violet-500/10">
+            <IconSettings className="h-5 w-5 text-violet-500" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Commission Rate</h2>
@@ -115,13 +115,13 @@ export default function ReferralSettings() {
                 min="0"
                 max="100"
                 step="0.5"
-                className="w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">%</span>
             </div>
           </div>
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-500 hover:bg-violet-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
             {saving ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <IconCheck size={16} />}
             Save
           </button>
@@ -132,7 +132,7 @@ export default function ReferralSettings() {
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <IconUsers className="h-4 w-4 text-amber-500" />
+            <IconUsers className="h-4 w-4 text-violet-500" />
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Referrals</p>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{total}</p>

@@ -33,9 +33,9 @@ const socialIcons = [
 ];
 
 const cols = [
-    { title: "Company", links: [["About", "/about"], ["Blog", "/blog"], ["Contact", "/contact"], ["Careers", "/about"]] },
-    { title: "Platform", links: [["ORVANTA Financial", "/platform"], ["Desktop", "/platform"], ["Web Trader", "/platform"], ["Mobile", "/platform"]] },
-    { title: "Trading", links: [["Forex CFDs", "/#accounts"], ["Crypto CFDs", "/#accounts"], ["Spreads", "/#accounts"], ["Leverage", "/#accounts"]] },
+    { title: "Company", links: [["About", "/about"], ["Contact", "/contact"], ["Careers", "/about"]] },
+    { title: "Platform", links: [["ORVANTA Financial", "/platform"], ["Desktop", "/platform"], ["Web Dashboard", "/platform"], ["Mobile", "/platform"]] },
+    { title: "Investing", links: [["Index Overview", "/platform"], ["Investment Tiers", "/login"], ["Wallet", "/login"], ["KYC Verification", "/login"]] },
     { title: "Legal", links: [["Terms", "/about"], ["Privacy", "/about"], ["Risk Disclosure", "/about"], ["Regulation", "/about"]] },
 ] as const;
 
@@ -53,8 +53,8 @@ export function Footer() {
                                 <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-20 w-auto hidden dark:block" />
                             </Link>
                             <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">
-                                Institutional-grade Forex and Crypto CFD trading.
-                                Deep liquidity, transparent pricing, and enterprise security for global traders.
+                                Institutional-grade Index investing.
+                                Transparent tiers, KYC-verified security, and real-time tracking for global investors.
                             </p>
                             <div className="mt-6 flex gap-2">
                                 {socialIcons.map(({ Icon, label }, i) => (
@@ -79,9 +79,9 @@ export function Footer() {
                     </div>
 
                     <div className="mt-14 rounded-lg glass p-5 text-xs text-muted-foreground leading-relaxed">
-                        <strong className="text-foreground">Risk Disclaimer:</strong> Trading Forex and Crypto CFDs
-                        involves significant risk of loss and is not suitable for all investors. Leveraged products
-                        can result in losses that exceed your initial deposit. Please ensure you understand the
+                        <strong className="text-foreground">Risk Disclaimer:</strong> Index investing
+                        involves risk of loss and is not suitable for all investors. Your capital is at risk,
+                        and returns are not guaranteed. Please ensure you understand the
                         risks involved and seek independent advice if necessary. Past performance is not indicative
                         of future results.
                     </div>

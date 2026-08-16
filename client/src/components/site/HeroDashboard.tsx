@@ -33,7 +33,7 @@ export function HeroDashboard() {
                             <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
                         </div>
                         <div className="hidden sm:flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-muted/60 dark:bg-white/5 border border-border/50 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-                            <CandlestickChart className="h-3 w-3 text-primary" /> MT5 Live Terminal
+                            <CandlestickChart className="h-3 w-3 text-primary" /> Index Live Dashboard
                         </div>
                     </div>
                     <div className="text-[11px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 font-medium">
@@ -215,7 +215,7 @@ export function HeroDashboard() {
                 transition={{ delay: 1.1 }}
             >
                 <div className="flex items-center gap-3 text-xs">
-                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-violet-500/10 text-violet-500 border border-violet-500/20">
                         <Globe className="h-4.5 w-4.5" />
                     </div>
                     <div>

@@ -3,92 +3,54 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-    LineChart, Bot, BarChart3, MousePointerClick, CalendarDays, Layers,
-    ArrowRight, Download, Monitor, Globe, Smartphone, Apple, Check, Sparkles,
+    LineChart, ShieldCheck, BarChart3, Wallet, CalendarDays, Layers,
+    ArrowRight, Download, Monitor, Globe, Smartphone, Sparkles,
 } from "lucide-react";
 import { Reveal } from "../site/primitives";
 
 const features = [
     {
         icon: LineChart,
-        title: "Advanced Charts",
-        desc: "See price movements in real-time with 21 different timeframes (from 1 minute to 1 month). Use 38 built-in indicators like Moving Averages and RSI to find trading opportunities.",
-        beginner: "Think of charts as your trading map — they show you where the price has been and help predict where it might go next.",
+        title: "Real-Time Performance Charts",
+        desc: "Track your Index performance with clear, up-to-date charts covering historical and live movement.",
+        beginner: "Think of these charts as your investment map — they show you where performance has been and help you understand where it's heading.",
     },
     {
-        icon: Bot,
-        title: "Algorithmic Trading",
-        desc: "Build automated trading robots (called Expert Advisors) using MQL5 programming language. They can trade for you 24/7 while you sleep.",
-        beginner: "New to coding? No worries — MT5 has a marketplace where you can download free or paid trading robots made by other traders.",
+        icon: ShieldCheck,
+        title: "KYC-Gated Access",
+        desc: "Every account is verified before it can invest. Identity checks keep the platform secure for everyone.",
+        beginner: "New here? Complete a quick verification step once, and you'll have full access to your dashboard and Index.",
     },
     {
         icon: BarChart3,
-        title: "Depth of Market",
-        desc: "See real-time buy and sell orders from other traders. This helps you understand supply and demand before placing your trade.",
-        beginner: "It's like seeing how many people want to buy or sell at each price — helps you pick the best entry point.",
+        title: "Tiered Investment Plans",
+        desc: "Choose the investment tier that matches your goals. Each tier has clearly published terms in your dashboard.",
+        beginner: "Tiers just mean different investment levels — pick the one that fits your budget and goals from your dashboard.",
     },
     {
-        icon: MousePointerClick,
-        title: "One-Click Trading",
-        desc: "Buy or sell instantly with a single click directly from the chart. Set your risk amount beforehand so you always know your maximum loss.",
-        beginner: "Perfect for quick trades — no need to fill out order forms every time. Just click and you're in the market.",
+        icon: Wallet,
+        title: "Simple Wallet System",
+        desc: "Deposit funds into your wallet, then allocate them into the Index. Track balances and history in one place.",
+        beginner: "Your wallet is like a holding account — fund it first, then invest into the Index whenever you're ready.",
     },
     {
         icon: CalendarDays,
         title: "Economic Calendar",
-        desc: "Stay updated with major economic events like interest rate decisions and job reports. Each event shows expected impact so you can plan your trades.",
-        beginner: "Big news moves the market. This calendar tells you when important events happen so you're never caught off guard.",
+        desc: "Stay updated with major economic events like interest rate decisions and job reports, each with an expected impact rating.",
+        beginner: "Big news can move markets. This calendar helps you understand when important events happen.",
     },
     {
         icon: Layers,
-        title: "Multi-Asset Trading",
-        desc: "Trade Forex pairs (EUR/USD, GBP/JPY), Crypto CFDs (Bitcoin, Ethereum), and more — all from one account, one platform.",
-        beginner: "No need for multiple apps. Everything you want to trade is available in one place.",
-    },
-];
-
-const plans = [
-    {
-        name: "Live Account",
-        price: "$100",
-        unit: "minimum deposit",
-        popular: true,
-        desc: "Trade with real money. Full access to live markets, raw spreads, and instant execution.",
-        features: [
-            "Raw spreads from 0.0 pips",
-            "Leverage up to 1:500",
-            "100+ Forex & Crypto instruments",
-            "Negative balance protection",
-            "Instant deposits & withdrawals",
-            "24/5 priority support",
-        ],
-        cta: "Open Live Account",
-        href: "/#accounts",
-    },
-    {
-        name: "Demo Account",
-        price: "$50,000",
-        unit: "virtual balance",
-        popular: false,
-        desc: "Practice with fake money. Learn the platform and test strategies risk-free.",
-        features: [
-            "Real-time market data",
-            "Full MT5 functionality",
-            "Same execution as live",
-            "Reset balance anytime",
-            "No registration required",
-            "Unlimited time (30 days renewable)",
-        ],
-        cta: "Open Demo Account",
-        href: "/#accounts",
+        title: "Multi-Market Coverage",
+        desc: "Our Index tracks performance across Forex pairs, Crypto assets, and more — all reflected in one unified dashboard.",
+        beginner: "No need for multiple apps. Everything you want to track is available in one place.",
     },
 ];
 
 const downloads = [
-    { icon: Globe, label: "Web Trader", sub: "No install needed — trade in any browser", cta: "Launch", color: "from-amber-500/20 to-amber-600/20" },
-    { icon: Monitor, label: "Windows", sub: "Full desktop app for Windows 10/11", cta: "Download", color: "from-amber-500/20 to-yellow-600/20" },
-    { icon: Apple, label: "macOS", sub: "Native app for Apple Silicon Macs", cta: "Download", color: "from-purple-500/20 to-purple-600/20" },
-    { icon: Smartphone, label: "Mobile", sub: "iOS & Android — trade on the go", cta: "Get App", color: "from-emerald-500/20 to-emerald-600/20" },
+    { icon: Globe, label: "Web Dashboard", sub: "No install needed — access your account in any browser", cta: "Launch", color: "from-violet-500/20 to-violet-600/20" },
+    { icon: Monitor, label: "Desktop", sub: "Full dashboard experience on Windows & macOS", cta: "Learn More", color: "from-violet-500/20 to-violet-700/20" },
+    { icon: Smartphone, label: "Mobile", sub: "iOS & Android — check your Index on the go", cta: "Learn More", color: "from-emerald-500/20 to-emerald-600/20" },
 ];
 
 export default function PlatformPage() {
@@ -107,19 +69,19 @@ export default function PlatformPage() {
                                 </div>
                                 <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                                     The platform<br />
-                                    <span className="text-gradient">professionals</span> use.
+                                    <span className="text-gradient">investors</span> trust.
                                 </h1>
                                 <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-lg">
-                                    MT5 powers every ORVANTA Financial account. It&apos;s the world&apos;s most popular
-                                    trading platform — and for good reason. Industry-standard charting, automated
-                                    trading, and lightning-fast execution across desktop, web and mobile.
+                                    The ORVANTA Index platform powers every account with real-time performance
+                                    tracking, tiered investment plans, and KYC-verified security — available
+                                    from a single dashboard across desktop, web and mobile.
                                 </p>
                                 <div className="flex flex-wrap gap-3">
-                                    <Link href="/#accounts" className="inline-flex items-center gap-2 rounded-lg px-6 py-3.5 text-sm font-semibold btn-glow btn-glow-hover">
-                                        Open Live Account <ArrowRight className="h-4 w-4" />
+                                    <Link href="/login" className="inline-flex items-center gap-2 rounded-lg px-6 py-3.5 text-sm font-semibold btn-glow btn-glow-hover">
+                                        Get Started <ArrowRight className="h-4 w-4" />
                                     </Link>
                                     <a href="#downloads" className="inline-flex items-center gap-2 rounded-lg border border-border/70 px-6 py-3.5 text-sm font-medium hover:bg-accent transition">
-                                        <Download className="h-4 w-4" /> Download MT5
+                                        Explore Access Options
                                     </a>
                                 </div>
                             </div>
@@ -129,7 +91,7 @@ export default function PlatformPage() {
                             <div className="relative rounded-2xl overflow-hidden bg-muted/50 aspect-[4/3] border border-border/40">
                                 <Image
                                     src="/platform/mt5-hero.jpg"
-                                    alt="ORVANTA Financial Trading Platform"
+                                    alt="ORVANTA Financial Index Platform"
                                     fill
                                     className="object-cover"
                                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -150,8 +112,9 @@ export default function PlatformPage() {
                             Everything you need.<br />Nothing in your way.
                         </h2>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base leading-relaxed">
-                            MT5 was built for professional traders — and stripped of bloat by ORVANTA Financial.
-                            The result: a platform that gets out of your way and lets you focus on trading.
+                            The ORVANTA Index dashboard is built for serious investors — clean, focused, and
+                            stripped of bloat. The result: a platform that gets out of your way and lets you
+                            focus on your investments.
                         </p>
                     </div>
                 </Reveal>
@@ -176,98 +139,16 @@ export default function PlatformPage() {
                 </div>
             </div>
 
-            {/* ─── ACCOUNTS ─── */}
-            <div className="mx-auto max-w-6xl px-5 lg:px-8 py-20">
-                <Reveal>
-                    <div className="text-center max-w-2xl mx-auto mb-14">
-                        <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
-                            Two paths. One engine.<br />Pick your starting point.
-                        </h2>
-                        <p className="mt-4 text-muted-foreground text-sm md:text-base leading-relaxed">
-                            Whether you&apos;re learning the basics or scaling a live portfolio, every ORVANTA
-                            account runs on the same MT5 infrastructure.
-                        </p>
-                    </div>
-                </Reveal>
-
-                <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-                    {plans.map((plan, i) => (
-                        <Reveal key={plan.name} delay={i * 0.08}>
-                            <div className="relative rounded-[32px] overflow-hidden bg-white dark:bg-zinc-900 border border-border/60 dark:border-white/5 shadow-xl flex flex-col justify-between h-full">
-                                {/* Top Header Block */}
-                                <div className={`p-8 pb-14 relative ${plan.popular
-                                    ? "bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-500/10"
-                                    : "bg-zinc-100/60 dark:bg-zinc-800/40 border-b border-border/40"
-                                    }`}>
-                                    {/* Popular Badge */}
-                                    {plan.popular && (
-                                        <div className="absolute top-4 right-6 rounded-full bg-amber-500 text-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                                            Most Popular
-                                        </div>
-                                    )}
-
-                                    {/* Account Type Name */}
-                                    <span className="inline-block px-3.5 py-1 text-[11px] font-bold bg-white dark:bg-zinc-900 text-foreground border border-border/80 dark:border-white/10 rounded-full mb-6 uppercase tracking-wider">
-                                        {plan.name}
-                                    </span>
-
-                                    {/* Price and Unit */}
-                                    <div className="flex items-baseline gap-1 mt-2">
-                                        <span className="text-4xl font-extrabold text-foreground tracking-tight">
-                                            {plan.price}
-                                        </span>
-                                        <span className="text-sm font-semibold text-muted-foreground">
-                                            / {plan.unit}
-                                        </span>
-                                    </div>
-
-                                    {/* Tagline / Description */}
-                                    <p className="text-xs text-muted-foreground mt-4 font-semibold uppercase tracking-wide">
-                                        {plan.desc}
-                                    </p>
-
-                                    {/* Overlapping Call-To-Action Button */}
-                                    <div className="absolute left-6 right-6 bottom-0 translate-y-1/2 z-10">
-                                        <Link
-                                            href={plan.href}
-                                            className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition duration-300 shadow-md ${plan.popular
-                                                ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/25"
-                                                : "bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900 shadow-zinc-950/20"
-                                                }`}
-                                        >
-                                            <span>{plan.cta}</span>
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Link>
-                                    </div>
-                                </div>
-
-                                {/* Bottom Features List */}
-                                <div className="p-8 pt-12 flex-1 flex flex-col justify-between">
-                                    <ul className="space-y-4">
-                                        {plan.features.map((f) => (
-                                            <li key={f} className="flex items-center gap-3 text-sm text-foreground/90 font-medium">
-                                                <Check className="h-4.5 w-4.5 text-amber-500 dark:text-amber-500 shrink-0" strokeWidth={3} />
-                                                <span>{f}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </Reveal>
-                    ))}
-                </div>
-            </div>
-
             {/* ─── DOWNLOADS ─── */}
             <div className="mx-auto max-w-6xl px-5 lg:px-8 py-20" id="downloads">
                 <Reveal>
                     <div className="text-center max-w-2xl mx-auto mb-14">
                         <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
-                            Download anywhere.<br />Trade everywhere.
+                            Access anywhere.<br />Invest everywhere.
                         </h2>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base leading-relaxed">
-                            Start on your laptop, check positions on your phone. MT5 is available
-                            on every device — your account syncs across all of them.
+                            Start on your laptop, check your Index on your phone. Your ORVANTA account
+                            is available on every device and syncs across all of them.
                         </p>
                     </div>
                 </Reveal>
@@ -295,27 +176,27 @@ export default function PlatformPage() {
             {/* ─── CTA ─── */}
             <div className="mx-auto max-w-6xl px-5 lg:px-8 py-16">
                 <Reveal>
-                    <div className="relative overflow-hidden rounded-[32px] p-8 md:p-14 bg-gradient-to-r from-amber-600 via-amber-600 to-amber-700 text-white shadow-2xl border border-amber-500/20">
+                    <div className="relative overflow-hidden rounded-[32px] p-8 md:p-14 bg-gradient-to-r from-violet-600 via-violet-600 to-violet-700 text-white shadow-2xl border border-violet-500/20">
                         {/* Ambient Glows */}
                         <div aria-hidden className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-                        <div aria-hidden className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
+                        <div aria-hidden className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-violet-500/20 blur-3xl pointer-events-none" />
 
                         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 z-10">
                             <div className="space-y-4 max-w-xl text-left">
                                 {/* Badge */}
                                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold border border-white/10 select-none">
-                                    <Sparkles size={14} className="text-amber-200 animate-pulse" />
+                                    <Sparkles size={14} className="text-violet-200 animate-pulse" />
                                     <span>Instant Setup</span>
                                 </div>
 
                                 {/* Title */}
                                 <h3 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-white">
-                                    Ready to start trading?
+                                    Ready to start investing?
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-sm text-amber-100/80 leading-relaxed">
-                                    Open an account in minutes. Fund it when you&apos;re ready. Trade with discipline.
+                                <p className="text-sm text-violet-100/80 leading-relaxed">
+                                    Create an account in minutes. Fund your wallet when you&apos;re ready. Invest with discipline.
                                 </p>
                             </div>
 
@@ -324,10 +205,10 @@ export default function PlatformPage() {
                                 {/* Buttons */}
                                 <div className="flex flex-wrap gap-3">
                                     <Link
-                                        href="/#accounts"
-                                        className="inline-flex items-center gap-2 rounded-lg bg-white text-amber-600 hover:bg-amber-50 px-6 py-3.5 text-sm font-bold transition duration-200 shadow-lg shadow-black/10"
+                                        href="/login"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-white text-violet-600 hover:bg-violet-50 px-6 py-3.5 text-sm font-bold transition duration-200 shadow-lg shadow-black/10"
                                     >
-                                        Open Live Account <ArrowRight className="h-4 w-4" />
+                                        Get Started <ArrowRight className="h-4 w-4" />
                                     </Link>
                                     <Link
                                         href="/contact"
@@ -350,11 +231,11 @@ export default function PlatformPage() {
                                                 key={idx}
                                                 src={src}
                                                 alt="User avatar"
-                                                className="h-7 w-7 rounded-full border border-amber-600 object-cover"
+                                                className="h-7 w-7 rounded-full border border-violet-600 object-cover"
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-amber-100/90 font-medium">5/5 (220,000+ Active Clients)</span>
+                                    <span className="text-xs text-violet-100/90 font-medium">5/5 (220,000+ Active Clients)</span>
                                 </div>
                             </div>
                         </div>

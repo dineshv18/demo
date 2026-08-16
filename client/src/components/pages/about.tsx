@@ -14,12 +14,12 @@ const features = [
     {
         icon: Target,
         title: "Target Oriented",
-        desc: "Every feature we build is measured by one thing — does it help our traders perform better in live markets?",
+        desc: "Every feature we build is measured by one thing — does it help our investors track and grow their portfolio with confidence?",
     },
     {
         icon: Award,
         title: "Success Guarantee",
-        desc: "From execution speed to fund security, we engineer reliability into every layer of the infrastructure.",
+        desc: "From platform reliability to fund security, we engineer trust into every layer of the infrastructure.",
     },
 ];
 
@@ -43,8 +43,8 @@ export default function AboutPage() {
                     </Reveal>
                     <Reveal delay={0.05}>
                         <p className="mt-4 text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                            ORVANTA Financial was founded on a simple belief: independent traders deserve the same
-                            infrastructure, pricing and safeguards as institutional desks. We spent years engineering that reality.
+                            ORVANTA Financial was founded on a simple belief: independent investors deserve the same
+                            transparency, security and infrastructure as institutional desks. We spent years engineering that reality.
                         </p>
                     </Reveal>
                 </div>
@@ -83,14 +83,14 @@ export default function AboutPage() {
                     <Reveal delay={0.08}>
                         <div className="grid sm:grid-cols-2 gap-6 text-sm text-muted-foreground leading-relaxed">
                             <p>
-                                ORVANTA Financial was built by traders, for traders. We saw how institutional desks
-                                had access to better pricing, faster execution, and deeper liquidity — and we
+                                ORVANTA Financial was built by investors, for investors. We saw how institutional desks
+                                had access to better transparency, faster access to information, and deeper liquidity — and we
                                 built the bridge to bring that to independent professionals.
                             </p>
                             <p>
-                                From raw spreads starting at 0.0 pips to sub-25ms execution across three continents,
-                                every part of our platform is designed for traders who take performance seriously.
-                                No marketing spreads — just real infrastructure delivering real results.
+                                From KYC-verified security to real-time performance tracking across three continents,
+                                every part of our platform is designed for investors who take performance seriously.
+                                No marketing spin — just real infrastructure delivering real results.
                             </p>
                         </div>
                     </Reveal>
@@ -134,14 +134,14 @@ export default function AboutPage() {
                                 We empower small business owners
                             </h2>
                             <p className="text-sm text-muted-foreground leading-relaxed">
-                                From solo traders running algorithmic strategies to prop firms managing
-                                multiple accounts — we provide the infrastructure that scales with ambition.
-                                Our MT5 environment delivers the same institutional-grade tools to everyone.
+                                From individual investors tracking a single tier to portfolios managing
+                                multiple positions — we provide the infrastructure that scales with ambition.
+                                Our Index platform delivers the same institutional-grade tools to everyone.
                             </p>
                             <div className="rounded-lg border-l-4 border-primary bg-primary/5 p-5">
                                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                                    &ldquo;ORVANTA Financial was built on the belief that every serious trader deserves
-                                    transparent pricing, lightning-fast execution, and a platform they can trust.
+                                    &ldquo;ORVANTA Financial was built on the belief that every serious investor deserves
+                                    transparent terms, verified security, and a platform they can trust.
                                     That belief drives everything we build.&rdquo;
                                 </p>
                             </div>

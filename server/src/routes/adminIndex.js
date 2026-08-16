@@ -3,6 +3,8 @@ import {
   adminGetTiers, adminCreateTier, adminUpdateTier, adminDeleteTier,
   adminGetPrices, adminCreatePrice, adminUpdatePrice, adminDeletePrice,
   adminGetManager, adminUpsertManager,
+  adminGetInvestments,
+  adminGetIndexSettings, adminUpdateIndexSettings,
 } from "../controllers/indexController.js";
 import { authenticate } from "../middleware/auth.js";
 
@@ -24,5 +26,12 @@ router.delete("/prices/:id", adminDeletePrice);
 // Manager
 router.get("/manager", adminGetManager);
 router.post("/manager", adminUpsertManager);
+
+// Investments
+router.get("/investments", adminGetInvestments);
+
+// Fee / Commission Settings
+router.get("/settings", adminGetIndexSettings);
+router.put("/settings", adminUpdateIndexSettings);
 
 export default router;

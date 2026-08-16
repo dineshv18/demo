@@ -5,14 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
-import { ThemeToggleButton } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const links = [
     { href: "/", label: "Home" },
     { href: "/platform", label: "Platform" },
     { href: "/about", label: "About" },
-    { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -80,12 +78,6 @@ export function Navbar() {
 
                     {/* Right elements */}
                     <div className="hidden lg:flex items-center gap-2">
-                        <ThemeToggleButton
-                            variant="rectangle"
-                            start="bottom-up"
-                            className="h-9 w-9"
-                        />
-
                         <Link
                             href="/login"
                             className={cn(
@@ -119,15 +111,7 @@ export function Navbar() {
                         ))}
                     </div>
                     <div className="flex items-center justify-between gap-2 p-2 pt-4 border-t border-border/40 mt-2">
-                        <ThemeToggleButton
-                            variant="rectangle"
-                            start="bottom-up"
-                            className="h-9 w-9"
-                        />
-                        <div className="flex gap-2 flex-1 justify-end">
-
-                            <Link href="/login" className="px-4 py-2 text-center rounded-full text-sm btn-glow flex-1">Open Account</Link>
-                        </div>
+                        <Link href="/login" className="px-4 py-2 text-center rounded-full text-sm btn-glow flex-1">Open Account</Link>
                     </div>
                 </div>
             )}

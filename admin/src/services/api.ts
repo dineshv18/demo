@@ -138,7 +138,7 @@ export const kycAPI = {
 };
 
 // ─── Payment Types ───
-export type PaymentType = "DEPOSIT" | "WITHDRAWAL";
+export type PaymentType = "DEPOSIT" | "WITHDRAWAL" | "BONUS_WITHDRAWAL";
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
 
 export interface PaymentRequest {
@@ -260,6 +260,7 @@ export interface IndexTier {
   minAmount: string;
   maxAmount: string;
   label: string;
+  durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;
   halfYearlyReturn: string;
@@ -286,10 +287,36 @@ export interface IndexManager {
   isActive: boolean;
 }
 
+export interface IndexSettings {
+  id: string;
+  maintenanceFeePercent: string;
+  level1Percent: string;
+  level2Percent: string;
+  level3Percent: string;
+  level4Percent: string;
+  level5Percent: string;
+  earlyWithdrawalPercent: string;
+  maturityWithdrawalFee: string;
+}
+
+export interface IndexInvestmentRecord {
+  id: string;
+  userId: string;
+  tierId: string;
+  amount: string;
+  feeAmount: string;
+  netAmount: string;
+  status: "ACTIVE" | "MATURED" | "CANCELLED";
+  activatedAt: string;
+  createdAt: string;
+  tier: IndexTier;
+  user: { id: string; name: string; email: string };
+}
+
 // ─── Index API ───
 export const indexAPI = {
   getTiers: () => request<{ tiers: IndexTier[] }>("/admin/index/tiers"),
-  createTier: (data: { minAmount: number; maxAmount: number; label: string; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number }) =>
+  createTier: (data: { minAmount: number; maxAmount: number; label: string; durationMonths?: number; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number }) =>
     request<{ message: string; tier: IndexTier }>("/admin/index/tiers", { method: "POST", body: JSON.stringify(data) }),
   updateTier: (id: string, data: Partial<IndexTier>) =>
     request<{ message: string; tier: IndexTier }>(`/admin/index/tiers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
@@ -307,4 +334,104 @@ export const indexAPI = {
   getManager: () => request<{ manager: IndexManager | null }>("/admin/index/manager"),
   upsertManager: (data: { name: string; title: string; bio?: string; imageUrl?: string }) =>
     request<{ message: string; manager: IndexManager }>("/admin/index/manager", { method: "POST", body: JSON.stringify(data) }),
+
+  getInvestments: () => request<{ investments: IndexInvestmentRecord[] }>("/admin/index/investments"),
+
+  getSettings: () => request<{ settings: IndexSettings }>("/admin/index/settings"),
+  updateSettings: (data: Partial<{ maintenanceFeePercent: number; level1Percent: number; level2Percent: number; level3Percent: number; level4Percent: number; level5Percent: number; earlyWithdrawalPercent: number; maturityWithdrawalFee: number }>) =>
+    request<{ message: string; settings: IndexSettings }>("/admin/index/settings", { method: "PUT", body: JSON.stringify(data) }),
+};
+
+// ─── Support Tickets (Admin) API ───
+export type SupportCategory = "TECHNICAL" | "BILLING" | "KYC" | "ACCOUNT" | "OTHER";
+export type SupportTicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  category: SupportCategory;
+  subject: string;
+  message: string;
+  phone: string | null;
+  status: SupportTicketStatus;
+  adminNote: string | null;
+  resolvedBy: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; name: string; email: string; role: string };
+}
+
+export interface SupportTicketListResponse {
+  tickets: SupportTicket[];
+  total: number;
+  page: number;
+  limit: number;
+  counts: { open: number; inProgress: number };
+}
+
+export const supportTicketsAPI = {
+  getAll: (params?: { status?: string; category?: string; page?: number; limit?: number }) =>
+    request<SupportTicketListResponse>("/admin/support-tickets" + (params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : "")),
+  getDetail: (id: string) =>
+    request<{ ticket: SupportTicket }>(`/admin/support-tickets/${id}`),
+  update: (id: string, data: { status?: SupportTicketStatus; adminNote?: string }) =>
+    request<{ message: string; ticket: SupportTicket }>(`/admin/support-tickets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+};
+
+// ─── Platform Wallet (Admin) API ───
+export interface PlatformWalletData {
+  id: string;
+  balance: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformLedgerEntry {
+  id: string;
+  platformWalletId: string;
+  type: "FEE_CREDIT" | "WITHDRAWAL";
+  amount: string;
+  description: string | null;
+  indexInvestmentId: string | null;
+  investor: { id: string; name: string; email: string } | null;
+  createdAt: string;
+}
+
+export interface PlatformWithdrawalRecord {
+  id: string;
+  platformWalletId: string;
+  amount: string;
+  status: "PENDING" | "COMPLETED" | "REJECTED";
+  destination: string;
+  note: string | null;
+  requestedBy: string;
+  processedBy: string | null;
+  processedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  requester?: { id: string; name: string; email: string } | null;
+  processor?: { id: string; name: string; email: string } | null;
+}
+
+export const platformWalletAPI = {
+  get: () => request<{ wallet: PlatformWalletData; pendingWithdrawal: PlatformWithdrawalRecord | null }>("/admin/platform-wallet"),
+  getLedger: (params?: { page?: number; limit?: number }) =>
+    request<{ entries: PlatformLedgerEntry[]; total: number; page: number; limit: number; totalPages: number }>(
+      "/admin/platform-wallet/ledger" + (params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : "")
+    ),
+  getWithdrawals: (params?: { status?: string; page?: number; limit?: number }) =>
+    request<{ withdrawals: PlatformWithdrawalRecord[]; total: number; page: number; limit: number; totalPages: number }>(
+      "/admin/platform-wallet/withdrawals" + (params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : "")
+    ),
+  requestWithdrawal: (data: { amount: number; destination: string; note?: string }) =>
+    request<{ message: string; withdrawal: PlatformWithdrawalRecord }>("/admin/platform-wallet/withdrawals", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  processWithdrawal: (id: string, action: "approve" | "reject", note?: string) =>
+    request<{ message: string; withdrawal: PlatformWithdrawalRecord }>(`/admin/platform-wallet/withdrawals/${id}/process`, {
+      method: "POST",
+      body: JSON.stringify({ action, note }),
+    }),
 };

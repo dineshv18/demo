@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import {
   IconX, IconInfoCircle, IconTrendingUp, IconClock, IconStar,
 } from "@tabler/icons-react";
+import { indexAPI, type IndexTier } from "@/lib/api";
 
-const INVESTMENT_BASE = [
-  { num: 1, name: "NOVA INDEX", range: "$100 - $500", returnRange: "3% to 5%", duration: "18 months", color: "from-blue-500 to-cyan-400" },
-  { num: 2, name: "PRIME INDEX", range: "$501 - $2,000", returnRange: "5% to 7%", duration: "18 months", color: "from-purple-500 to-pink-400" },
-  { num: 3, name: "VERTEX INDEX", range: "$2,001 - $10,000", returnRange: "7% to 9%", duration: "24 months", color: "from-amber-500 to-orange-400" },
-  { num: 4, name: "IMPERIUM INDEX", range: "$10,001 & above", returnRange: "9% to 11%", duration: "30 months", color: "from-emerald-500 to-teal-400" },
+const TIER_COLORS = [
+  "from-blue-500 to-cyan-400",
+  "from-purple-500 to-pink-400",
+  "from-amber-500 to-orange-400",
+  "from-emerald-500 to-teal-400",
 ];
 
 export function useInvestmentBasePopup() {
@@ -31,9 +32,20 @@ export function useInvestmentBasePopup() {
   return { show, close };
 }
 
-export default function InvestmentBasePopup({ onClose }: { onClose: () => void }) {
+export default function InvestmentBasePopup({
+  onClose,
+  onSelectTier,
+}: {
+  onClose: () => void;
+  onSelectTier?: (minAmount: number, tierId?: string) => void;
+}) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
+  const [tiers, setTiers] = useState<IndexTier[]>([]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+    indexAPI.getData().then((res) => setTiers(res.tiers || [])).catch(() => {});
+  }, []);
 
   return (
     <div
@@ -79,39 +91,49 @@ export default function InvestmentBasePopup({ onClose }: { onClose: () => void }
 
           {/* Tier Cards */}
           <div className="space-y-3 mb-6">
-            {INVESTMENT_BASE.map((item, i) => (
-              <div
-                key={item.num}
-                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-background/40 hover:bg-background/80 transition-all duration-300"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                {/* Left accent bar */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${item.color}`} />
+            {tiers.filter((t) => t.isActive).map((item, i) => {
+              const color = TIER_COLORS[i % TIER_COLORS.length];
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => onSelectTier?.(parseFloat(item.minAmount), item.id)}
+                  role={onSelectTier ? "button" : undefined}
+                  className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-background/40 hover:bg-background/80 transition-all duration-300 ${onSelectTier ? "cursor-pointer" : ""}`}
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  {/* Left accent bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${color}`} />
 
-                <div className="flex items-center gap-4 p-4 pl-5">
-                  {/* Number badge */}
-                  <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    {item.num}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="font-display text-sm sm:text-base font-bold tracking-wide text-foreground">{item.name}</p>
-                      <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">{item.range}</span>
+                  <div className="flex items-center gap-4 p-4 pl-5">
+                    {/* Number badge */}
+                    <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      {i + 1}
                     </div>
-                    <div className="flex items-center gap-4 mt-1.5">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-brand">
-                        <IconTrendingUp className="h-3 w-3" /> {item.returnRange}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <IconClock className="h-3 w-3" /> {item.duration}
-                      </span>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="font-display text-sm sm:text-base font-bold tracking-wide text-foreground">{item.label}</p>
+                        <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md">
+                          ${parseFloat(item.minAmount).toLocaleString()} - ${parseFloat(item.maxAmount).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-1.5 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-brand">
+                          <IconTrendingUp className="h-3 w-3" /> {parseFloat(item.weeklyReturn).toFixed(2)}% / week
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <IconClock className="h-3 w-3" /> {item.durationMonths} months
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+            {tiers.filter((t) => t.isActive).length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-6">No investment tiers available right now.</p>
+            )}
           </div>
 
           {/* Notes */}

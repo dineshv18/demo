@@ -85,6 +85,7 @@ export interface WalletData {
   id: string;
   userId: string;
   balance: string;
+  bonusBalance: string;
   frozen: string;
   currency: string;
 }
@@ -92,7 +93,7 @@ export interface WalletData {
 export interface TransactionData {
   id: string;
   walletId: string;
-  type: "DEPOSIT" | "WITHDRAWAL";
+  type: "DEPOSIT" | "WITHDRAWAL" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER";
   amount: string;
   status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
   description: string | null;
@@ -106,6 +107,21 @@ export interface TransactionData {
 }
 
 // ─── Fetch Wrapper ───
+const REQUEST_TIMEOUT_MS = 20000;
+
+function friendlyNetworkMessage(err: unknown): string {
+  if (err instanceof DOMException && err.name === "AbortError") {
+    return "Request timed out. Please check your connection and try again.";
+  }
+  if (err instanceof TypeError) {
+    // Browser fetch throws a generic TypeError ("Failed to fetch" / "Load failed")
+    // for DNS failures, offline state, CORS, and server-unreachable — none of that
+    // detail survives, so we normalize it to one actionable message.
+    return "Unable to reach the server. Please check your internet connection and try again.";
+  }
+  return "Something went wrong. Please try again.";
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -123,16 +139,47 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${env.API_URL}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const data = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(`${env.API_URL}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: "include",
+      signal: controller.signal,
+    });
+  } catch (err) {
+    throw new Error(friendlyNetworkMessage(err));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  let data: Record<string, unknown> | null = null;
+  try {
+    data = await res.json();
+  } catch {
+    // Non-JSON response (HTML error page, empty body, proxy error, etc.)
+    if (!res.ok) {
+      const err = new Error(
+        res.status >= 500
+          ? "Server error. Please try again in a moment."
+          : "Something went wrong. Please try again."
+      );
+      (err as unknown as Record<string, unknown>).status = res.status;
+      throw err;
+    }
+    return {} as T;
+  }
 
   if (!res.ok) {
-    const err = new Error(data.message || "Something went wrong");
+    const message =
+      (data && typeof data.message === "string" && data.message) ||
+      (res.status >= 500
+        ? "Server error. Please try again in a moment."
+        : "Something went wrong. Please try again.");
+    const err = new Error(message);
     (err as unknown as Record<string, unknown>).status = res.status;
     throw err;
   }
@@ -185,7 +232,7 @@ export interface UsdPaymentInfo {
 // ─── Wallet API ───
 export const walletAPI = {
   getWallet: () =>
-    request<{ wallet: WalletData; upiId: string; usdPayment: UsdPaymentInfo; pendingRequest: TransactionData | null; currencyLocked: boolean }>("/wallet"),
+    request<{ wallet: WalletData; upiId: string; usdPayment: UsdPaymentInfo; pendingRequest: TransactionData | null; pendingBonusRequest: TransactionData | null; currencyLocked: boolean }>("/wallet"),
 
   getTransactions: () =>
     request<{ transactions: TransactionData[] }>("/wallet/transactions"),
@@ -213,7 +260,42 @@ export const walletAPI = {
       method: "POST",
       body: JSON.stringify({ currency }),
     }),
+
+  transferBonusToWallet: (amount: number) =>
+    request<{ message: string; transaction: TransactionData }>("/wallet/bonus/transfer", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+
+  requestBonusWithdrawal: (amount: number, upiId: string) =>
+    request<{ message: string; transaction: TransactionData }>("/wallet/bonus/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amount, upiId }),
+    }),
+
+  getTransactionHistory: (page: number, limit = 30, type?: "DEPOSIT" | "WITHDRAWAL" | "INDEX" | "BONUS") =>
+    request<TransactionHistoryResponse>(
+      `/wallet/transactions/history?page=${page}&limit=${limit}${type ? `&type=${type}` : ""}`
+    ),
 };
+
+export interface TransactionEvent {
+  id: string;
+  category: "WALLET" | "INDEX" | "BONUS";
+  type: "DEPOSIT" | "WITHDRAWAL" | "INDEX_INVEST" | "INDEX_WITHDRAW" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER";
+  amount: number | null;
+  status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
+  description: string | null;
+  date: string;
+}
+
+export interface TransactionHistoryResponse {
+  transactions: TransactionEvent[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 // ─── KYC API ───
 export const kycAPI = {
@@ -297,11 +379,18 @@ export type ReferralDashboardStats = {
   commissionRate: number;
 };
 
+export interface ReferralEarningsBreakdown {
+  byLevel: number[];
+  monthlyTotals: { label: string; amount: number }[];
+  totalEarned: number;
+}
+
 export const referralAPI = {
   getMyCode: () => request<ReferralCode>("/referral/my-code"),
   getMyReferrals: () => request<{ referrals: Referral[]; stats: ReferralStats }>("/referral/my-referrals"),
   getMyStats: () => request<{ stats: ReferralDashboardStats }>("/referral/stats"),
   getHierarchy: () => request<{ hierarchy: HierarchyItem[] }>("/referral/hierarchy"),
+  getEarningsBreakdown: () => request<ReferralEarningsBreakdown>("/referral/earnings-breakdown"),
 };
 
 // ─── Index Types ───
@@ -310,6 +399,7 @@ export interface IndexTier {
   minAmount: string;
   maxAmount: string;
   label: string;
+  durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;
   halfYearlyReturn: string;
@@ -335,12 +425,75 @@ export interface IndexData {
   tiers: IndexTier[];
   activeTier: IndexTier | null;
   walletBalance: number;
+  maintenanceFeePercent: number;
+  earlyWithdrawalPercent: number;
+  maturityWithdrawalFee: number;
+  referralLevels: number[];
   priceHistory: IndexPriceEntry[];
   currentPrice: { price: number; changePercent: number; changeAmount: number };
   manager: IndexManager | null;
 }
 
+export interface IndexInvestment {
+  id: string;
+  userId: string;
+  tierId: string;
+  amount: string;
+  feeAmount: string;
+  netAmount: string;
+  status: "ACTIVE" | "MATURED" | "CANCELLED";
+  activatedAt: string;
+  maturesAt: string | null;
+  withdrawnAt: string | null;
+  withdrawalFee: string | null;
+  payoutAmount: string | null;
+  createdAt: string;
+  tier: IndexTier;
+}
+
 // ─── Index API ───
 export const indexAPI = {
   getData: () => request<IndexData>("/index"),
+  getMyInvestments: () => request<{ investments: IndexInvestment[] }>("/index/investments"),
+  invest: (amount: number, tierId: string) =>
+    request<{ message: string; investment: IndexInvestment }>("/index/invest", {
+      method: "POST",
+      body: JSON.stringify({ amount, tierId }),
+    }),
+  topUp: (amount: number) =>
+    request<{ message: string; investment: IndexInvestment }>("/index/top-up", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+  withdraw: () =>
+    request<{ message: string; payoutAmount: number; earlyFee: number; wasMature: boolean }>("/index/withdraw", {
+      method: "POST",
+    }),
+};
+
+// ─── Support API ───
+export type SupportCategory = "TECHNICAL" | "BILLING" | "KYC" | "ACCOUNT" | "OTHER";
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  category: SupportCategory;
+  subject: string;
+  message: string;
+  phone: string | null;
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  adminNote: string | null;
+  resolvedBy: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const supportAPI = {
+  createTicket: (data: { category: SupportCategory; subject: string; message: string; phone?: string }) =>
+    request<{ message: string; ticket: SupportTicket }>("/support", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMyTickets: () => request<{ tickets: SupportTicket[] }>("/support/my-tickets"),
 };

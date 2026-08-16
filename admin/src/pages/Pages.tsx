@@ -2,6 +2,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { IconPlus, IconTrash, IconEdit, IconFile, IconRefresh } from "@tabler/icons-react";
+import * as TablerIcons from "@tabler/icons-react";
+
+function PageIcon({ name, className }: { name?: string; className?: string }) {
+  const Icon = (name && (TablerIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name]) || IconFile;
+  return <Icon className={className} />;
+}
 import { env } from "../config/env";
 
 const API = env.API_URL;
@@ -121,7 +127,7 @@ export default function PagesPage() {
           <div key={page.id} className="border rounded-lg p-4 bg-card space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <IconFile size={16} className="text-muted-foreground" />
+                <PageIcon name={page.icon} className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-semibold text-sm">{page.name}</h3>
               </div>
               <div className="flex gap-1">

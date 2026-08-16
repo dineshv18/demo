@@ -182,7 +182,7 @@ export default function KycVerification() {
                   onClick={() => setFilter(tab)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     filter === tab
-                      ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -196,7 +196,7 @@ export default function KycVerification() {
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                       filter === tab
-                        ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                        ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
                         : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                     }`}
                   >
@@ -219,7 +219,7 @@ export default function KycVerification() {
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500"
               />
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function KycVerification() {
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
                             {sub.fullName?.charAt(0)?.toUpperCase() || sub.user?.name?.charAt(0)?.toUpperCase() || "?"}
                           </div>
                           <div>
@@ -389,6 +389,7 @@ export default function KycVerification() {
                       />
                       <InfoRow label="Country" value={selected.country || "-"} />
                       <InfoRow label="Government ID Type" value={selected.governmentIdType || "-"} />
+                      <InfoRow label="Address Proof Type" value={selected.addressProofType || "-"} />
                     </div>
                   </section>
 
@@ -400,14 +401,14 @@ export default function KycVerification() {
                         href={selected.documentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-violet-400 transition-colors group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                            <IconFile className="h-5 w-5 text-amber-600" />
+                          <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-violet-600 transition-colors">
                               View Front
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{selected.governmentIdType} — Front Side</p>
@@ -423,14 +424,14 @@ export default function KycVerification() {
                         href={selected.documentUrlBack}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-violet-400 transition-colors group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                            <IconFile className="h-5 w-5 text-amber-600" />
+                          <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-violet-600 transition-colors">
                               View Back
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{selected.governmentIdType} — Back Side</p>
@@ -446,14 +447,14 @@ export default function KycVerification() {
                         href={selected.addressDocUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-violet-400 transition-colors group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                            <IconFile className="h-5 w-5 text-amber-600" />
+                          <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-violet-600 transition-colors">
                               View Front
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{selected.addressProofType} — Front Side</p>
@@ -469,14 +470,14 @@ export default function KycVerification() {
                         href={selected.addressDocUrlBack}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 transition-colors group"
+                        className="block bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-700 hover:border-violet-400 transition-colors group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                            <IconFile className="h-5 w-5 text-amber-600" />
+                          <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+                            <IconFile className="h-5 w-5 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-violet-600 transition-colors">
                               View Back
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{selected.addressProofType} — Back Side</p>

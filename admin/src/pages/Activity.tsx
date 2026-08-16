@@ -14,6 +14,12 @@ const actionLabels: Record<string, string> = {
   delete_admin: "Deleted Admin", deactivate_admin: "Deactivated Admin", activate_admin: "Activated Admin",
   send_otp: "Sent OTP", verify_otp: "Verified OTP", forgot_password: "Forgot Password",
   reset_password: "Reset Password",
+  KYC_APPROVED: "Approved KYC", KYC_REJECTED: "Rejected KYC",
+  PAYMENT_APPROVED: "Approved Deposit", WITHDRAWAL_APPROVED: "Approved Withdrawal", PAYMENT_REJECTED: "Rejected Payment",
+  SUPPORT_TICKET_UPDATED: "Updated Support Ticket",
+  PLATFORM_WITHDRAWAL_REQUESTED: "Requested Platform Withdrawal",
+  PLATFORM_WITHDRAWAL_APPROVED: "Approved Platform Withdrawal",
+  PLATFORM_WITHDRAWAL_REJECTED: "Rejected Platform Withdrawal",
 };
 
 const actionColors: Record<string, string> = {
@@ -23,6 +29,13 @@ const actionColors: Record<string, string> = {
   assign_pages: "text-cyan-600 bg-cyan-600/10", create_admin: "text-indigo-600 bg-indigo-600/10",
   update_admin: "text-amber-600 bg-amber-600/10", delete_admin: "text-red-600 bg-red-600/10",
   deactivate_admin: "text-red-600 bg-red-600/10", activate_admin: "text-green-600 bg-green-600/10",
+  KYC_APPROVED: "text-green-600 bg-green-600/10", KYC_REJECTED: "text-red-600 bg-red-600/10",
+  PAYMENT_APPROVED: "text-green-600 bg-green-600/10", WITHDRAWAL_APPROVED: "text-blue-600 bg-blue-600/10",
+  PAYMENT_REJECTED: "text-red-600 bg-red-600/10",
+  SUPPORT_TICKET_UPDATED: "text-cyan-600 bg-cyan-600/10",
+  PLATFORM_WITHDRAWAL_REQUESTED: "text-amber-600 bg-amber-600/10",
+  PLATFORM_WITHDRAWAL_APPROVED: "text-green-600 bg-green-600/10",
+  PLATFORM_WITHDRAWAL_REJECTED: "text-red-600 bg-red-600/10",
 };
 
 function formatTime(dateStr: string) {
@@ -153,7 +166,7 @@ export default function ActivityPage() {
                       {actionLabels[log.action] || log.action}
                     </span>
                   </td>
-                  <td className="p-3 text-muted-foreground capitalize">{log.page || "-"}</td>
+                  <td className="p-3 text-muted-foreground">{log.page ? log.page.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "-"}</td>
                   <td className="p-3 text-muted-foreground text-xs font-mono">{log.ip || "-"}</td>
                   <td className="p-3 text-muted-foreground text-xs">{formatTime(log.createdAt)}</td>
                 </tr>

@@ -41,7 +41,7 @@ export const getAllPayments = async (req, res) => {
       }),
       getPrisma().transaction.count({ where }),
       getPrisma().transaction.count({ where: { type: "DEPOSIT", status: "PENDING" } }),
-      getPrisma().transaction.count({ where: { type: "WITHDRAWAL", status: "PENDING" } }),
+      getPrisma().transaction.count({ where: { type: { in: ["WITHDRAWAL", "BONUS_WITHDRAWAL"] }, status: "PENDING" } }),
       getPrisma().transaction.count({ where: { status: "COMPLETED" } }),
       getPrisma().transaction.count({ where: { status: "FAILED" } }),
     ]);
@@ -104,6 +104,16 @@ export const approvePayment = async (req, res) => {
         await prisma.wallet.update({
           where: { id: tx.walletId },
           data: { balance: { increment: parseFloat(tx.amount) } },
+        });
+      } else if (tx.type === "BONUS_WITHDRAWAL") {
+        // Bonus withdrawal — deduct from bonusBalance, not the main balance
+        const currentBonus = parseFloat(tx.wallet.bonusBalance);
+        if (currentBonus < parseFloat(tx.amount)) {
+          throw new Error("User has insufficient bonus balance to process this withdrawal");
+        }
+        await prisma.wallet.update({
+          where: { id: tx.walletId },
+          data: { bonusBalance: { decrement: parseFloat(tx.amount) } },
         });
       } else {
         // Withdrawal — deduct from balance (checked at request time, re-check here)

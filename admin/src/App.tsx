@@ -10,6 +10,8 @@ import Pages from "./pages/Pages";
 import KycVerification from "./pages/KycVerification";
 import Payments from "./pages/Payments";
 import Support from "./pages/Support";
+import SupportTickets from "./pages/SupportTickets";
+import PlatformWallet from "./pages/PlatformWallet";
 import Users from "./pages/Users";
 import ReferralSettings from "./pages/ReferralSettings";
 import IndexSettings from "./pages/IndexSettings";
@@ -59,6 +61,8 @@ function AppRoutes() {
         <Route path="kyc" element={<KycVerification />} />
         <Route path="payments" element={<Payments />} />
         <Route path="support" element={<Support />} />
+        <Route path="support-tickets" element={<SupportTickets />} />
+        <Route path="platform-wallet" element={<PlatformWallet />} />
         <Route path="activity" element={<Activity />} />
         <Route path="referrals" element={<ReferralSettings />} />
         <Route path="index-settings" element={<IndexSettings />} />

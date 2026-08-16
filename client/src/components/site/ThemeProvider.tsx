@@ -54,15 +54,16 @@ export function RoleThemeProvider({ children }: { children: ReactNode }) {
   // Apply default golden brand on mount (before API loads)
   useEffect(() => {
     if (!roleColor) {
-      applyBrandColor("#d4af37");
+      applyBrandColor("#7c3aed");
     }
   }, [roleColor]);
 
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      forcedTheme="light"
+      enableSystem={false}
       disableTransitionOnChange={false}
     >
       <RoleThemeInjector color={roleColor} />

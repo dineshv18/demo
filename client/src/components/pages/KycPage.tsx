@@ -386,6 +386,8 @@ export default function KycPage() {
   const [loading, setLoading] = useState(false);
   const [kyc, setKyc] = useState<KycData | null>(null);
   const [fetching, setFetching] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [fetchFailed, setFetchFailed] = useState(false);
   const [error, setError] = useState("");
 
   // Step 1 state
@@ -482,9 +484,11 @@ export default function KycPage() {
     fetchKyc();
   }, []);
 
-  const fetchKyc = async () => {
+  const fetchKyc = async (isRefresh = false) => {
     try {
-      setFetching(true);
+      if (isRefresh) setRefreshing(true);
+      else setFetching(true);
+      setFetchFailed(false);
       const res = await kycAPI.getStatus();
       setKyc(res.kyc);
       if (res.kyc.fullName) setFullName(res.kyc.fullName);
@@ -502,9 +506,12 @@ export default function KycPage() {
       if (res.kyc.governmentIdType) setIdType(res.kyc.governmentIdType);
       if (res.kyc.emailVerified) setOtpSuccess(true);
     } catch {
-      // KYC not started
+      // /kyc/status always returns 200 with a real record (auto-created if missing),
+      // so any failure here is a genuine network/server error — not "KYC not started".
+      setFetchFailed(true);
     } finally {
-      setFetching(false);
+      if (isRefresh) setRefreshing(false);
+      else setFetching(false);
     }
   };
 
@@ -728,6 +735,26 @@ export default function KycPage() {
     );
   }
 
+  if (fetchFailed) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
+        <div className="grid h-16 w-16 place-items-center rounded-full bg-destructive/10 ring-1 ring-destructive/20">
+          <IconAlertCircle className="h-8 w-8 text-destructive" />
+        </div>
+        <div>
+          <p className="font-semibold">Couldn&apos;t load your KYC status</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Please check your internet connection and try again.
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => fetchKyc()} disabled={fetching}>
+          <IconRefresh className="mr-2 h-4 w-4" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   // Ek baar submit karne ke baad form dobara nahi dikhega — sirf status
   const kycStatus = kyc?.status ?? "NOT_STARTED";
   const showForm =
@@ -852,9 +879,14 @@ export default function KycPage() {
                   <IconClock className="h-4 w-4 shrink-0" />
                   Estimated review time: 12-24 working hours
                 </div>
-                <Button variant="outline" onClick={fetchKyc} className="w-full sm:w-auto">
-                  <IconRefresh className="mr-2 h-4 w-4" />
-                  Refresh Status
+                <Button
+                  variant="outline"
+                  onClick={() => fetchKyc(true)}
+                  disabled={refreshing}
+                  className="w-full sm:w-auto"
+                >
+                  <IconRefresh className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                  {refreshing ? "Refreshing..." : "Refresh Status"}
                 </Button>
               </>
             )}

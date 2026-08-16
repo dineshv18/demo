@@ -2,13 +2,17 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/AuthContext";
-import { walletAPI, kycAPI, referralAPI, type WalletData, type TransactionData, type KycData, type ReferralDashboardStats } from "@/lib/api";
+import {
+  walletAPI, kycAPI, referralAPI, indexAPI,
+  type WalletData, type TransactionData, type KycData, type ReferralDashboardStats,
+  type ReferralEarningsBreakdown, type IndexInvestment,
+} from "@/lib/api";
 import {
   IconWallet, IconShieldCheck, IconShield, IconClock,
   IconArrowUpRight, IconArrowDownLeft, IconLoader2, IconLock,
-  IconAlertCircle, IconCheck, IconX, IconUserPlus,
+  IconAlertCircle, IconCheck, IconX, IconUserPlus, IconUsers,
+  IconTrendingUp, IconInfoCircle, IconChartLine, IconGift,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -26,43 +30,51 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
 
 export default function ClientDashboard() {
   const { user } = useAuth();
-  const { resolvedTheme } = useTheme();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [kyc, setKyc] = useState<KycData | null>(null);
   const [referralStats, setReferralStats] = useState<ReferralDashboardStats | null>(null);
+  const [earnings, setEarnings] = useState<ReferralEarningsBreakdown | null>(null);
+  const [levelRates, setLevelRates] = useState<number[]>([]);
+  const [activeInvestment, setActiveInvestment] = useState<IndexInvestment | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  // Theme-aware chart colors (must be before any early return)
-  const chartColors = useMemo(() => {
-    const isDark = resolvedTheme === "dark";
-    return {
-      grid: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-      axis: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
-      tooltipBg: isDark ? "#1a1a2e" : "#ffffff",
-      tooltipBorder: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-      tooltipText: isDark ? "#e2e8f0" : "#1e293b",
-      stroke: isDark ? "oklch(0.78 0.14 85)" : "oklch(0.72 0.14 85)",
-      gradientStart: isDark ? "oklch(0.78 0.14 85)" : "oklch(0.72 0.14 85)",
-    };
-  }, [resolvedTheme]);
+  // Chart colors — the app is light-mode only (dark mode is force-disabled),
+  // so these are fixed rather than theme-conditional.
+  const chartColors = useMemo(() => ({
+    grid: "rgba(0,0,0,0.06)",
+    axis: "rgba(0,0,0,0.4)",
+    tooltipBg: "#ffffff",
+    tooltipBorder: "rgba(0,0,0,0.1)",
+    tooltipText: "#1e293b",
+    stroke: "#4A3AA7",
+    gradientStart: "#4A3AA7",
+  }), []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [walletRes, txRes, kycRes, refRes] = await Promise.allSettled([
+        const [walletRes, txRes, kycRes, refRes, earnRes, indexRes, investRes] = await Promise.allSettled([
           walletAPI.getWallet(),
           walletAPI.getTransactions(),
           kycAPI.getStatus(),
           referralAPI.getMyStats(),
+          referralAPI.getEarningsBreakdown(),
+          indexAPI.getData(),
+          indexAPI.getMyInvestments(),
         ]);
         if (walletRes.status === "fulfilled") setWallet(walletRes.value.wallet);
         if (txRes.status === "fulfilled") setTransactions(txRes.value.transactions);
         if (kycRes.status === "fulfilled") setKyc(kycRes.value.kyc);
         if (refRes.status === "fulfilled") setReferralStats(refRes.value.stats);
+        if (earnRes.status === "fulfilled") setEarnings(earnRes.value);
+        if (indexRes.status === "fulfilled") setLevelRates(indexRes.value.referralLevels || []);
+        if (investRes.status === "fulfilled") {
+          setActiveInvestment(investRes.value.investments.find((i) => i.status === "ACTIVE") || null);
+        }
       } finally {
         setLoading(false);
       }
@@ -79,6 +91,7 @@ export default function ClientDashboard() {
   }
 
   const balance = wallet ? parseFloat(wallet.balance) : 0;
+  const bonusBalance = wallet ? parseFloat(wallet.bonusBalance) : 0;
   const frozen = wallet ? parseFloat(wallet.frozen) : 0;
   const sym = currencySymbol();
   const kycStatus = kyc?.status || "NOT_STARTED";
@@ -163,6 +176,51 @@ export default function ClientDashboard() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(" ")[0]}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Here&apos;s your account overview</p>
+      </div>
+
+      {/* Top Stats: Wallet / Index / Bonus */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link href="/dashboard/wallet" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-blue-500/10 shrink-0">
+              <IconWallet className="h-5 w-5 text-blue-500" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">Wallet</p>
+          </div>
+          <p className="text-2xl font-bold text-foreground">{sym}{balance.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground mt-1">Available balance</p>
+        </Link>
+
+        <Link href="/dashboard/index" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
+              <IconChartLine className="h-5 w-5 text-brand" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">Index</p>
+          </div>
+          {activeInvestment ? (
+            <>
+              <p className="text-2xl font-bold text-foreground">{sym}{parseFloat(activeInvestment.netAmount || activeInvestment.amount).toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">{activeInvestment.tier.label} · Active</p>
+            </>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-muted-foreground">{sym}0.00</p>
+              <p className="text-xs text-muted-foreground mt-1">No active investment</p>
+            </>
+          )}
+        </Link>
+
+        <Link href="/dashboard/wallet" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-purple-500/10 shrink-0">
+              <IconGift className="h-5 w-5 text-purple-500" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">Bonus</p>
+          </div>
+          <p className="text-2xl font-bold text-foreground">{sym}{bonusBalance.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground mt-1">From referral earnings</p>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -348,6 +406,80 @@ export default function ClientDashboard() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Referral Overview */}
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-1.5">
+            Referral Overview
+            <IconInfoCircle className="h-3.5 w-3.5 text-muted-foreground" />
+          </h2>
+          <Link href="/dashboard/referral" className="text-xs font-medium text-brand hover:underline">View All</Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <div className="rounded-xl border border-border p-4 flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
+              <IconUsers className="h-5 w-5 text-brand" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Total Referrals</p>
+              <p className="text-xl font-bold text-foreground">{referralStats?.totalReferrals || 0}</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-4 flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-500/10 shrink-0">
+              <IconTrendingUp className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Referral Earnings</p>
+              <p className="text-xl font-bold text-foreground">{sym}{(earnings?.totalEarned ?? referralStats?.totalCommission ?? 0).toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+
+        {levelRates.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="md:col-span-2 space-y-3">
+              <p className="text-sm font-semibold text-foreground">Referral Level Commission</p>
+              {(() => {
+                const byLevel = earnings?.byLevel || [];
+                const maxEarning = Math.max(...levelRates.map((_, i) => byLevel[i] || 0), 1);
+                return levelRates.map((rate, i) => {
+                  const amount = byLevel[i] || 0;
+                  const widthPct = Math.max((amount / maxEarning) * 100, amount > 0 ? 4 : 0);
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="w-24 shrink-0 text-xs text-muted-foreground">
+                        Level {i + 1} ({rate}%)
+                      </span>
+                      <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${widthPct}%`, backgroundColor: "#2a78d6" }}
+                        />
+                      </div>
+                      <span className="w-16 shrink-0 text-right text-xs font-semibold text-foreground">
+                        {sym}{amount.toFixed(0)}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="grid h-24 w-24 place-items-center rounded-full bg-brand/10 mb-3">
+                <IconUsers className="h-10 w-10 text-brand" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Keep referring<br />to earn more!</p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-sm text-muted-foreground">No referral commission data yet</p>
+          </div>
+        )}
       </div>
     </div>
   );

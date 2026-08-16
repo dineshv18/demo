@@ -2,17 +2,18 @@
 import { useState, useEffect } from "react";
 import {
   IconPlus, IconEdit, IconTrash, IconCheck,
-  IconChartLine, IconUser, IconCoin,
+  IconChartLine, IconUser, IconCoin, IconPercentage,
 } from "@tabler/icons-react";
-import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager } from "../services/api";
+import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager, type IndexSettings as IndexSettingsData } from "../services/api";
 
-type Tab = "tiers" | "prices" | "manager";
+type Tab = "tiers" | "prices" | "manager" | "fees";
 
 export default function IndexSettings() {
   const [tab, setTab] = useState<Tab>("tiers");
   const [tiers, setTiers] = useState<IndexTier[]>([]);
   const [prices, setPrices] = useState<IndexPriceEntry[]>([]);
   const [manager, setManager] = useState<IndexManager | null>(null);
+  const [feeSettings, setFeeSettings] = useState<IndexSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -24,14 +25,16 @@ export default function IndexSettings() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [tiersRes, pricesRes, managerRes] = await Promise.allSettled([
+      const [tiersRes, pricesRes, managerRes, settingsRes] = await Promise.allSettled([
         indexAPI.getTiers(),
         indexAPI.getPrices(),
         indexAPI.getManager(),
+        indexAPI.getSettings(),
       ]);
       if (tiersRes.status === "fulfilled") setTiers(tiersRes.value.tiers);
       if (pricesRes.status === "fulfilled") setPrices(pricesRes.value.prices);
       if (managerRes.status === "fulfilled") setManager(managerRes.value.manager);
+      if (settingsRes.status === "fulfilled") setFeeSettings(settingsRes.value.settings);
     } catch (err: any) {
       showToast("error", err.message || "Failed to load data");
     } finally {
@@ -56,13 +59,14 @@ export default function IndexSettings() {
 
       {/* Tabs */}
       <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900">
-        {(["tiers", "prices", "manager"] as const).map((t) => (
+        {(["tiers", "prices", "manager", "fees"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${tab === t ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${tab === t ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
             {t === "tiers" && <IconCoin size={16} />}
             {t === "prices" && <IconChartLine size={16} />}
             {t === "manager" && <IconUser size={16} />}
-            {t === "tiers" ? "Investment Tiers" : t === "prices" ? "Price History" : "Index Manager"}
+            {t === "fees" && <IconPercentage size={16} />}
+            {t === "tiers" ? "Investment Tiers" : t === "prices" ? "Price History" : t === "manager" ? "Index Manager" : "Fees & Commission"}
           </button>
         ))}
       </div>
@@ -74,6 +78,7 @@ export default function IndexSettings() {
           {tab === "tiers" && <TiersTab tiers={tiers} onRefresh={fetchAll} showToast={showToast} />}
           {tab === "prices" && <PricesTab prices={prices} onRefresh={fetchAll} showToast={showToast} />}
           {tab === "manager" && <ManagerTab manager={manager} onRefresh={fetchAll} showToast={showToast} />}
+          {tab === "fees" && <FeesTab settings={feeSettings} onRefresh={fetchAll} showToast={showToast} />}
         </>
       )}
     </div>
@@ -83,10 +88,10 @@ export default function IndexSettings() {
 function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefresh: () => Promise<void>; showToast: (t: "success" | "error", m: string) => void }) {
   const [editTier, setEditTier] = useState<IndexTier | null>(null);
   const [newTier, setNewTier] = useState(false);
-  const [form, setForm] = useState({ minAmount: "", maxAmount: "", label: "", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
+  const [form, setForm] = useState({ minAmount: "", maxAmount: "", label: "", durationMonths: "18", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
   const [saving, setSaving] = useState(false);
 
-  const resetForm = () => setForm({ minAmount: "", maxAmount: "", label: "", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
+  const resetForm = () => setForm({ minAmount: "", maxAmount: "", label: "", durationMonths: "18", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
 
   const openEdit = (tier: IndexTier) => {
     setEditTier(tier);
@@ -94,6 +99,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
       minAmount: tier.minAmount,
       maxAmount: tier.maxAmount,
       label: tier.label,
+      durationMonths: String(tier.durationMonths ?? 18),
       weeklyReturn: tier.weeklyReturn,
       monthlyReturn: tier.monthlyReturn,
       halfYearlyReturn: tier.halfYearlyReturn,
@@ -108,6 +114,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           minAmount: form.minAmount,
           maxAmount: form.maxAmount,
           label: form.label,
+          durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: form.weeklyReturn,
           monthlyReturn: form.monthlyReturn,
           halfYearlyReturn: form.halfYearlyReturn,
@@ -118,6 +125,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           minAmount: parseFloat(form.minAmount),
           maxAmount: parseFloat(form.maxAmount),
           label: form.label,
+          durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: parseFloat(form.weeklyReturn || "0"),
           monthlyReturn: parseFloat(form.monthlyReturn || "0"),
           halfYearlyReturn: parseFloat(form.halfYearlyReturn || "0"),
@@ -163,7 +171,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500 dark:text-gray-400">{tiers.length} tiers configured</p>
         <button onClick={() => { setNewTier(true); setEditTier(null); resetForm(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold transition-colors">
           <IconPlus size={16} /> Add Tier
         </button>
       </div>
@@ -176,46 +184,52 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Label *</label>
               <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })}
                 placeholder="e.g. $100 - $500"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Min Amount *</label>
                 <input type="number" value={form.minAmount} onChange={(e) => setForm({ ...form, minAmount: e.target.value })}
                   placeholder="100"
-                  className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                  className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Max Amount *</label>
                 <input type="number" value={form.maxAmount} onChange={(e) => setForm({ ...form, maxAmount: e.target.value })}
                   placeholder="500"
-                  className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                  className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
               </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Duration (months)</label>
+              <input type="number" min="1" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })}
+                placeholder="18"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Weekly Return (%)</label>
               <input type="number" step="0.01" value={form.weeklyReturn} onChange={(e) => setForm({ ...form, weeklyReturn: e.target.value })}
                 placeholder="0.50"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Monthly Return (%)</label>
               <input type="number" step="0.01" value={form.monthlyReturn} onChange={(e) => setForm({ ...form, monthlyReturn: e.target.value })}
                 placeholder="2.00"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">6-Month Return (%)</label>
               <input type="number" step="0.01" value={form.halfYearlyReturn} onChange={(e) => setForm({ ...form, halfYearlyReturn: e.target.value })}
                 placeholder="12.00"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
           </div>
           <div className="flex gap-3 justify-end">
             <button onClick={() => { setEditTier(null); setNewTier(false); resetForm(); }}
               className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>
             <button onClick={handleSave} disabled={saving || !form.label || !form.minAmount || !form.maxAmount}
-              className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+              className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
               {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
               {editTier ? "Update" : "Create"}
             </button>
@@ -229,6 +243,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                 <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Tier</th>
+                <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Duration</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">1W Return</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">1M Return</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">6M Return</th>
@@ -240,6 +255,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               {tiers.map((tier) => (
                 <tr key={tier.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">{tier.label}</td>
+                  <td className="px-5 py-4 text-right text-gray-600 dark:text-gray-400">{tier.durationMonths} months</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.weeklyReturn).toFixed(2)}%</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.monthlyReturn).toFixed(2)}%</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.halfYearlyReturn).toFixed(2)}%</td>
@@ -258,7 +274,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
                 </tr>
               ))}
               {tiers.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No tiers configured yet.</td></tr>
+                <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">No tiers configured yet.</td></tr>
               )}
             </tbody>
           </table>
@@ -312,7 +328,7 @@ function PricesTab({ prices, onRefresh, showToast }: { prices: IndexPriceEntry[]
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500 dark:text-gray-400">{prices.length} price entries</p>
         <button onClick={() => setNewPrice(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold transition-colors">
           <IconPlus size={16} /> Add Price
         </button>
       </div>
@@ -324,29 +340,29 @@ function PricesTab({ prices, onRefresh, showToast }: { prices: IndexPriceEntry[]
             <div>
               <label className="text-xs font-medium text-gray-500">Price *</label>
               <input type="number" step="0.000001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}
-                placeholder="0.02" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                placeholder="0.02" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500">Date Label</label>
               <input value={form.dateLabel} onChange={(e) => setForm({ ...form, dateLabel: e.target.value })}
-                placeholder="e.g. 04 Aug" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                placeholder="e.g. 04 Aug" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500">Change %</label>
               <input type="number" step="0.01" value={form.changePercent} onChange={(e) => setForm({ ...form, changePercent: e.target.value })}
-                placeholder="2.56" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                placeholder="2.56" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500">Change Amount</label>
               <input type="number" step="0.000001" value={form.changeAmount} onChange={(e) => setForm({ ...form, changeAmount: e.target.value })}
-                placeholder="0.0005" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+                placeholder="0.0005" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
             </div>
           </div>
           <div className="flex gap-3 justify-end">
             <button onClick={() => { setNewPrice(false); resetForm(); }}
               className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>
             <button onClick={handleCreate} disabled={saving || !form.price}
-              className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+              className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
               {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
               Create
             </button>
@@ -423,26 +439,165 @@ function ManagerTab({ manager, onRefresh, showToast }: { manager: IndexManager |
         <label className="text-xs font-medium text-gray-500">Name *</label>
         <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder="e.g. Orla Steenbakkers"
-          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
       </div>
       <div>
         <label className="text-xs font-medium text-gray-500">Title *</label>
         <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
           placeholder="e.g. Index Manager"
-          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50" />
+          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
       </div>
       <div>
         <label className="text-xs font-medium text-gray-500">Bio</label>
         <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })}
           placeholder="Brief bio of the index manager..."
           rows={3}
-          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none" />
+          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" />
       </div>
       <div className="flex justify-end">
         <button onClick={handleSave} disabled={saving || !form.name || !form.title}
-          className="px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+          className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
           {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
           {manager ? "Update" : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsData | null; onRefresh: () => Promise<void>; showToast: (t: "success" | "error", m: string) => void }) {
+  const [form, setForm] = useState({
+    maintenanceFeePercent: "5",
+    level1Percent: "2",
+    level2Percent: "0.5",
+    level3Percent: "0.5",
+    level4Percent: "0.5",
+    level5Percent: "0.5",
+    earlyWithdrawalPercent: "17",
+    maturityWithdrawalFee: "2",
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setForm({
+        maintenanceFeePercent: settings.maintenanceFeePercent,
+        level1Percent: settings.level1Percent,
+        level2Percent: settings.level2Percent,
+        level3Percent: settings.level3Percent,
+        level4Percent: settings.level4Percent,
+        level5Percent: settings.level5Percent,
+        earlyWithdrawalPercent: settings.earlyWithdrawalPercent ?? "17",
+        maturityWithdrawalFee: settings.maturityWithdrawalFee ?? "2",
+      });
+    }
+  }, [settings]);
+
+  const levelTotal = ["level1Percent", "level2Percent", "level3Percent", "level4Percent", "level5Percent"]
+    .reduce((sum, k) => sum + (parseFloat(form[k as keyof typeof form]) || 0), 0);
+  const feeTotal = parseFloat(form.maintenanceFeePercent) || 0;
+  const platformShare = feeTotal - levelTotal;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await indexAPI.updateSettings({
+        maintenanceFeePercent: parseFloat(form.maintenanceFeePercent),
+        level1Percent: parseFloat(form.level1Percent),
+        level2Percent: parseFloat(form.level2Percent),
+        level3Percent: parseFloat(form.level3Percent),
+        level4Percent: parseFloat(form.level4Percent),
+        level5Percent: parseFloat(form.level5Percent),
+        earlyWithdrawalPercent: parseFloat(form.earlyWithdrawalPercent),
+        maturityWithdrawalFee: parseFloat(form.maturityWithdrawalFee),
+      });
+      showToast("success", "Fee settings updated");
+      await onRefresh();
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const fields: { key: keyof typeof form; label: string }[] = [
+    { key: "maintenanceFeePercent", label: "Maintenance Fee (% of investment)" },
+    { key: "level1Percent", label: "Level 1 (direct referrer)" },
+    { key: "level2Percent", label: "Level 2" },
+    { key: "level3Percent", label: "Level 3" },
+    { key: "level4Percent", label: "Level 4" },
+    { key: "level5Percent", label: "Level 5" },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 space-y-4 max-w-xl">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Index Investment Fees & Commission</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          When a user invests in the Index, this maintenance fee is deducted from their amount. It is then
+          split across up to 5 levels of their referral chain. Whatever the fee doesn't cover goes to the platform —
+          this is never shown to users.
+        </p>
+      </div>
+
+      {fields.map((f) => (
+        <div key={f.key}>
+          <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{f.label}</label>
+          <div className="relative mt-1">
+            <input type="number" step="0.01" min="0" value={form[f.key]}
+              onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+              className="w-full px-4 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+          </div>
+        </div>
+      ))}
+
+      <div className={`rounded-xl border p-4 text-sm ${platformShare < 0 ? "border-red-300 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300" : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400"}`}>
+        <div className="flex justify-between"><span>Total fee</span><span className="font-semibold">{feeTotal.toFixed(2)}%</span></div>
+        <div className="flex justify-between"><span>Paid to referral levels</span><span className="font-semibold">{levelTotal.toFixed(2)}%</span></div>
+        <div className="flex justify-between mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+          <span>Platform share (remainder)</span>
+          <span className="font-semibold">{platformShare.toFixed(2)}%</span>
+        </div>
+        {platformShare < 0 && (
+          <p className="mt-2 text-xs">Level percentages exceed the total fee — reduce them or raise the fee.</p>
+        )}
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Withdrawal Fees</h4>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Applied when a user withdraws their index investment back to their wallet.
+        </p>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Early Withdrawal Fee (% of investment)</label>
+        <div className="relative mt-1">
+          <input type="number" step="0.01" min="0" value={form.earlyWithdrawalPercent}
+            onChange={(e) => setForm({ ...form, earlyWithdrawalPercent: e.target.value })}
+            className="w-full px-4 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1">Charged if a user withdraws before their plan's duration is complete.</p>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Maturity Withdrawal Fee ($)</label>
+        <div className="relative mt-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+          <input type="number" step="0.01" min="0" value={form.maturityWithdrawalFee}
+            onChange={(e) => setForm({ ...form, maturityWithdrawalFee: e.target.value })}
+            className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1">Flat fee charged if a user withdraws after their plan has fully matured.</p>
+      </div>
+
+      <div className="flex justify-end">
+        <button onClick={handleSave} disabled={saving}
+          className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+          {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
+          Save
         </button>
       </div>
     </div>

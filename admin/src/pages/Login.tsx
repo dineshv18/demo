@@ -91,7 +91,7 @@ export default function Login() {
           {/* Logo (mobile) */}
           <div className="flex justify-center lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-600 to-yellow-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-amber-500/25">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-violet-500/25">
                 O
               </div>
               <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -138,7 +138,7 @@ export default function Login() {
                   className={`w-full rounded-lg border px-4 py-3 pl-10 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-gray-50 dark:bg-gray-800/50 ${
                     errors.email
                       ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:ring-amber-500/40 focus:border-amber-500"
+                      : "border-gray-200 dark:border-gray-700 focus:ring-violet-500/40 focus:border-violet-500"
                   }`}
                 />
               </div>
@@ -168,7 +168,7 @@ export default function Login() {
                   className={`w-full rounded-lg border px-4 py-3 pl-10 pr-11 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-gray-50 dark:bg-gray-800/50 ${
                     errors.password
                       ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:ring-amber-500/40 focus:border-amber-500"
+                      : "border-gray-200 dark:border-gray-700 focus:ring-violet-500/40 focus:border-violet-500"
                   }`}
                 />
                 <button
@@ -190,7 +190,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-600 py-3 text-sm font-semibold text-white hover:from-amber-700 hover:to-yellow-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-6 shadow-lg shadow-amber-500/25"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 py-3 text-sm font-semibold text-white hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-6 shadow-lg shadow-violet-500/25"
             >
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />

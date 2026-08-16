@@ -193,7 +193,7 @@ export default function Register() {
           </div>
           <div className="relative z-10 flex flex-col justify-between p-12 text-white">
             <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 backdrop-blur-sm px-3.5 py-1.5 text-xs font-medium tracking-wide uppercase w-fit">
-              <span className="h-1.5 w-1.5 rounded-lg bg-amber-400 animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-lg bg-violet-400 animate-pulse" />
               Verification
             </div>
             <div>

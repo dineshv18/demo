@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent, Suspense } from "react";
 import { toast } from "sonner";
 import { authAPI } from "@/lib/api";
-import { IconLock, IconLoader2, IconAlertCircle, IconCircleCheck, IconEye, IconEyeOff, IconHome } from "@tabler/icons-react";
-import Image from "next/image";
-import { ThemeToggleButton } from "../site/ThemeToggle";
+import { IconLock, IconLoader2, IconAlertCircle, IconCircleCheck, IconEye, IconEyeOff } from "@tabler/icons-react";
+import { AuthLogo } from "@/components/site/AuthShell";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -32,65 +31,101 @@ function ResetPasswordForm() {
       toast.success("Password reset!", { description: "You can now log in with your new password." });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? (err as { response?: { data?: { message?: string } } }).response?.data?.message : undefined;
-      setError(msg || "Reset failed");
-      toast.error("Reset failed", { description: msg });
+      const message = err instanceof Error ? err.message : "Reset failed";
+      setError(message);
+      toast.error("Reset failed", { description: message });
     } finally { setLoading(false); }
   };
 
   const inputClass = (hasError: boolean) =>
-    `w-full rounded-lg border px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 transition-all bg-muted/50 ${hasError ? "border-destructive focus:ring-destructive/30" : "border-border focus:ring-brand/40 focus:border-brand/50"}`;
+    `w-full rounded-lg border pl-10 pr-11 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all bg-background ${hasError ? "border-destructive focus:ring-destructive/30" : "border-border focus:ring-brand/30 focus:border-brand/50"}`;
 
   if (!token) {
     return (
-      <div className="text-center space-y-4">
-        <h2 className="font-display text-3xl font-bold tracking-tight">Invalid Link</h2>
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm text-center space-y-4">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-destructive/10 ring-1 ring-destructive/20">
+          <IconAlertCircle className="h-7 w-7 text-destructive" />
+        </div>
+        <h2 className="font-display text-2xl font-bold tracking-tight">Invalid Link</h2>
         <p className="text-muted-foreground text-sm">This password reset link is invalid or expired.</p>
-        <Link href="/forgot-password" className="inline-block rounded-lg bg-foreground py-3 px-6 text-sm font-semibold text-background hover:bg-foreground/90">Request New Link</Link>
+        <Link href="/forgot-password" className="inline-flex w-full items-center justify-center rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white">
+          Request New Link
+        </Link>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="text-center space-y-6">
-        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-          <IconCircleCheck className="h-10 w-10 text-emerald-500" />
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm text-center space-y-5">
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
+          <IconCircleCheck className="h-9 w-9 text-emerald-500" />
         </div>
         <div>
-          <h2 className="font-display text-3xl font-bold tracking-tight">Password Reset!</h2>
-          <p className="mt-3 text-muted-foreground text-sm">Your password has been updated successfully.</p>
+          <h2 className="font-display text-2xl font-bold tracking-tight">Password Reset!</h2>
+          <p className="mt-2 text-muted-foreground text-sm">Your password has been updated successfully.</p>
         </div>
-        <button onClick={() => router.push("/login")} className="w-full rounded-lg bg-foreground py-3 text-sm font-semibold text-background hover:bg-foreground/90">Go to Sign In</button>
+        <button
+          onClick={() => router.push("/login")}
+          className="w-full rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white"
+        >
+          Go to Sign In
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="font-display text-3xl font-bold tracking-tight">Reset Password</h2>
-        <p className="mt-2 text-muted-foreground text-sm">Enter your new password below</p>
+    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+      <div className="text-center space-y-1.5 mb-6">
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20 mb-3">
+          <IconLock className="h-6 w-6 text-brand" />
+        </div>
+        <h2 className="font-display text-2xl font-bold tracking-tight">Reset Password</h2>
+        <p className="text-muted-foreground text-sm">Enter your new password below</p>
       </div>
-      {error && <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"><IconAlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
+
+      {error && (
+        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mb-5">
+          <IconAlertCircle className="h-4 w-4 shrink-0" />{error}
+        </div>
+      )}
+
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div className="space-y-1.5">
           <label className="text-sm font-medium">New Password</label>
           <div className="relative">
-            <IconLock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-            <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter new password" className={`${inputClass(false)} pl-10 pr-11`} />
-            <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}</button>
+            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            <input
+              type={showPassword ? "text" : "password"} value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter new password"
+              className={inputClass(false)}
+            />
+            <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+              {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Confirm Password</label>
           <div className="relative">
-            <IconLock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-            <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" className={`${inputClass(false)} pl-10 pr-11`} />
-            <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showConfirm ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}</button>
+            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            <input
+              type={showConfirm ? "text" : "password"} value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter new password"
+              className={inputClass(false)}
+            />
+            <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+              {showConfirm ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
-        <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white transition-all disabled:opacity-60">
+        <button
+          type="submit" disabled={loading}
+          className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60"
+        >
           {loading ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <><span>Reset Password</span><IconCircleCheck className="h-4 w-4" /></>}
         </button>
       </form>
@@ -100,19 +135,9 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen w-full bg-background items-center justify-center px-6">
+    <div className="flex min-h-screen w-full bg-background items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><IconHome className="h-4 w-4" /> Home</Link>
-          <ThemeToggleButton className="!h-9 !w-9" />
-        </div>
-        <div className="flex justify-center">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA" width={40} height={40} className="h-10 w-auto dark:hidden" />
-            <Image src="/dark-Photoroom.png" alt="ORVANTA" width={40} height={40} className="h-10 w-auto hidden dark:block" />
-            <span className="font-display text-xl font-semibold tracking-tight">ORVANTA <span className="text-gradient">Financial</span></span>
-          </Link>
-        </div>
+        <AuthLogo />
         <Suspense fallback={<div className="flex justify-center py-8"><IconLoader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
           <ResetPasswordForm />
         </Suspense>

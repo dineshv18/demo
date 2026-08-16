@@ -21,6 +21,12 @@ type StatusFilter = "ALL" | "PENDING" | "COMPLETED" | "FAILED";
 const tabs: Tab[] = ["ALL", "DEPOSIT", "WITHDRAWAL"];
 const statusFilters: StatusFilter[] = ["ALL", "PENDING", "COMPLETED", "FAILED"];
 
+function typeLabel(type: string) {
+  if (type === "DEPOSIT") return "Deposit";
+  if (type === "BONUS_WITHDRAWAL") return "Bonus Withdrawal";
+  return "Withdrawal";
+}
+
 function statusBadge(status: PaymentStatus) {
   const cfg: Record<PaymentStatus, string> = {
     PENDING: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
@@ -172,7 +178,7 @@ export default function Payments() {
         <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900 self-start">
           {tabs.map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
               {t === "ALL" ? "All" : t === "DEPOSIT" ? "Deposits" : "Withdrawals"}
             </button>
           ))}
@@ -192,7 +198,7 @@ export default function Payments() {
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input type="text" placeholder="Search by name, email, transaction ID, UPI..." value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500" />
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500" />
       </div>
 
       {/* Table */}
@@ -230,7 +236,7 @@ export default function Payments() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${p.type === "DEPOSIT" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
                         {p.type === "DEPOSIT" ? <IconArrowDownLeft size={14} /> : <IconArrowUpRight size={14} />}
-                        {p.type === "DEPOSIT" ? "Deposit" : "Withdrawal"}
+                        {typeLabel(p.type)}
                       </span>
                     </td>
                     <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">{fmtAmt(p)}</td>
@@ -282,7 +288,7 @@ export default function Payments() {
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Request Details</h3>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold text-gray-900 dark:text-white">{fmtAmt(selected)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Type</span><span className="font-medium text-gray-900 dark:text-white">{selected.type === "DEPOSIT" ? "Deposit" : "Withdrawal"}</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">Type</span><span className="font-medium text-gray-900 dark:text-white">{typeLabel(selected.type)}</span></div>
                       {selected.type === "DEPOSIT" ? (
                         <div className="flex justify-between"><span className="text-gray-500">Transaction ID / UTR</span><span className="font-mono text-xs text-gray-900 dark:text-white text-right">{selected.transactionId || "-"}</span></div>
                       ) : (
@@ -297,9 +303,9 @@ export default function Payments() {
                   {selected.type === "DEPOSIT" && selected.screenshotUrl && (
                     <section>
                       <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Payment Screenshot</h3>
-                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-amber-400 transition-colors group">
+                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-violet-400 transition-colors group">
                         <img src={selected.screenshotUrl} alt="Payment proof" className="w-full object-contain max-h-80 bg-gray-50 dark:bg-gray-800" />
-                        <div className="px-4 py-2 text-xs text-gray-500 flex items-center gap-1 group-hover:text-amber-600">
+                        <div className="px-4 py-2 text-xs text-gray-500 flex items-center gap-1 group-hover:text-violet-600">
                           <IconEye size={14} /> Click to open full size
                         </div>
                       </a>
@@ -307,9 +313,9 @@ export default function Payments() {
                   )}
 
                   {/* withdrawal note */}
-                  {selected.type === "WITHDRAWAL" && (
-                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10 p-4 text-sm text-amber-700 dark:text-amber-300">
-                      Send <strong>{fmtAmt(selected)}</strong> to the user&apos;s UPI: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their wallet.
+                  {(selected.type === "WITHDRAWAL" || selected.type === "BONUS_WITHDRAWAL") && (
+                    <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 p-4 text-sm text-violet-700 dark:text-violet-300">
+                      Send <strong>{fmtAmt(selected)}</strong> to the user&apos;s UPI: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their {selected.type === "BONUS_WITHDRAWAL" ? "bonus" : "wallet"} balance.
                     </div>
                   )}
 
@@ -344,7 +350,7 @@ export default function Payments() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => !actionLoading && setRejectModal(null)} />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reject {rejectModal.type === "DEPOSIT" ? "Deposit" : "Withdrawal"}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reject {typeLabel(rejectModal.type)}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">Provide a reason. The user will be informed.</p>
             <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Payment not received / screenshot unclear..." rows={4}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none" />

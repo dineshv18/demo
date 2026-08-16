@@ -85,31 +85,76 @@ export const getMyReferrals = async (req, res) => {
   }
 };
 
-export const getHierarchy = async (req, res) => {
+export const getEarningsBreakdown = async (req, res) => {
   try {
-    const directReferrals = await getPrisma().referral.findMany({
-      where: { referrerId: req.user.id },
-      include: {
-        referred: { select: { id: true, name: true, email: true, createdAt: true } },
-      },
+    const commissions = await getPrisma().referralCommission.findMany({
+      where: { userId: req.user.id, status: "PAID" },
+      orderBy: { createdAt: "asc" },
     });
 
-    const hierarchy = await Promise.all(
-      directReferrals.map(async (ref) => {
-        const subReferrals = await getPrisma().referral.findMany({
-          where: { referrerId: ref.referredId },
-          include: {
-            referred: { select: { id: true, name: true, email: true, createdAt: true } },
-          },
-        });
-        return {
-          ...ref,
-          level: 1,
-          subReferrals: subReferrals.map(sr => ({ ...sr, level: 2 })),
-        };
-      })
-    );
+    // Earned totals per referral level — level 1..5, 6th slot ("6+") catches
+    // anything beyond the configured depth so the UI never has to guess.
+    const byLevel = [0, 0, 0, 0, 0, 0];
+    for (const c of commissions) {
+      const idx = Math.min(Math.max((c.level || 1) - 1, 0), 5);
+      byLevel[idx] += parseFloat(c.amount);
+    }
 
+    // Monthly earnings series for the last 6 months, oldest first.
+    const now = new Date();
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString("en-US", { month: "short", year: "2-digit" }) };
+    });
+    const monthlyTotals = months.map(({ year, month, label }) => {
+      const total = commissions
+        .filter((c) => {
+          const cd = new Date(c.createdAt);
+          return cd.getFullYear() === year && cd.getMonth() === month;
+        })
+        .reduce((sum, c) => sum + parseFloat(c.amount), 0);
+      return { label, amount: total };
+    });
+
+    return res.status(200).json({
+      byLevel,
+      monthlyTotals,
+      totalEarned: commissions.reduce((sum, c) => sum + parseFloat(c.amount), 0),
+    });
+  } catch (error) {
+    console.error("Get earnings breakdown error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const MAX_HIERARCHY_DEPTH = 5;
+
+// Recursively walks the referral tree down to MAX_HIERARCHY_DEPTH levels —
+// matches the 5-level commission structure, so what the user sees here is
+// exactly how deep their earning chain goes. Each node carries its own
+// subReferrals so the tree can nest to any depth in the UI.
+async function buildReferralTree(prisma, referrerId, level) {
+  if (level > MAX_HIERARCHY_DEPTH) return [];
+
+  const referrals = await prisma.referral.findMany({
+    where: { referrerId },
+    include: {
+      referred: { select: { id: true, name: true, email: true, createdAt: true } },
+    },
+  });
+
+  return Promise.all(
+    referrals.map(async (ref) => ({
+      ...ref,
+      level,
+      subReferrals: await buildReferralTree(prisma, ref.referredId, level + 1),
+    }))
+  );
+}
+
+export const getHierarchy = async (req, res) => {
+  try {
+    const hierarchy = await buildReferralTree(getPrisma(), req.user.id, 1);
     return res.status(200).json({ hierarchy });
   } catch (error) {
     console.error("Get hierarchy error:", error);
@@ -205,7 +250,17 @@ export async function processReferralCommission(prisma, depositTx) {
 
     await prisma.wallet.update({
       where: { id: referrerWallet.id },
-      data: { balance: { increment: commissionAmount } },
+      data: { bonusBalance: { increment: commissionAmount } },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        walletId: referrerWallet.id,
+        type: "BONUS_CREDIT",
+        status: "COMPLETED",
+        amount: commissionAmount,
+        description: `Referral commission from deposit`,
+      },
     });
 
     await prisma.referralCommission.create({
