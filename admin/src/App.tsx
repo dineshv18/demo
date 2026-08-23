@@ -16,13 +16,15 @@ import Users from "./pages/Users";
 import ReferralSettings from "./pages/ReferralSettings";
 import IndexSettings from "./pages/IndexSettings";
 import type { ReactNode } from "react";
+import { Card, CardContent } from "./components/ui/card";
+import { IconSettings } from "@tabler/icons-react";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-gray-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -33,8 +35,8 @@ function PublicRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-gray-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -66,7 +68,20 @@ function AppRoutes() {
         <Route path="activity" element={<Activity />} />
         <Route path="referrals" element={<ReferralSettings />} />
         <Route path="index-settings" element={<IndexSettings />} />
-        <Route path="settings" element={<div className="text-gray-900 dark:text-white text-lg font-semibold">Settings - Coming Soon</div>} />
+        <Route
+          path="settings"
+          element={
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-muted">
+                  <IconSettings className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h2 className="text-lg font-semibold">Settings</h2>
+                <p className="text-sm text-muted-foreground">Coming soon</p>
+              </CardContent>
+            </Card>
+          }
+        />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

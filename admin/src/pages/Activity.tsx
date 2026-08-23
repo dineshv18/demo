@@ -3,6 +3,12 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { IconFilter, IconCalendar } from "@tabler/icons-react";
 import { env } from "../config/env";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "../components/ui/table";
 
 const API = env.API_URL;
 
@@ -23,19 +29,19 @@ const actionLabels: Record<string, string> = {
 };
 
 const actionColors: Record<string, string> = {
-  login: "text-green-600 bg-green-600/10", register: "text-blue-600 bg-blue-600/10",
-  logout: "text-muted-foreground bg-muted", create_role: "text-purple-600 bg-purple-600/10",
-  update_role: "text-orange-600 bg-orange-600/10", delete_role: "text-red-600 bg-red-600/10",
-  assign_pages: "text-cyan-600 bg-cyan-600/10", create_admin: "text-indigo-600 bg-indigo-600/10",
-  update_admin: "text-amber-600 bg-amber-600/10", delete_admin: "text-red-600 bg-red-600/10",
-  deactivate_admin: "text-red-600 bg-red-600/10", activate_admin: "text-green-600 bg-green-600/10",
-  KYC_APPROVED: "text-green-600 bg-green-600/10", KYC_REJECTED: "text-red-600 bg-red-600/10",
-  PAYMENT_APPROVED: "text-green-600 bg-green-600/10", WITHDRAWAL_APPROVED: "text-blue-600 bg-blue-600/10",
-  PAYMENT_REJECTED: "text-red-600 bg-red-600/10",
-  SUPPORT_TICKET_UPDATED: "text-cyan-600 bg-cyan-600/10",
-  PLATFORM_WITHDRAWAL_REQUESTED: "text-amber-600 bg-amber-600/10",
-  PLATFORM_WITHDRAWAL_APPROVED: "text-green-600 bg-green-600/10",
-  PLATFORM_WITHDRAWAL_REJECTED: "text-red-600 bg-red-600/10",
+  login: "text-[#00A94F] bg-[#EAF7E8]", register: "text-sky-700 bg-sky-100",
+  logout: "text-[#68736E] bg-[#F3F8EF]", create_role: "text-[#10211D] bg-[#F3F8EF]",
+  update_role: "text-orange-700 bg-orange-100", delete_role: "text-red-700 bg-red-100",
+  assign_pages: "text-cyan-700 bg-cyan-100", create_admin: "text-[#10211D] bg-[#EAF7E8]",
+  update_admin: "text-amber-700 bg-amber-100", delete_admin: "text-red-700 bg-red-100",
+  deactivate_admin: "text-red-700 bg-red-100", activate_admin: "text-[#00A94F] bg-[#EAF7E8]",
+  KYC_APPROVED: "text-[#00A94F] bg-[#EAF7E8]", KYC_REJECTED: "text-red-700 bg-red-100",
+  PAYMENT_APPROVED: "text-[#00A94F] bg-[#EAF7E8]", WITHDRAWAL_APPROVED: "text-sky-700 bg-sky-100",
+  PAYMENT_REJECTED: "text-red-700 bg-red-100",
+  SUPPORT_TICKET_UPDATED: "text-cyan-700 bg-cyan-100",
+  PLATFORM_WITHDRAWAL_REQUESTED: "text-amber-700 bg-amber-100",
+  PLATFORM_WITHDRAWAL_APPROVED: "text-[#00A94F] bg-[#EAF7E8]",
+  PLATFORM_WITHDRAWAL_REJECTED: "text-red-700 bg-red-100",
 };
 
 function formatTime(dateStr: string) {
@@ -100,90 +106,92 @@ export default function ActivityPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Activity Logs</h1>
-        <p className="text-muted-foreground text-sm">Monitor all admin and system actions</p>
+        <h1 className="text-2xl font-bold text-[#10211D]">Activity Logs</h1>
+        <p className="text-[#68736E] text-sm">Monitor all admin and system actions</p>
       </div>
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { label: "Today", value: stats.stats?.today || 0, color: "text-blue-600" },
-            { label: "This Week", value: stats.stats?.thisWeek || 0, color: "text-purple-600" },
-            { label: "This Month", value: stats.stats?.thisMonth || 0, color: "text-green-600" },
+            { label: "Today", value: stats.stats?.today || 0, color: "text-[#10211D]" },
+            { label: "This Week", value: stats.stats?.thisWeek || 0, color: "text-[#00A94F]" },
+            { label: "This Month", value: stats.stats?.thisMonth || 0, color: "text-[#10211D]" },
           ].map((s) => (
-            <div key={s.label} className="border rounded-lg p-4 bg-card">
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-              <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-            </div>
+            <Card key={s.label} className="rounded-2xl border border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+              <CardContent>
+                <p className="text-sm text-[#68736E]">{s.label}</p>
+                <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
       <div className="flex flex-wrap gap-3 items-center">
-        <IconFilter size={16} className="text-muted-foreground" />
+        <IconFilter size={16} className="text-[#68736E]" />
         <select value={filters.action} onChange={(e) => { setFilters({ ...filters, action: e.target.value }); setPage(1); }}
-          className="px-3 py-1.5 border rounded-md bg-background text-sm">
+          className="px-3 py-1.5 border border-[#DDE4DE] rounded-xl bg-white text-sm text-[#10211D]">
           <option value="">All actions</option>
           {Object.entries(actionLabels).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </select>
         <div className="flex items-center gap-2">
-          <IconCalendar size={14} className="text-muted-foreground" />
+          <IconCalendar size={14} className="text-[#68736E]" />
           <input type="date" value={filters.startDate} onChange={(e) => { setFilters({ ...filters, startDate: e.target.value }); setPage(1); }}
-            className="px-3 py-1.5 border rounded-md bg-background text-sm" />
-          <span className="text-muted-foreground text-sm">to</span>
+            className="px-3 py-1.5 border border-[#DDE4DE] rounded-xl bg-white text-sm text-[#10211D]" />
+          <span className="text-[#68736E] text-sm">to</span>
           <input type="date" value={filters.endDate} onChange={(e) => { setFilters({ ...filters, endDate: e.target.value }); setPage(1); }}
-            className="px-3 py-1.5 border rounded-md bg-background text-sm" />
+            className="px-3 py-1.5 border border-[#DDE4DE] rounded-xl bg-white text-sm text-[#10211D]" />
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <Card className="overflow-hidden py-0 rounded-2xl border border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
         {loading ? (
-          <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>
+          <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00A94F]" /></div>
         ) : logs.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground text-sm">No activity logs found</div>
+          <div className="p-8 text-center text-[#68736E] text-sm">No activity logs found</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left p-3 font-medium">User</th>
-                <th className="text-left p-3 font-medium">Action</th>
-                <th className="text-left p-3 font-medium">Page</th>
-                <th className="text-left p-3 font-medium">IP</th>
-                <th className="text-left p-3 font-medium">Time</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-[#F3F8EF]">
+                <TableHead>User</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Page</TableHead>
+                <TableHead>IP</TableHead>
+                <TableHead>Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-t hover:bg-muted/30">
-                  <td className="p-3">
-                    <div className="font-medium">{log.user?.name}</div>
-                    <div className="text-xs text-muted-foreground">{log.user?.email}</div>
-                  </td>
-                  <td className="p-3">
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${actionColors[log.action] || "text-muted-foreground bg-muted"}`}>
+                <TableRow key={log.id}>
+                  <TableCell>
+                    <div className="font-medium text-[#10211D]">{log.user?.name}</div>
+                    <div className="text-xs text-[#68736E]">{log.user?.email}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`rounded-full ${actionColors[log.action] || "text-[#68736E] bg-[#F3F8EF]"}`}>
                       {actionLabels[log.action] || log.action}
-                    </span>
-                  </td>
-                  <td className="p-3 text-muted-foreground">{log.page ? log.page.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "-"}</td>
-                  <td className="p-3 text-muted-foreground text-xs font-mono">{log.ip || "-"}</td>
-                  <td className="p-3 text-muted-foreground text-xs">{formatTime(log.createdAt)}</td>
-                </tr>
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-[#68736E]">{log.page ? log.page.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "-"}</TableCell>
+                  <TableCell className="text-[#68736E] text-xs font-mono">{log.ip || "-"}</TableCell>
+                  <TableCell className="text-[#68736E] text-xs">{formatTime(log.createdAt)}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
+          </div>
         )}
-      </div>
+      </Card>
 
       {pagination.pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}</p>
+          <p className="text-sm text-[#68736E]">Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}</p>
           <div className="flex gap-1">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
-              className="px-3 py-1 border rounded text-sm disabled:opacity-50 hover:bg-muted">Prev</button>
-            <button onClick={() => setPage(Math.min(pagination.pages, page + 1))} disabled={page === pagination.pages}
-              className="px-3 py-1 border rounded text-sm disabled:opacity-50 hover:bg-muted">Next</button>
+            <Button variant="outline" size="sm" className="rounded-xl border-[#DDE4DE] text-[#10211D]" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>Prev</Button>
+            <Button variant="outline" size="sm" className="rounded-xl border-[#DDE4DE] text-[#10211D]" onClick={() => setPage(Math.min(pagination.pages, page + 1))} disabled={page === pagination.pages}>Next</Button>
           </div>
         </div>
       )}

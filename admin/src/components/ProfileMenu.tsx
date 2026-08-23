@@ -38,7 +38,7 @@ export default function ProfileMenu({ className }: { className?: string }) {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-muted transition-colors"
       >
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xs font-bold">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#10211D] text-white text-xs font-bold">
           {user?.name?.charAt(0)?.toUpperCase() || "A"}
         </div>
         <span className="hidden sm:inline max-w-[120px] truncate font-medium">{user?.name}</span>
@@ -46,10 +46,10 @@ export default function ProfileMenu({ className }: { className?: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border bg-card shadow-lg z-50 overflow-hidden">
-          <div className="p-4 border-b">
+        <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-[#DDE4DE] bg-card shadow-lg z-50 overflow-hidden">
+          <div className="p-4 border-b border-[#DDE4DE]">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-white text-sm font-bold">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#10211D] text-white text-sm font-bold">
                 {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <div className="min-w-0">
@@ -59,13 +59,13 @@ export default function ProfileMenu({ className }: { className?: string }) {
             </div>
           </div>
 
-          <div className="p-3 space-y-2 border-b">
-            <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-xs">
-              <IconShield className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+          <div className="p-3 space-y-2 border-b border-[#DDE4DE]">
+            <div className="flex items-center gap-2 rounded-lg bg-[#F3F8EF] px-3 py-2 text-xs">
+              <IconShield className="h-3.5 w-3.5 text-[#00A94F] shrink-0" />
               <span className="font-medium truncate">{user?.role}</span>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-xs">
-              <IconMail className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+            <div className="flex items-center gap-2 rounded-lg bg-[#F3F8EF] px-3 py-2 text-xs">
+              <IconMail className="h-3.5 w-3.5 text-[#00A94F] shrink-0" />
               <span className="font-medium truncate">{user?.email}</span>
             </div>
           </div>

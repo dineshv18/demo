@@ -14,6 +14,13 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import { paymentsAPI, type PaymentRequest, type PaymentStatus } from "../services/api";
+import { Card } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "../components/ui/table";
 
 type Tab = "ALL" | "DEPOSIT" | "WITHDRAWAL";
 type StatusFilter = "ALL" | "PENDING" | "COMPLETED" | "FAILED";
@@ -29,18 +36,18 @@ function typeLabel(type: string) {
 
 function statusBadge(status: PaymentStatus) {
   const cfg: Record<PaymentStatus, string> = {
-    PENDING: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
-    COMPLETED: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
-    FAILED: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300",
-    CANCELLED: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400",
+    PENDING: "bg-amber-100 text-amber-700",
+    COMPLETED: "bg-[#EAF7E8] text-[#00A94F]",
+    FAILED: "bg-red-100 text-red-700",
+    CANCELLED: "bg-[#F3F8EF] text-[#68736E]",
   };
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg[status]}`}>
+    <Badge className={`gap-1.5 rounded-full ${cfg[status]}`}>
       {status === "PENDING" && <IconClock size={12} />}
       {status === "COMPLETED" && <IconCheck size={12} />}
       {status === "FAILED" && <IconX size={12} />}
       {status}
-    </span>
+    </Badge>
   );
 }
 
@@ -149,44 +156,44 @@ export default function Payments() {
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Requests</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Review deposit & withdrawal requests. Verify payment screenshots before approving.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-[#10211D]">Payment Requests</h1>
+        <p className="mt-1 text-sm text-[#68736E]">Review deposit & withdrawal requests. Verify payment screenshots before approving.</p>
       </div>
 
       {/* Counts */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Deposits</p>
-          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{counts.pendingDeposits}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Withdrawals</p>
-          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{counts.pendingWithdrawals}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completed</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{counts.completed}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rejected</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{counts.rejected}</p>
-        </div>
+        <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] uppercase tracking-wider">Pending Deposits</p>
+          <p className="text-2xl font-bold text-amber-600 mt-1">{counts.pendingDeposits}</p>
+        </Card>
+        <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] uppercase tracking-wider">Pending Withdrawals</p>
+          <p className="text-2xl font-bold text-amber-600 mt-1">{counts.pendingWithdrawals}</p>
+        </Card>
+        <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] uppercase tracking-wider">Completed</p>
+          <p className="text-2xl font-bold text-[#00A94F] mt-1">{counts.completed}</p>
+        </Card>
+        <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] uppercase tracking-wider">Rejected</p>
+          <p className="text-2xl font-bold text-red-600 mt-1">{counts.rejected}</p>
+        </Card>
       </div>
 
       {/* Tabs */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900 self-start">
+        <div className="inline-flex rounded-xl border border-[#DDE4DE] p-1 bg-white self-start">
           {tabs.map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-[#EAF7E8] text-[#00A94F]" : "text-[#68736E] hover:bg-[#F3F8EF]"}`}>
               {t === "ALL" ? "All" : t === "DEPOSIT" ? "Deposits" : "Withdrawals"}
             </button>
           ))}
         </div>
-        <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900 self-start">
+        <div className="inline-flex rounded-xl border border-[#DDE4DE] p-1 bg-white self-start">
           {statusFilters.map((s) => (
             <button key={s} onClick={() => setStatus(s)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${status === s ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}>
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${status === s ? "bg-[#F3F8EF] text-[#10211D]" : "text-[#89938E] hover:bg-[#F3F8EF]/60"}`}>
               {s === "ALL" ? "All Status" : s.charAt(0) + s.slice(1).toLowerCase()}
             </button>
           ))}
@@ -195,66 +202,66 @@ export default function Payments() {
 
       {/* Search */}
       <div className="relative">
-        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input type="text" placeholder="Search by name, email, transaction ID, UPI..." value={search}
+        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#89938E]" />
+        <Input type="text" placeholder="Search by name, email, transaction ID, UPI..." value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500" />
+          className="pl-10 rounded-xl border-[#DDE4DE]" />
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <Card className="overflow-hidden py-0 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
         {loading ? (
-          <div className="p-6 text-center text-sm text-gray-500">Loading...</div>
+          <div className="p-6 text-center text-sm text-[#68736E]">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-              <IconWallet className="h-7 w-7 text-gray-400" />
+            <div className="h-14 w-14 rounded-full bg-[#F3F8EF] flex items-center justify-center mb-4">
+              <IconWallet className="h-7 w-7 text-[#89938E]" />
             </div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">No payment requests</p>
+            <p className="text-sm font-medium text-[#10211D]">No payment requests</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">User</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Type</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Amount</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Reference</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Date</th>
-                  <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {filtered.map((p) => (
-                  <tr key={p.id} onClick={() => openDetail(p.id)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-gray-900 dark:text-white">{p.user?.name || "Unknown"}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{p.user?.email || "-"}</p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${p.type === "DEPOSIT" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
-                        {p.type === "DEPOSIT" ? <IconArrowDownLeft size={14} /> : <IconArrowUpRight size={14} />}
-                        {typeLabel(p.type)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">{fmtAmt(p)}</td>
-                    <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">
-                      {p.type === "DEPOSIT" ? (p.transactionId || "-") : (p.upiId || "-")}
-                    </td>
-                    <td className="px-5 py-4">{statusBadge(p.status)}</td>
-                    <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">{fmtDate(p.createdAt)}</td>
-                    <td className="px-5 py-4 text-right">
-                      <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><IconEye size={16} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-[#F3F8EF]">
+                <TableHead className="text-[#68736E]">User</TableHead>
+                <TableHead className="text-[#68736E]">Type</TableHead>
+                <TableHead className="text-[#68736E]">Amount</TableHead>
+                <TableHead className="text-[#68736E]">Reference</TableHead>
+                <TableHead className="text-[#68736E]">Status</TableHead>
+                <TableHead className="text-[#68736E]">Date</TableHead>
+                <TableHead className="text-right text-[#68736E]">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((p) => (
+                <TableRow key={p.id} onClick={() => openDetail(p.id)} className="cursor-pointer border-[#DDE4DE]">
+                  <TableCell>
+                    <p className="font-medium text-[#10211D]">{p.user?.name || "Unknown"}</p>
+                    <p className="text-xs text-[#89938E]">{p.user?.email || "-"}</p>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${p.type === "DEPOSIT" ? "text-[#00A94F]" : "text-amber-600"}`}>
+                      {p.type === "DEPOSIT" ? <IconArrowDownLeft size={14} /> : <IconArrowUpRight size={14} />}
+                      {typeLabel(p.type)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="font-medium text-[#10211D]">{fmtAmt(p)}</TableCell>
+                  <TableCell className="text-xs text-[#68736E]">
+                    {p.type === "DEPOSIT" ? (p.transactionId || "-") : (p.upiId || "-")}
+                  </TableCell>
+                  <TableCell>{statusBadge(p.status)}</TableCell>
+                  <TableCell className="text-xs text-[#68736E]">{fmtDate(p.createdAt)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#68736E] hover:bg-[#F3F8EF]"><IconEye size={16} /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Detail Panel */}
       {(selected || detailLoading) && (
@@ -303,9 +310,9 @@ export default function Payments() {
                   {selected.type === "DEPOSIT" && selected.screenshotUrl && (
                     <section>
                       <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Payment Screenshot</h3>
-                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-violet-400 transition-colors group">
-                        <img src={selected.screenshotUrl} alt="Payment proof" className="w-full object-contain max-h-80 bg-gray-50 dark:bg-gray-800" />
-                        <div className="px-4 py-2 text-xs text-gray-500 flex items-center gap-1 group-hover:text-violet-600">
+                      <a href={selected.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-[#DDE4DE] hover:border-[#00A94F] transition-colors group">
+                        <img src={selected.screenshotUrl} alt="Payment proof" className="w-full object-contain max-h-80 bg-[#F3F8EF]" />
+                        <div className="px-4 py-2 text-xs text-[#68736E] flex items-center gap-1 group-hover:text-[#00A94F]">
                           <IconEye size={14} /> Click to open full size
                         </div>
                       </a>
@@ -314,22 +321,20 @@ export default function Payments() {
 
                   {/* withdrawal note */}
                   {(selected.type === "WITHDRAWAL" || selected.type === "BONUS_WITHDRAWAL") && (
-                    <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 p-4 text-sm text-violet-700 dark:text-violet-300">
+                    <div className="rounded-xl border border-[#00A94F]/30 bg-[#EAF7E8] p-4 text-sm text-[#10211D]">
                       Send <strong>{fmtAmt(selected)}</strong> to the user&apos;s UPI: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their {selected.type === "BONUS_WITHDRAWAL" ? "bonus" : "wallet"} balance.
                     </div>
                   )}
 
                   {selected.status === "PENDING" && (
                     <section className="flex gap-3 pt-2">
-                      <button onClick={() => handleApprove(selected.id)} disabled={actionLoading}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                      <Button onClick={() => handleApprove(selected.id)} disabled={actionLoading} className="flex-1 bg-[#00A94F] hover:bg-[#00A94F]/90 text-white rounded-xl">
                         {actionLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
                         Approve
-                      </button>
-                      <button onClick={() => { setRejectModal(selected); setRejectReason(""); }} disabled={actionLoading}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                      </Button>
+                      <Button variant="destructive" onClick={() => { setRejectModal(selected); setRejectReason(""); }} disabled={actionLoading} className="flex-1 rounded-xl">
                         <IconX size={16} /> Reject
-                      </button>
+                      </Button>
                     </section>
                   )}
 
@@ -347,21 +352,22 @@ export default function Payments() {
 
       {/* Reject Modal */}
       {rejectModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => !actionLoading && setRejectModal(null)} />
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reject {typeLabel(rejectModal.type)}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Provide a reason. The user will be informed.</p>
-            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Payment not received / screenshot unclear..." rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none" />
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setRejectModal(null)} disabled={actionLoading} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>
-              <button onClick={handleReject} disabled={actionLoading}
-                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
-                {actionLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconX size={16} />} Reject
-              </button>
+          <Card className="relative w-full max-w-md shadow-2xl">
+            <div className="px-6 py-6 space-y-4">
+              <h3 className="text-lg font-semibold">Reject {typeLabel(rejectModal.type)}</h3>
+              <p className="text-sm text-muted-foreground">Provide a reason. The user will be informed.</p>
+              <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Payment not received / screenshot unclear..." rows={4}
+                className="w-full px-4 py-3 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none" />
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setRejectModal(null)} disabled={actionLoading}>Cancel</Button>
+                <Button variant="destructive" onClick={handleReject} disabled={actionLoading}>
+                  {actionLoading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconX size={16} />} Reject
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

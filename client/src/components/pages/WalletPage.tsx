@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   IconPlus, IconMinus, IconLoader2, IconAlertCircle,
   IconCheck, IconArrowUpRight, IconArrowDownLeft, IconClock,
@@ -9,10 +10,20 @@ import {
   IconCopy, IconGift, IconArrowRight,
 } from "@tabler/icons-react";
 import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type UsdPaymentInfo } from "@/lib/api";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const currencySymbol = () => "$";
 
 export default function WalletPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [usdPayment, setUsdPayment] = useState<UsdPaymentInfo | null>(null);
   const [currencyLocked, setCurrencyLocked] = useState(false);
@@ -202,6 +213,19 @@ export default function WalletPage() {
     setTransferSuccess(false);
   };
 
+  // Deep-link support — e.g. the Dashboard's Bonus card links here with
+  // ?action=bonus-add / ?action=bonus-withdraw to jump straight into the
+  // right modal instead of duplicating this flow's logic on the dashboard.
+  useEffect(() => {
+    if (loading) return;
+    const action = searchParams.get("action");
+    if (!action) return;
+    if (action === "bonus-add") openTransfer();
+    else if (action === "bonus-withdraw") openWithdraw("bonus");
+    router.replace(pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   const closeDeposit = () => {
     setDepositOpen(false);
     setDepositStep("qr");
@@ -244,14 +268,14 @@ export default function WalletPage() {
         <div className="flex items-center gap-3">
           {/* Currency Badge */}
           {wallet?.currency && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border border-blue-500/30 bg-blue-500/10 text-blue-500">
+            <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-xs font-bold border-teal-500/30 bg-teal-500/10 text-teal-500">
               $ USD
               {currencyLocked && <IconLock className="h-3 w-3 opacity-50" />}
-            </span>
+            </Badge>
           )}
-          <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors">
+          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
             <IconRefresh className="h-4 w-4" /> Refresh
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -271,12 +295,14 @@ export default function WalletPage() {
                 <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Your identity needs to be verified before you can access wallet features.</p>
               </div>
             </div>
-            <Link href="/dashboard/kyc" className="shrink-0 self-start sm:self-auto rounded-lg bg-amber-500 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-600 transition-colors">
-              {kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}
+            <Link href="/dashboard/kyc" className="shrink-0 self-start sm:self-auto">
+              <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
+                {kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}
+              </Button>
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
+          <Card className="px-6 py-16 text-center gap-0">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
               <IconLock className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -287,11 +313,11 @@ export default function WalletPage() {
                 : "Complete your KYC verification to view your balance, add funds, and make withdrawals."}
             </p>
             {kyc?.status === "PENDING" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 mx-auto">
                 <IconClock className="h-4 w-4" /> KYC Under Review — 12-24 working hours
               </div>
             )}
-          </div>
+          </Card>
         </>
       ) : (
         <>
@@ -302,7 +328,7 @@ export default function WalletPage() {
 
           {/* Pending Request Banner */}
           {hasPending && (
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+            <Card className="border-amber-500/30 bg-amber-500/5 p-4 gap-0">
               <div className="flex items-start gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-500/10 shrink-0">
                   <IconClock className="h-5 w-5 text-amber-500" />
@@ -322,11 +348,11 @@ export default function WalletPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Balance Card */}
-          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <Card className="p-6 sm:p-8 gap-0">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Total Balance</p>
@@ -341,44 +367,44 @@ export default function WalletPage() {
                 <p className="text-xs text-muted-foreground mt-1">{wallet?.currency || "USD"}</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={openDeposit} disabled={hasPending}
-                  className="flex items-center gap-2 rounded-lg btn-glow btn-glow-hover px-5 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                <Button onClick={openDeposit} disabled={hasPending}
+                  className="gap-2 btn-glow btn-glow-hover"
                   title={hasPending ? "You have a pending request" : undefined}>
                   <IconPlus className="h-4 w-4" /> Add Funds
-                </button>
-                <button onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
+                </Button>
+                <Button variant="outline" onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
                   title={balance <= 0 ? "No balance" : hasPending ? "You have a pending request" : undefined}
-                  className="flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="gap-2">
                   <IconMinus className="h-4 w-4" /> Withdraw
-                </button>
+                </Button>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Bonus Card */}
-          <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-6 sm:p-8">
+          <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-6 sm:p-8 gap-0">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <IconGift className="h-4 w-4 text-purple-500" />
+                  <IconGift className="h-4 w-4 text-amber-500" />
                   <p className="text-sm font-medium text-muted-foreground">Bonus Balance</p>
                 </div>
-                <p className="font-display text-3xl font-bold tracking-tight text-purple-600 dark:text-purple-400">
+                <p className="font-display text-3xl font-bold tracking-tight text-amber-600 dark:text-amber-400">
                   {sym}{bonusBalance.toFixed(2)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">Earned from your referral commissions</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={openTransfer} disabled={bonusBalance <= 0}
+                <Button onClick={openTransfer} disabled={bonusBalance <= 0}
                   title={bonusBalance <= 0 ? "No bonus balance" : undefined}
-                  className="flex items-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="gap-2 bg-amber-600 hover:bg-amber-700 text-white">
                   <IconArrowRight className="h-4 w-4" /> Add to Wallet
-                </button>
-                <button onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
+                </Button>
+                <Button variant="outline" onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
                   title={bonusBalance <= 0 ? "No bonus balance" : pendingBonusRequest ? "You have a pending bonus withdrawal" : undefined}
-                  className="flex items-center gap-2 rounded-lg border border-purple-500/30 px-4 py-2.5 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="gap-2 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
                   <IconMinus className="h-4 w-4" /> Withdraw
-                </button>
+                </Button>
               </div>
             </div>
             {pendingBonusRequest && (
@@ -387,10 +413,10 @@ export default function WalletPage() {
                 Bonus withdrawal of {sym}{parseFloat(pendingBonusRequest.amount).toFixed(2)} is under review.
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Transaction History */}
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <Card className="overflow-hidden p-0 gap-0">
             <div className="px-6 py-4 border-b border-border">
               <h2 className="font-display text-lg font-semibold">Transaction History</h2>
             </div>
@@ -400,75 +426,112 @@ export default function WalletPage() {
                 <p className="text-sm text-muted-foreground">No transactions yet</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="px-6 py-3 font-medium">Type</th>
-                      <th className="px-6 py-3 font-medium">Amount</th>
-                      <th className="px-6 py-3 font-medium">Status</th>
-                      <th className="px-6 py-3 font-medium">Reference</th>
-                      <th className="px-6 py-3 font-medium text-right">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((tx) => {
-                      const isCredit = tx.type === "DEPOSIT" || tx.type === "BONUS_CREDIT" || tx.type === "BONUS_TRANSFER";
-                      const txLabel = tx.type === "DEPOSIT" ? "Deposit"
-                        : tx.type === "WITHDRAWAL" ? "Withdrawal"
-                        : tx.type === "BONUS_CREDIT" ? "Bonus Credited"
-                        : tx.type === "BONUS_WITHDRAWAL" ? "Bonus Withdrawal"
-                        : "Bonus → Wallet";
-                      return (
-                      <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors">
-                        <td className="px-6 py-3">
-                          <div className="flex items-center gap-2">
-                            {isCredit ? (
-                              <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500/10"><IconArrowDownLeft className="h-4 w-4 text-emerald-500" /></div>
-                            ) : (
-                              <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-500/10"><IconArrowUpRight className="h-4 w-4 text-amber-500" /></div>
-                            )}
-                            <span className="font-medium">{txLabel}</span>
+              <>
+                {/* Desktop table */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Reference</TableHead>
+                        <TableHead className="text-right">Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.map((tx) => {
+                        const isCredit = tx.type === "DEPOSIT" || tx.type === "BONUS_CREDIT" || tx.type === "BONUS_TRANSFER";
+                        const txLabel = tx.type === "DEPOSIT" ? "Deposit"
+                          : tx.type === "WITHDRAWAL" ? "Withdrawal"
+                          : tx.type === "BONUS_CREDIT" ? "Bonus Credited"
+                          : tx.type === "BONUS_WITHDRAWAL" ? "Bonus Withdrawal"
+                          : "Bonus → Wallet";
+                        return (
+                        <TableRow key={tx.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {isCredit ? (
+                                <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500/10"><IconArrowDownLeft className="h-4 w-4 text-emerald-500" /></div>
+                              ) : (
+                                <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-500/10"><IconArrowUpRight className="h-4 w-4 text-amber-500" /></div>
+                              )}
+                              <span className="font-medium">{txLabel}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`font-medium ${isCredit ? "text-emerald-500" : "text-foreground"}`}>
+                              {isCredit ? "+" : "-"}{sym}{parseFloat(tx.amount).toFixed(2)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`gap-1 border-transparent text-xs font-medium ${statusColor(tx.status)}`}>
+                              {tx.status === "PENDING" && <IconClock className="h-3 w-3" />}
+                              {tx.status === "COMPLETED" && <IconCheck className="h-3 w-3" />}
+                              {tx.status === "PENDING" ? "PROCESSING" : tx.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-xs">
+                            {tx.type === "DEPOSIT" ? (tx.transactionId || "—") : (tx.upiId || "—")}
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">{formatDate(tx.createdAt)}</TableCell>
+                        </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile card list */}
+                <div className="sm:hidden divide-y divide-border">
+                  {transactions.map((tx) => {
+                    const isCredit = tx.type === "DEPOSIT" || tx.type === "BONUS_CREDIT" || tx.type === "BONUS_TRANSFER";
+                    const txLabel = tx.type === "DEPOSIT" ? "Deposit"
+                      : tx.type === "WITHDRAWAL" ? "Withdrawal"
+                      : tx.type === "BONUS_CREDIT" ? "Bonus Credited"
+                      : tx.type === "BONUS_WITHDRAWAL" ? "Bonus Withdrawal"
+                      : "Bonus → Wallet";
+                    return (
+                      <div key={tx.id} className="p-4 flex items-center gap-3">
+                        {isCredit ? (
+                          <div className="grid h-9 w-9 place-items-center rounded-full bg-emerald-500/10 shrink-0"><IconArrowDownLeft className="h-4 w-4 text-emerald-500" /></div>
+                        ) : (
+                          <div className="grid h-9 w-9 place-items-center rounded-full bg-amber-500/10 shrink-0"><IconArrowUpRight className="h-4 w-4 text-amber-500" /></div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold truncate">{txLabel}</p>
+                            <span className={`text-sm font-bold shrink-0 ${isCredit ? "text-emerald-500" : "text-foreground"}`}>
+                              {isCredit ? "+" : "-"}{sym}{parseFloat(tx.amount).toFixed(2)}
+                            </span>
                           </div>
-                        </td>
-                        <td className="px-6 py-3">
-                          <span className={`font-medium ${isCredit ? "text-emerald-500" : "text-foreground"}`}>
-                            {isCredit ? "+" : "-"}{sym}{parseFloat(tx.amount).toFixed(2)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3">
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium ${statusColor(tx.status)}`}>
-                            {tx.status === "PENDING" && <IconClock className="h-3 w-3" />}
-                            {tx.status === "COMPLETED" && <IconCheck className="h-3 w-3" />}
-                            {tx.status === "PENDING" ? "PROCESSING" : tx.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3 text-muted-foreground text-xs">
-                          {tx.type === "DEPOSIT" ? (tx.transactionId || "—") : (tx.upiId || "—")}
-                        </td>
-                        <td className="px-6 py-3 text-right text-muted-foreground">{formatDate(tx.createdAt)}</td>
-                      </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                          <div className="flex items-center justify-between gap-2 mt-1">
+                            <Badge variant="outline" className={`gap-1 border-transparent text-[10px] px-1.5 py-0.5 ${statusColor(tx.status)}`}>
+                              {tx.status === "PENDING" && <IconClock className="h-2.5 w-2.5" />}
+                              {tx.status === "COMPLETED" && <IconCheck className="h-2.5 w-2.5" />}
+                              {tx.status === "PENDING" ? "PROCESSING" : tx.status}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">{formatDate(tx.createdAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
-          </div>
+          </Card>
         </>
       )}
 
       {/* Deposit Modal - QR Code Flow */}
-      {depositOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold">Add Funds</h3>
-              <button onClick={closeDeposit} className="text-muted-foreground hover:text-foreground">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
+      <Dialog open={depositOpen} onOpenChange={(o) => { if (!o) closeDeposit(); }}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Funds</DialogTitle>
+          </DialogHeader>
 
+          <div className="space-y-4">
             {depositSuccess ? (
               <div className="text-center py-6 space-y-3">
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -476,7 +539,7 @@ export default function WalletPage() {
                 </div>
                 <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Payment Request Submitted!</p>
                 <p className="text-xs text-muted-foreground">Your payment is now being processed. It will be verified within 12-24 working hours. Do not make another payment until this is processed.</p>
-                <button onClick={closeDeposit} className="w-full rounded-lg bg-foreground py-2.5 text-sm font-semibold text-background hover:bg-foreground/90 transition-colors">Done</button>
+                <Button onClick={closeDeposit} className="w-full">Done</Button>
               </div>
             ) : depositStep === "qr" ? (
               <>
@@ -516,10 +579,10 @@ export default function WalletPage() {
                 </p>
 
                 <div className="flex gap-3">
-                  <button onClick={closeDeposit} className="flex-1 rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition-colors">Cancel</button>
-                  <button onClick={() => setDepositStep("details")} className="flex-1 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all">
+                  <Button variant="outline" onClick={closeDeposit} className="flex-1">Cancel</Button>
+                  <Button onClick={() => setDepositStep("details")} className="flex-1 btn-glow btn-glow-hover">
                     I&apos;ve Paid — Next
-                  </button>
+                  </Button>
                 </div>
               </>
             ) : (
@@ -534,33 +597,32 @@ export default function WalletPage() {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Amount (USD) *</label>
-                    <div className="relative mt-1">
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Amount (USD) *</Label>
+                    <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
-                      <input
+                      <Input
                         type="number"
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(e.target.value)}
                         placeholder="0.00"
                         min="1"
                         step="0.01"
-                        className="w-full rounded-lg border border-border pl-8 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background"
+                        className="pl-8"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Transaction ID / UTR *</label>
-                    <input
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Transaction ID / UTR *</Label>
+                    <Input
                       type="text"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
                       placeholder="Enter 12-digit UTR / Transaction ID"
-                      className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Payment Screenshot *</label>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Payment Screenshot *</Label>
                     <div
                       onClick={() => fileInputRef.current?.click()}
                       className={`mt-1 relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 cursor-pointer transition-all ${
@@ -605,30 +667,25 @@ export default function WalletPage() {
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => setDepositStep("qr")} className="flex-1 rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition-colors">Back</button>
-                  <button onClick={handleDepositSubmit} disabled={depositLoading}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60">
+                  <Button variant="outline" onClick={() => setDepositStep("qr")} className="flex-1">Back</Button>
+                  <Button onClick={handleDepositSubmit} disabled={depositLoading}
+                    className="flex-1 gap-2 btn-glow btn-glow-hover">
                     {depositLoading ? <><IconLoader2 className="h-4 w-4 animate-spin" /> Submitting...</> : "Submit for Verification"}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Withdraw Modal */}
-      {withdrawOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold">
-                {withdrawSource === "bonus" ? "Withdraw Bonus" : "Withdraw Funds"}
-              </h3>
-              <button onClick={closeWithdraw} className="text-muted-foreground hover:text-foreground">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
+      <Dialog open={withdrawOpen} onOpenChange={(o) => { if (!o) closeWithdraw(); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{withdrawSource === "bonus" ? "Withdraw Bonus" : "Withdraw Funds"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
             {withdrawSuccess ? (
               <div className="text-center py-6 space-y-3">
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -636,7 +693,7 @@ export default function WalletPage() {
                 </div>
                 <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Withdrawal Request Submitted!</p>
                 <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your bank account within 12-24 working hours.</p>
-                <button onClick={closeWithdraw} className="w-full rounded-lg bg-foreground py-2.5 text-sm font-semibold text-background hover:bg-foreground/90 transition-colors">Done</button>
+                <Button onClick={closeWithdraw} className="w-full">Done</Button>
               </div>
             ) : (
               <>
@@ -653,42 +710,38 @@ export default function WalletPage() {
                 )}
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Amount *</label>
-                    <div className="relative mt-1">
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Amount *</Label>
+                    <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
-                      <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
-                        className="w-full rounded-lg border border-border pl-8 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background" />
+                      <Input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
+                        className="pl-8" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Your UPI ID (where you&apos;ll receive funds) *</label>
-                    <input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="yourname@upi"
-                      className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background" />
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Your UPI ID (where you&apos;ll receive funds) *</Label>
+                    <Input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="yourname@upi" />
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeWithdraw} className="flex-1 rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition-colors">Cancel</button>
-                  <button onClick={handleWithdraw} disabled={withdrawLoading}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60">
+                  <Button variant="outline" onClick={closeWithdraw} className="flex-1">Cancel</Button>
+                  <Button onClick={handleWithdraw} disabled={withdrawLoading}
+                    className="flex-1 gap-2 btn-glow btn-glow-hover">
                     {withdrawLoading ? <><IconLoader2 className="h-4 w-4 animate-spin" /> Processing...</> : "Submit Withdrawal"}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Transfer Bonus to Wallet Modal */}
-      {transferOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold">Add Bonus to Wallet</h3>
-              <button onClick={closeTransfer} className="text-muted-foreground hover:text-foreground">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
+      <Dialog open={transferOpen} onOpenChange={(o) => { if (!o) closeTransfer(); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Bonus to Wallet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
             {transferSuccess ? (
               <div className="text-center py-6 space-y-3">
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -696,7 +749,7 @@ export default function WalletPage() {
                 </div>
                 <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Bonus Added to Wallet!</p>
                 <p className="text-xs text-muted-foreground">The amount is now available in your main wallet balance.</p>
-                <button onClick={closeTransfer} className="w-full rounded-lg bg-foreground py-2.5 text-sm font-semibold text-background hover:bg-foreground/90 transition-colors">Done</button>
+                <Button onClick={closeTransfer} className="w-full">Done</Button>
               </div>
             ) : (
               <>
@@ -709,26 +762,25 @@ export default function WalletPage() {
                   </div>
                 )}
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Amount *</label>
-                  <div className="relative mt-1">
+                  <Label className="text-xs font-medium text-muted-foreground mb-1">Amount *</Label>
+                  <div className="relative">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
-                    <input type="number" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} placeholder="0.00" min="0" max={bonusBalance} step="0.01"
-                      className="w-full rounded-lg border border-border pl-8 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all bg-background" />
+                    <Input type="number" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} placeholder="0.00" min="0" max={bonusBalance} step="0.01"
+                      className="pl-8" />
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeTransfer} className="flex-1 rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition-colors">Cancel</button>
-                  <button onClick={handleTransfer} disabled={transferLoading}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60">
+                  <Button variant="outline" onClick={closeTransfer} className="flex-1">Cancel</Button>
+                  <Button onClick={handleTransfer} disabled={transferLoading}
+                    className="flex-1 gap-2 bg-amber-600 hover:bg-amber-700 text-white">
                     {transferLoading ? <><IconLoader2 className="h-4 w-4 animate-spin" /> Processing...</> : "Add to Wallet"}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </div>
-        </div>
-      )}
-
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

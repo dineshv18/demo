@@ -211,7 +211,7 @@ export const sendSupportTicketAdminNotification = async (adminEmails, ticket, us
     to: adminEmails,
     subject: `New Support Ticket [${categoryLabel}]: ${ticket.subject}`,
     headers: getBaseHeaders(),
-    text: `New support ticket submitted.\n\nFrom: ${user.name} (${user.email})\nPhone: ${ticket.phone || "Not provided"}\nCategory: ${categoryLabel}\nSubject: ${ticket.subject}\n\nMessage:\n${ticket.message}\n\nView in admin panel: ${adminUrl}\n\nORVANTA Financial`,
+    text: `New support ticket submitted.\n\nFrom: ${user.name} (${user.email})\nCategory: ${categoryLabel}\nSubject: ${ticket.subject}\n\nMessage:\n${ticket.message}\n${ticket.screenshotUrls?.length ? `\n${ticket.screenshotUrls.length} screenshot(s) attached.\n` : ""}\nView in admin panel: ${adminUrl}\n\nORVANTA Financial`,
     html: `
       <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
       <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
@@ -225,11 +225,11 @@ export const sendSupportTicketAdminNotification = async (adminEmails, ticket, us
               <tr><td style="padding:36px 40px;">
                 <div style="background:#f9fafb;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
                   <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>From:</strong> ${user.name} (${user.email})</p>
-                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>Phone:</strong> ${ticket.phone || "Not provided"}</p>
                   <p style="color:#374151;font-size:13px;margin:0;"><strong>User ID:</strong> ${user.id}</p>
                 </div>
                 <p style="color:#111827;font-size:15px;font-weight:600;margin:0 0 8px;">${ticket.subject}</p>
-                <p style="color:#4b5563;font-size:14px;margin:0 0 24px;line-height:1.6;white-space:pre-wrap;">${ticket.message}</p>
+                <p style="color:#4b5563;font-size:14px;margin:0 0 ${ticket.screenshotUrls?.length ? "8px" : "24px"};line-height:1.6;white-space:pre-wrap;">${ticket.message}</p>
+                ${ticket.screenshotUrls?.length ? `<p style="color:#7c3aed;font-size:12px;font-weight:600;margin:0 0 24px;">${ticket.screenshotUrls.length} screenshot(s) attached — view in admin panel</p>` : ""}
                 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
                   <a href="${adminUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View Ticket</a>
                 </td></tr></table>
@@ -272,7 +272,7 @@ export const sendSupportTicketConfirmation = async (userEmail, userName, ticket)
                   <p style="color:#111827;font-size:14px;font-weight:600;margin:0 0 8px;">${ticket.subject}</p>
                   <p style="color:#6b7280;font-size:13px;margin:0;line-height:1.6;white-space:pre-wrap;">${ticket.message}</p>
                 </div>
-                <p style="color:#9ca3af;font-size:12px;margin:0;">If you gave a phone number, our team may also call you directly.</p>
+                <p style="color:#9ca3af;font-size:12px;margin:0;">We'll follow up by email — no action needed from you right now.</p>
               </td></tr>
               <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
                 <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>

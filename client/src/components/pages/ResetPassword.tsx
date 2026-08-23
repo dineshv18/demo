@@ -7,6 +7,10 @@ import { toast } from "sonner";
 import { authAPI } from "@/lib/api";
 import { IconLock, IconLoader2, IconAlertCircle, IconCircleCheck, IconEye, IconEyeOff } from "@tabler/icons-react";
 import { AuthLogo } from "@/components/site/AuthShell";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -37,51 +41,49 @@ function ResetPasswordForm() {
     } finally { setLoading(false); }
   };
 
-  const inputClass = (hasError: boolean) =>
-    `w-full rounded-lg border pl-10 pr-11 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all bg-background ${hasError ? "border-destructive focus:ring-destructive/30" : "border-border focus:ring-brand/30 focus:border-brand/50"}`;
-
   if (!token) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm text-center space-y-4">
+      <Card className="p-8 gap-4 shadow-sm rounded-2xl text-center">
         <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-destructive/10 ring-1 ring-destructive/20">
           <IconAlertCircle className="h-7 w-7 text-destructive" />
         </div>
-        <h2 className="font-display text-2xl font-bold tracking-tight">Invalid Link</h2>
+        <h2 className="font-display text-2xl font-semibold tracking-tight">Invalid Link</h2>
         <p className="text-muted-foreground text-sm">This password reset link is invalid or expired.</p>
-        <Link href="/forgot-password" className="inline-flex w-full items-center justify-center rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white">
-          Request New Link
-        </Link>
-      </div>
+        <Button asChild className="w-full btn-glow btn-glow-hover" size="lg">
+          <Link href="/forgot-password">Request New Link</Link>
+        </Button>
+      </Card>
     );
   }
 
   if (success) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm text-center space-y-5">
+      <Card className="p-8 gap-5 shadow-sm rounded-2xl text-center">
         <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
           <IconCircleCheck className="h-9 w-9 text-emerald-500" />
         </div>
         <div>
-          <h2 className="font-display text-2xl font-bold tracking-tight">Password Reset!</h2>
+          <h2 className="font-display text-2xl font-semibold tracking-tight">Password Reset!</h2>
           <p className="mt-2 text-muted-foreground text-sm">Your password has been updated successfully.</p>
         </div>
-        <button
+        <Button
           onClick={() => router.push("/login")}
-          className="w-full rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white"
+          className="w-full btn-glow btn-glow-hover"
+          size="lg"
         >
           Go to Sign In
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+    <Card className="p-6 sm:p-8 gap-0 shadow-sm rounded-2xl">
       <div className="text-center space-y-1.5 mb-6">
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20 mb-3">
           <IconLock className="h-6 w-6 text-brand" />
         </div>
-        <h2 className="font-display text-2xl font-bold tracking-tight">Reset Password</h2>
+        <h2 className="font-display text-2xl font-semibold tracking-tight">Reset Password</h2>
         <p className="text-muted-foreground text-sm">Enter your new password below</p>
       </div>
 
@@ -93,14 +95,14 @@ function ResetPasswordForm() {
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">New Password</label>
+          <Label className="text-sm font-medium">New Password</Label>
           <div className="relative">
             <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-            <input
+            <Input
               type={showPassword ? "text" : "password"} value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter new password"
-              className={inputClass(false)}
+              className="pl-10 pr-11"
             />
             <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
@@ -108,28 +110,28 @@ function ResetPasswordForm() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Confirm Password</label>
+          <Label className="text-sm font-medium">Confirm Password</Label>
           <div className="relative">
             <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-            <input
+            <Input
               type={showConfirm ? "text" : "password"} value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter new password"
-              className={inputClass(false)}
+              className="pl-10 pr-11"
             />
             <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               {showConfirm ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
             </button>
           </div>
         </div>
-        <button
+        <Button
           type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60"
+          className="w-full gap-2 btn-glow btn-glow-hover"
         >
           {loading ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <><span>Reset Password</span><IconCircleCheck className="h-4 w-4" /></>}
-        </button>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }
 

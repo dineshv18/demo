@@ -3,6 +3,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { IconPlus, IconUserCheck, IconUserX, IconTrash, IconEdit } from "@tabler/icons-react";
 import { env } from "../config/env";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "../components/ui/table";
 
 const API = env.API_URL;
 
@@ -105,101 +112,106 @@ export default function AdminsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Admins</h1>
-          <p className="text-muted-foreground text-sm">Manage admin accounts and role assignments</p>
+          <h1 className="text-2xl font-bold text-[#10211D]">Admins</h1>
+          <p className="text-[#68736E] text-sm">Manage admin accounts and role assignments</p>
         </div>
-        <button onClick={() => { setEditing(null); setForm({ name: "", email: "", password: "", assignedRoleId: "" }); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90">
+        <Button onClick={() => { setEditing(null); setForm({ name: "", email: "", password: "", assignedRoleId: "" }); setShowModal(true); }}
+          className="rounded-xl bg-[#10211D] text-white hover:bg-[#10211D]/90">
           <IconPlus size={16} /> Add Admin
-        </button>
+        </Button>
       </div>
 
-      {error && <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">{error}</div>}
+      {error && <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-xl text-sm">{error}</div>}
 
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-3 font-medium">Name</th>
-              <th className="text-left p-3 font-medium">Email</th>
-              <th className="text-left p-3 font-medium">Role</th>
-              <th className="text-left p-3 font-medium">Status</th>
-              <th className="text-left p-3 font-medium">Last Login</th>
-              <th className="text-right p-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card className="overflow-hidden py-0 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+        <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-[#F7F8F4] hover:bg-[#F7F8F4]">
+              <TableHead className="text-[#68736E]">Name</TableHead>
+              <TableHead className="text-[#68736E]">Email</TableHead>
+              <TableHead className="text-[#68736E]">Role</TableHead>
+              <TableHead className="text-[#68736E]">Status</TableHead>
+              <TableHead className="text-[#68736E]">Last Login</TableHead>
+              <TableHead className="text-right text-[#68736E]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {admins.map((admin: any) => (
-              <tr key={admin.id} className="border-t hover:bg-muted/30">
-                <td className="p-3 font-medium">{admin.name}</td>
-                <td className="p-3 text-muted-foreground">{admin.email}</td>
-                <td className="p-3">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: admin.assignedRole?.color + "20", color: admin.assignedRole?.color }}>
+              <TableRow key={admin.id} className="border-[#DDE4DE]">
+                <TableCell className="font-medium text-[#10211D]">{admin.name}</TableCell>
+                <TableCell className="text-[#68736E]">{admin.email}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="rounded-full" style={{ backgroundColor: admin.assignedRole?.color + "20", color: admin.assignedRole?.color, borderColor: "transparent" }}>
                     {admin.assignedRole?.displayName || admin.role}
-                  </span>
-                </td>
-                <td className="p-3">
-                  <span className={`inline-flex items-center gap-1 text-xs ${admin.isActive ? "text-green-600" : "text-destructive"}`}>
-                    {admin.isActive ? <IconUserCheck size={12} /> : <IconUserX size={12} />}
-                    {admin.isActive ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="p-3 text-muted-foreground text-xs">
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {admin.isActive ? (
+                    <Badge className="rounded-full bg-[#EAF7E8] text-[#00A94F] border-transparent"><IconUserCheck size={12} /> Active</Badge>
+                  ) : (
+                    <Badge variant="destructive" className="rounded-full"><IconUserX size={12} /> Inactive</Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-[#68736E] text-xs">
                   {admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleDateString() : "Never"}
-                </td>
-                <td className="p-3 text-right">
+                </TableCell>
+                <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
-                    <button onClick={() => openEdit(admin)} className="p-1 rounded hover:bg-muted"><IconEdit size={14} /></button>
-                    <button onClick={() => toggleActive(admin)} className="p-1 rounded hover:bg-muted" title={admin.isActive ? "Deactivate" : "Activate"}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-[#10211D]" onClick={() => openEdit(admin)}><IconEdit size={14} /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-[#10211D]" onClick={() => toggleActive(admin)} title={admin.isActive ? "Deactivate" : "Activate"}>
                       {admin.isActive ? <IconUserX size={14} /> : <IconUserCheck size={14} />}
-                    </button>
-                    <button onClick={() => handleDelete(admin.id)} className="p-1 rounded hover:bg-destructive/10 text-destructive"><IconTrash size={14} /></button>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10" onClick={() => handleDelete(admin.id)}><IconTrash size={14} /></Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+        </div>
+      </Card>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card border rounded-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-lg font-semibold">{editing ? "Edit Admin" : "Create Admin"}</h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-sm font-medium">Name</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm" />
-              </div>
-              {!editing && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md rounded-2xl border-[#DDE4DE]">
+            <CardContent className="space-y-4">
+              <h2 className="text-lg font-semibold text-[#10211D]">{editing ? "Edit Admin" : "Create Admin"}</h2>
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium">Password</label>
-                  <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm" />
+                  <label className="text-sm font-medium text-[#10211D]">Name</label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="mt-1 rounded-xl border-[#DDE4DE] focus-visible:ring-[#00A94F]" />
                 </div>
-              )}
-              <div>
-                <label className="text-sm font-medium">Assigned Role</label>
-                <select value={form.assignedRoleId} onChange={(e) => setForm({ ...form, assignedRoleId: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm">
-                  <option value="">No role</option>
-                  {roles.map((r: any) => (
-                    <option key={r.id} value={r.id}>{r.displayName}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <button type="button" onClick={() => { setShowModal(false); setEditing(null); }} className="px-4 py-2 border rounded-md text-sm hover:bg-muted">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90">{editing ? "Update" : "Create"}</button>
-              </div>
-            </form>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-[#10211D]">Email</label>
+                  <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="mt-1 rounded-xl border-[#DDE4DE] focus-visible:ring-[#00A94F]" />
+                </div>
+                {!editing && (
+                  <div>
+                    <label className="text-sm font-medium text-[#10211D]">Password</label>
+                    <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className="mt-1 rounded-xl border-[#DDE4DE] focus-visible:ring-[#00A94F]" />
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium text-[#10211D]">Assigned Role</label>
+                  <select value={form.assignedRoleId} onChange={(e) => setForm({ ...form, assignedRoleId: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 border border-[#DDE4DE] rounded-xl bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A94F]">
+                    <option value="">No role</option>
+                    {roles.map((r: any) => (
+                      <option key={r.id} value={r.id}>{r.displayName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button type="button" variant="outline" onClick={() => { setShowModal(false); setEditing(null); }} className="rounded-xl border-[#DDE4DE] text-[#10211D]">Cancel</Button>
+                  <Button type="submit" className="rounded-xl bg-[#10211D] text-white hover:bg-[#10211D]/90">{editing ? "Update" : "Create"}</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

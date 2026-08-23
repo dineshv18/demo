@@ -7,6 +7,9 @@ import {
   IconClock, IconCheck, IconX, IconBan, IconGift,
 } from "@tabler/icons-react";
 import { walletAPI, type TransactionEvent } from "@/lib/api";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type FilterKey = "ALL" | "DEPOSIT" | "WITHDRAWAL" | "INDEX" | "BONUS";
 
@@ -22,8 +25,8 @@ const TYPE_META: Record<TransactionEvent["type"], { label: string; icon: typeof 
   DEPOSIT: { label: "Wallet Deposit", icon: IconArrowDownLeft, color: "text-emerald-600", bg: "bg-emerald-500/10" },
   WITHDRAWAL: { label: "Wallet Withdrawal", icon: IconArrowUpRight, color: "text-red-500", bg: "bg-red-500/10" },
   INDEX_INVEST: { label: "Index Investment", icon: IconChartLine, color: "text-brand", bg: "bg-brand/10" },
-  INDEX_WITHDRAW: { label: "Index Payout", icon: IconChartLine, color: "text-blue-500", bg: "bg-blue-500/10" },
-  BONUS_CREDIT: { label: "Bonus Credited", icon: IconGift, color: "text-purple-500", bg: "bg-purple-500/10" },
+  INDEX_WITHDRAW: { label: "Index Payout", icon: IconChartLine, color: "text-teal-500", bg: "bg-teal-500/10" },
+  BONUS_CREDIT: { label: "Bonus Credited", icon: IconGift, color: "text-amber-500", bg: "bg-amber-500/10" },
   BONUS_WITHDRAWAL: { label: "Bonus Withdrawal", icon: IconArrowUpRight, color: "text-red-500", bg: "bg-red-500/10" },
   BONUS_TRANSFER: { label: "Bonus to Wallet", icon: IconArrowDownLeft, color: "text-emerald-600", bg: "bg-emerald-500/10" },
 };
@@ -39,9 +42,9 @@ function StatusBadge({ status }: { status: TransactionEvent["status"] }) {
   const s = STATUS_META[status];
   const Icon = s.icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${s.color} ${s.bg}`}>
+    <Badge variant="outline" className={`gap-1 border-transparent font-semibold ${s.color} ${s.bg}`}>
       <Icon size={10} /> {s.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -119,7 +122,7 @@ export default function TransactionsPage() {
           <button
             key={f.key}
             onClick={() => changeFilter(f.key)}
-            className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all min-h-9 ${
               filter === f.key ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"
             }`}
           >
@@ -131,12 +134,12 @@ export default function TransactionsPage() {
       {error && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
-          <button onClick={() => fetchPage(page, filter)} className="ml-auto text-xs font-semibold underline shrink-0">Retry</button>
+          <Button variant="link" size="sm" onClick={() => fetchPage(page, filter)} className="ml-auto h-auto p-0 text-xs font-semibold text-destructive shrink-0">Retry</Button>
         </div>
       )}
 
       {/* List */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <Card className="p-0 gap-0 overflow-hidden">
         {loading ? (
           <div className="divide-y divide-border">
             {Array.from({ length: 8 }).map((_, i) => <RowSkeleton key={i} />)}
@@ -181,7 +184,7 @@ export default function TransactionsPage() {
             })}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Pagination */}
       {!loading && total > 0 && (
@@ -190,20 +193,24 @@ export default function TransactionsPage() {
             Page {page} of {totalPages} · {total} total
           </p>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => goToPage(page - 1)}
               disabled={page === 1}
-              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="gap-1"
             >
               <IconChevronLeft className="h-3.5 w-3.5" /> Prev
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => goToPage(page + 1)}
               disabled={page === totalPages}
-              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="gap-1"
             >
               Next <IconChevronRight className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { RoleThemeProvider } from "@/components/site/ThemeProvider";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -30,12 +26,12 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;r.style.setProperty("--brand","oklch(0.58 0.19 293)");r.style.setProperty("--brand-2","oklch(0.52 0.20 286)");r.style.setProperty("--brand-glow","oklch(0.68 0.17 298)");r.style.setProperty("--ring","oklch(0.58 0.19 293)")}catch(e){}})();`,
+            __html: `(function(){try{var r=document.documentElement;r.style.setProperty("--brand","#00A94F");r.style.setProperty("--brand-2","#00B956");r.style.setProperty("--brand-glow","#00B956");r.style.setProperty("--ring","#00A94F")}catch(e){}})();`,
           }}
         />
       </head>
       <body
-        className={`${geist.variable} ${inter.variable} font-sans antialiased`}
+        className={`${manrope.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <AuthProvider>

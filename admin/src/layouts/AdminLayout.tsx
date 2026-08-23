@@ -73,7 +73,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <NavLink to="/dashboard" onClick={() => setOpenMobile(false)}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 text-white font-bold text-sm shadow-lg shadow-violet-500/25">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#10211D] text-white font-bold text-sm shadow-lg shadow-[#10211D]/25">
                   O
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -104,7 +104,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
                     asChild
                     isActive={location.pathname === item.to}
                     tooltip={item.label}
-                    className="h-9 data-[active=true]:bg-violet-50 data-[active=true]:text-violet-600 data-[active=true]:font-semibold dark:data-[active=true]:bg-violet-500/10 dark:data-[active=true]:text-violet-400"
+                    className="h-9 data-[active=true]:bg-[#EAF7E8] data-[active=true]:text-[#00A94F] data-[active=true]:font-semibold dark:data-[active=true]:bg-[#00A94F]/10 dark:data-[active=true]:text-[#00A94F]"
                   >
                     <NavLink to={item.to} onClick={() => setOpenMobile(false)}>
                       <item.icon />
@@ -132,7 +132,7 @@ function AppSidebar({ pendingCounts }: { pendingCounts: { kyc: number; payments:
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-3 rounded-md px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xs font-bold">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#10211D] text-white text-xs font-bold">
                 {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
@@ -194,7 +194,7 @@ export default function AdminLayout() {
     <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar pendingCounts={pendingCounts} />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[#DDE4DE] bg-card px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-6" />
           <h1 className="text-sm font-semibold tracking-tight truncate">
@@ -203,7 +203,7 @@ export default function AdminLayout() {
           <div className="flex-1" />
           <ProfileMenu />
         </header>
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 overflow-y-auto bg-[#F7F8F4] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>
       </SidebarInset>

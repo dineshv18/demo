@@ -14,6 +14,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -831,7 +833,7 @@ export default function KycPage() {
       )}
 
       {/* Main Card */}
-      <div className="rounded-xl border bg-card shadow-sm p-4 sm:p-6 lg:p-8">
+      <Card className="p-4 sm:p-6 lg:p-8 gap-0 shadow-sm rounded-2xl">
         {submitted ? (
           <div className="space-y-6 text-center py-4">
             <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -862,9 +864,12 @@ export default function KycPage() {
                   <IconClock className="h-10 w-10 text-amber-500" />
                 </div>
                 <div>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
-                    KYC Under Review
-                  </h2>
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                      KYC Under Review
+                    </h2>
+                    <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">Pending</Badge>
+                  </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Your documents were submitted
                     {kyc?.createdAt
@@ -897,9 +902,12 @@ export default function KycPage() {
                   <IconShieldCheck className="h-10 w-10 text-emerald-500" />
                 </div>
                 <div>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
-                    KYC Approved!
-                  </h2>
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                      KYC Approved!
+                    </h2>
+                    <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Verified</Badge>
+                  </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Your identity has been verified. You now have full access to
                     deposits, withdrawals, and all wallet features.
@@ -920,9 +928,12 @@ export default function KycPage() {
                   <IconX className="h-10 w-10 text-destructive" />
                 </div>
                 <div>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
-                    KYC Rejected
-                  </h2>
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                      KYC Rejected
+                    </h2>
+                    <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">Rejected</Badge>
+                  </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Unfortunately, your submission could not be approved.
                   </p>
@@ -1760,7 +1771,7 @@ export default function KycPage() {
             )}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

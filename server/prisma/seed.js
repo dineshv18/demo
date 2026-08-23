@@ -34,7 +34,7 @@ const DEFAULT_ROLES = [
   { name: "manager", displayName: "Manager", description: "Management access", color: "#f97316", theme: "default" },
   { name: "analyst", displayName: "Analyst", description: "Read-only analytics", color: "#06b6d4", theme: "default" },
   { name: "support", displayName: "Support", description: "KYC review and user support", color: "#10b981", theme: "default" },
-  { name: "user", displayName: "User", description: "Client user access", color: "#8b5cf6", theme: "default" },
+  { name: "user", displayName: "User", description: "Client user access", color: "#00A94F", theme: "default" },
 ];
 
 const TEST_USERS = [

@@ -7,10 +7,10 @@ import {
 import { indexAPI, type IndexTier } from "@/lib/api";
 
 const TIER_COLORS = [
-  "from-blue-500 to-cyan-400",
-  "from-purple-500 to-pink-400",
-  "from-amber-500 to-orange-400",
   "from-emerald-500 to-teal-400",
+  "from-brand to-emerald-400",
+  "from-amber-500 to-orange-400",
+  "from-teal-500 to-emerald-300",
 ];
 
 export function useInvestmentBasePopup() {

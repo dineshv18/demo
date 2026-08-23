@@ -48,30 +48,30 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full bg-white dark:bg-gray-950">
+    <div className="relative flex min-h-screen w-full bg-[#F7F8F4] dark:bg-gray-950">
       {/* Left Panel */}
       <div className="relative hidden lg:flex lg:w-[55%] overflow-hidden rounded-r-[1.5rem]">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1f3a] via-[#2a2040] to-[#1a2540]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#10211D] via-[#15302a] to-[#0c1a16]" />
           <div className="absolute inset-0 opacity-60">
             <svg viewBox="0 0 800 600" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
               <defs>
                 <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#c9a84c" />
-                  <stop offset="50%" stopColor="#d4af37" />
-                  <stop offset="100%" stopColor="#b8942e" />
+                  <stop offset="0%" stopColor="#00A94F" />
+                  <stop offset="50%" stopColor="#00B956" />
+                  <stop offset="100%" stopColor="#087a3d" />
                 </linearGradient>
               </defs>
-              <path d="M0,300 Q200,100 400,300 T800,300 L800,600 L0,600 Z" fill="url(#g1)" opacity="0.3" />
-              <circle cx="400" cy="280" r="150" fill="none" stroke="rgba(201,168,76,0.1)" strokeWidth="1" />
-              <circle cx="400" cy="280" r="220" fill="none" stroke="rgba(201,168,76,0.06)" strokeWidth="1" />
+              <path d="M0,300 Q200,100 400,300 T800,300 L800,600 L0,600 Z" fill="url(#g1)" opacity="0.25" />
+              <circle cx="400" cy="280" r="150" fill="none" stroke="rgba(0,169,79,0.15)" strokeWidth="1" />
+              <circle cx="400" cy="280" r="220" fill="none" stroke="rgba(0,169,79,0.08)" strokeWidth="1" />
             </svg>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         </div>
         <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-          <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 backdrop-blur-sm px-3.5 py-1.5 text-xs font-medium tracking-wide uppercase w-fit">
-            <span className="h-1.5 w-1.5 rounded-lg bg-emerald-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-3.5 py-1.5 text-xs font-medium tracking-wide uppercase w-fit">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#00B956] animate-pulse" />
             Admin Portal
           </div>
           <div>
@@ -87,25 +87,25 @@ export default function Login() {
 
       {/* Right Panel */}
       <div className="flex flex-1 items-center justify-center px-6 py-12 lg:px-16">
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md space-y-6 bg-white dark:bg-gray-900 rounded-2xl border border-[#DDE4DE] dark:border-gray-800 shadow-[0_8px_30px_rgba(16,33,29,0.05)] p-8">
           {/* Logo (mobile) */}
           <div className="flex justify-center lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-violet-500/25">
+              <div className="h-10 w-10 rounded-xl bg-[#10211D] flex items-center justify-center text-white font-bold text-lg">
                 O
               </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                ORVANTA <span className="text-indigo-600">Financial</span>
+              <span className="text-xl font-bold tracking-tight text-[#10211D] dark:text-white">
+                ORVANTA <span className="text-[#00A94F]">Financial</span>
               </span>
             </div>
           </div>
 
           {/* Heading */}
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h2 className="text-3xl font-bold tracking-tight text-[#10211D] dark:text-white">
               Welcome Back
             </h2>
-            <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
+            <p className="mt-2 text-[#68736E] dark:text-gray-400 text-sm">
               Sign in to access the admin dashboard
             </p>
           </div>
@@ -121,7 +121,7 @@ export default function Login() {
           {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="email" className="text-sm font-medium text-[#10211D] dark:text-gray-300">
                 Email
               </label>
               <div className="relative">
@@ -135,10 +135,10 @@ export default function Login() {
                     if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
                   }}
                   placeholder="admin@orvanta.com"
-                  className={`w-full rounded-lg border px-4 py-3 pl-10 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-gray-50 dark:bg-gray-800/50 ${
+                  className={`w-full rounded-xl border px-4 py-3 pl-10 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-[#F7F8F4] dark:bg-gray-800/50 ${
                     errors.email
                       ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:ring-violet-500/40 focus:border-violet-500"
+                      : "border-[#DDE4DE] dark:border-gray-700 focus:ring-[#00A94F]/40 focus:border-[#00A94F]"
                   }`}
                 />
               </div>
@@ -151,7 +151,7 @@ export default function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="password" className="text-sm font-medium text-[#10211D] dark:text-gray-300">
                 Password
               </label>
               <div className="relative">
@@ -165,10 +165,10 @@ export default function Login() {
                     if (errors.password) setErrors((p) => ({ ...p, password: undefined }));
                   }}
                   placeholder="Enter your password"
-                  className={`w-full rounded-lg border px-4 py-3 pl-10 pr-11 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-gray-50 dark:bg-gray-800/50 ${
+                  className={`w-full rounded-xl border px-4 py-3 pl-10 pr-11 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all bg-[#F7F8F4] dark:bg-gray-800/50 ${
                     errors.password
                       ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:ring-violet-500/40 focus:border-violet-500"
+                      : "border-[#DDE4DE] dark:border-gray-700 focus:ring-[#00A94F]/40 focus:border-[#00A94F]"
                   }`}
                 />
                 <button
@@ -190,7 +190,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 py-3 text-sm font-semibold text-white hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-6 shadow-lg shadow-violet-500/25"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#10211D] py-3 text-sm font-semibold text-white hover:bg-[#1a332c] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-6"
             >
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />

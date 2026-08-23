@@ -1,75 +1,57 @@
 "use client";
 
-import { Users, Target, Award, Play } from "lucide-react";
-import { Reveal } from "../site/primitives";
-import Image from "next/image";
+import { ShieldCheck, Eye, Users2, ArrowRight, LineChart, Lock, Sparkles } from "lucide-react";
+import { Reveal, SectionTitle } from "../site/primitives";
+import Link from "next/link";
 import { CtaBanner } from "../site/CtaBanner";
 
-const features = [
+const principles = [
     {
-        icon: Users,
-        title: "Professional Team",
-        desc: "Industry veterans with decades of combined experience in institutional trading, technology, and financial regulation.",
+        icon: Eye,
+        title: "Transparency First",
+        desc: "Every tier, fee, and referral payout is published where you can see it — in your dashboard, not in fine print you find later.",
     },
     {
-        icon: Target,
-        title: "Target Oriented",
-        desc: "Every feature we build is measured by one thing — does it help our investors track and grow their portfolio with confidence?",
+        icon: ShieldCheck,
+        title: "Security By Default",
+        desc: "KYC verification, segregated wallet tracking, and role-based admin controls aren't add-ons — they're how the platform is built.",
     },
     {
-        icon: Award,
-        title: "Success Guarantee",
-        desc: "From platform reliability to fund security, we engineer trust into every layer of the infrastructure.",
+        icon: Users2,
+        title: "Investor-First",
+        desc: "Features ship because they help investors understand and track their capital — not because they look good in a pitch deck.",
     },
 ];
 
-const teamImages = [
-    { src: "/about/team1.jpg", alt: "Team collaboration" },
-    { src: "/about/team2.jpg", alt: "Office meeting" },
-    { src: "/about/team3.jpg", alt: "Team working" },
-    { src: "/about/team4.jpg", alt: "Team discussion" },
+const whyUs = [
+    { icon: LineChart, title: "Real-Time Visibility", desc: "Your Index performance, wallet balance, and transaction history update live — you're never guessing where things stand." },
+    { icon: Lock, title: "Verified, Not Anonymous", desc: "Every account on the platform completes KYC. That protects you as much as it protects the platform." },
+    { icon: Users2, title: "A Referral Program That Pays Out", desc: "Five levels deep, tracked automatically, with payouts visible in your dashboard the moment they're earned." },
 ];
 
 export default function AboutPage() {
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
-            <div className="relative bg-primary/10 pt-28 pb-0 overflow-hidden">
-                <div className="mx-auto max-w-6xl px-5 lg:px-8 text-center">
+            <div
+                className="relative pt-28 pb-20 overflow-hidden"
+                style={{ background: "radial-gradient(circle at 80% 20%, rgba(0,185,86,0.08), transparent 60%)" }}
+            >
+                <div className="mx-auto max-w-4xl px-5 lg:px-8 text-center">
                     <Reveal>
-                        <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                            About us
+                        <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight">
+                            About <span className="text-gradient">ORVANTA Financial</span>
                         </h1>
                     </Reveal>
                     <Reveal delay={0.05}>
-                        <p className="mt-4 text-muted-foreground text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                            ORVANTA Financial was founded on a simple belief: independent investors deserve the same
-                            transparency, security and infrastructure as institutional desks. We spent years engineering that reality.
+                        <p className="mt-6 text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                            ORVANTA Financial was built on a simple premise: independent investors deserve
+                            the same transparency and security standards as institutional platforms — a
+                            KYC-verified account, published tier terms, and a dashboard that tells you
+                            exactly where your capital stands.
                         </p>
                     </Reveal>
                 </div>
-
-                {/* Team Images Row */}
-                <Reveal delay={0.1}>
-                    <div className="mt-10 flex justify-center gap-4 px-5 max-w-5xl mx-auto pb-0">
-                        {teamImages.map((img, i) => (
-                            <div
-                                key={i}
-                                className="relative flex-1 h-48 md:h-56 lg:h-64 rounded-t-2xl overflow-hidden bg-muted/50 border border-border/40 border-b-0"
-                            >
-                                <Image
-                                    src={img.src}
-                                    alt={img.alt}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 50vw, 25vw"
-                                />
-                                {/* Placeholder gradient if no image */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-muted/60 -z-10" />
-                            </div>
-                        ))}
-                    </div>
-                </Reveal>
             </div>
 
             {/* Mission Section */}
@@ -77,97 +59,41 @@ export default function AboutPage() {
                 <div className="grid gap-12 lg:grid-cols-2 items-start">
                     <Reveal>
                         <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-snug">
-                            We make sure your idea &amp; creation delivered properly
+                            What we're building
                         </h2>
                     </Reveal>
                     <Reveal delay={0.08}>
                         <div className="grid sm:grid-cols-2 gap-6 text-sm text-muted-foreground leading-relaxed">
                             <p>
-                                ORVANTA Financial was built by investors, for investors. We saw how institutional desks
-                                had access to better transparency, faster access to information, and deeper liquidity — and we
-                                built the bridge to bring that to independent professionals.
+                                ORVANTA Financial is a KYC-verified Index investing platform. Investors deposit
+                                into a wallet, choose from tiered investment plans with clearly published
+                                minimums, maximums and maturity periods, and track performance from a real-time
+                                dashboard.
                             </p>
                             <p>
-                                From KYC-verified security to real-time performance tracking across three continents,
-                                every part of our platform is designed for investors who take performance seriously.
-                                No marketing spin — just real infrastructure delivering real results.
+                                We built the wallet, the tier system, and the referral program around one
+                                idea: an investor should never have to guess. Terms are disclosed upfront,
+                                fees are published, and every transaction is logged and visible in your
+                                account history.
                             </p>
                         </div>
                     </Reveal>
                 </div>
             </div>
 
-            {/* Empower Section */}
-            <div className="mx-auto max-w-6xl px-5 lg:px-8 pb-20">
-                <div className="grid gap-12 lg:grid-cols-2 items-center">
-                    {/* Image Side */}
-                    <Reveal>
-                        <div className="relative">
-                            <div className="relative rounded-2xl overflow-hidden bg-muted/50 aspect-[4/3] border border-border/40">
-                                <Image
-                                    src="/about/empower.jpg"
-                                    alt="Team meeting"
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-muted/60 -z-10" />
-                                {/* Play button */}
-                                <div className="absolute inset-0 grid place-items-center">
-                                    <div className="grid h-14 w-14 place-items-center rounded-full bg-white/90 shadow-lg cursor-pointer hover:scale-105 transition-transform">
-                                        <Play className="h-5 w-5 text-foreground ml-0.5" fill="currentColor" />
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Quote card */}
-                            <div className="absolute -bottom-6 left-6 right-6 md:right-auto md:left-6 md:max-w-xs rounded-lg bg-white dark:bg-card border border-border/60 shadow-xl p-5">
-                                <p className="text-sm font-semibold">&ldquo;Making an impact, together&rdquo;</p>
-                                <p className="text-xs text-muted-foreground mt-1">ORVANTA Founder</p>
-                            </div>
-                        </div>
-                    </Reveal>
-
-                    {/* Text Side */}
-                    <Reveal delay={0.1}>
-                        <div className="space-y-6 pt-8 lg:pt-0">
-                            <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-snug">
-                                We empower small business owners
-                            </h2>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                From individual investors tracking a single tier to portfolios managing
-                                multiple positions — we provide the infrastructure that scales with ambition.
-                                Our Index platform delivers the same institutional-grade tools to everyone.
-                            </p>
-                            <div className="rounded-lg border-l-4 border-primary bg-primary/5 p-5">
-                                <p className="text-sm text-muted-foreground leading-relaxed italic">
-                                    &ldquo;ORVANTA Financial was built on the belief that every serious investor deserves
-                                    transparent terms, verified security, and a platform they can trust.
-                                    That belief drives everything we build.&rdquo;
-                                </p>
-                            </div>
-                        </div>
-                    </Reveal>
-                </div>
-            </div>
-
-            {/* Growth Section */}
-            <div className="mx-auto max-w-6xl px-5 lg:px-8 py-20 text-center">
-                <Reveal>
-                    <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-snug max-w-2xl mx-auto">
-                        We help business to grow faster and bigger
-                    </h2>
-                    <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                        A connected set of services designed to turn strategy into scale — from execution
-                        infrastructure to dedicated support.
-                    </p>
-                </Reveal>
-
+            {/* Principles Section */}
+            <div className="mx-auto max-w-6xl px-5 lg:px-8 py-20">
+                <SectionTitle
+                    eyebrow="Core Principles"
+                    title={<>What guides <span className="text-gradient">how we build.</span></>}
+                    description="These aren't slogans — they're the standard every feature on the platform is measured against."
+                />
                 <div className="mt-14 grid gap-8 md:grid-cols-3">
-                    {features.map((f, i) => (
+                    {principles.map((f, i) => (
                         <Reveal key={f.title} delay={0.1 + i * 0.08}>
                             <div className="text-center space-y-4">
-                                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary/10 border border-primary/20">
-                                    <f.icon className="h-7 w-7 text-primary" />
+                                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand/15 text-brand">
+                                    <f.icon className="h-7 w-7" />
                                 </div>
                                 <h3 className="font-display text-lg font-semibold">{f.title}</h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
@@ -177,6 +103,66 @@ export default function AboutPage() {
                         </Reveal>
                     ))}
                 </div>
+            </div>
+
+            {/* Trust Statement / Pull Quote */}
+            <div className="mx-auto max-w-6xl px-5 lg:px-8 py-4">
+                <Reveal>
+                    <div className="rounded-lg glass-strong p-10 md:p-16 relative overflow-hidden text-center">
+                        <div aria-hidden className="absolute -inset-x-20 -top-20 h-40 blur-3xl opacity-40"
+                            style={{ background: "radial-gradient(closest-side, color-mix(in oklab, var(--brand) 14%, transparent), transparent)" }} />
+                        <div className="relative max-w-3xl mx-auto">
+                            <Sparkles className="h-8 w-8 text-brand mx-auto mb-6" strokeWidth={1.5} />
+                            <p className="font-display text-2xl md:text-4xl font-normal tracking-tight leading-snug text-foreground">
+                                We publish what other platforms bury in fine print —
+                                <span className="text-gradient"> that's the whole philosophy.</span>
+                            </p>
+                            <p className="mt-6 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                                Transparent terms, verified accounts, and a dashboard that tells the truth
+                                about your capital — measured against the same standard on every feature we ship.
+                            </p>
+                        </div>
+                    </div>
+                </Reveal>
+            </div>
+
+            {/* Why Choose Us Section */}
+            <div className="mx-auto max-w-6xl px-5 lg:px-8 py-20">
+                <Reveal>
+                    <div className="rounded-2xl border border-border/50 bg-card/50 p-8 md:p-12">
+                        <div className="grid gap-10 lg:grid-cols-2 items-center">
+                            <div className="space-y-4">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 border border-brand/20 px-3.5 py-1.5 text-xs font-semibold text-brand">
+                                    Why Choose ORVANTA
+                                </div>
+                                <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
+                                    Built for investors who read the fine print.
+                                </h2>
+                                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                                    Because we published it in plain view instead. If you want a platform
+                                    where verification is real, terms are disclosed, and your dashboard
+                                    tells the truth about your account, that's what we built.
+                                </p>
+                                <Link href="/platform" className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:gap-3 transition-all">
+                                    See how the platform works <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+                            <div className="space-y-4">
+                                {whyUs.map((w) => (
+                                    <div key={w.title} className="flex items-start gap-4 rounded-xl border border-border/50 bg-background p-4">
+                                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand/15 text-brand">
+                                            <w.icon className="h-4.5 w-4.5" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-foreground">{w.title}</div>
+                                            <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{w.desc}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </Reveal>
             </div>
 
             {/* CTA */}

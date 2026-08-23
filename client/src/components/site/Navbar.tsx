@@ -31,19 +31,20 @@ export function Navbar() {
     return (
         <header className="fixed top-0 z-50 w-full px-2">
             <div className={cn(
-                'mx-auto mt-2 max-w-7xl px-6 transition-all duration-300 lg:px-12',
-                scrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-6 shadow-md border-border/60 shadow-zinc-950/15'
+                'mx-auto mt-2 max-w-7xl rounded-2xl px-6 transition-all duration-300 lg:px-8',
+                'bg-background/80 backdrop-blur-lg border border-border/60',
+                scrolled && 'shadow-md shadow-zinc-950/10'
             )}>
-                <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+                <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-3.5">
                     <div className="flex w-full justify-between lg:w-auto">
                         <Link href="/" className="flex items-center gap-2.5 group">
-                            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto transition-all dark:hidden" priority />
-                            <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto transition-all hidden dark:block" priority />
+                            <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-14 w-auto transition-all dark:hidden" priority />
+                            <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-14 w-auto transition-all hidden dark:block" priority />
                         </Link>
 
                         <button
                             aria-label={open ? "Close Menu" : "Open Menu"}
-                            className="lg:hidden grid h-9 w-9 place-items-center rounded-full border border-border/70 cursor-pointer"
+                            className="lg:hidden grid h-9 w-9 place-items-center rounded-lg border border-border/70 cursor-pointer"
                             onClick={() => setOpen((v) => !v)}
                         >
                             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -51,10 +52,7 @@ export function Navbar() {
                     </div>
 
                     {/* Centered navigation on desktop */}
-                    <div className={cn(
-                        "absolute inset-x-0 mx-auto hidden w-fit lg:block transition-all",
-                        scrolled && "static translate-x-0"
-                    )}>
+                    <div className="absolute inset-x-0 mx-auto hidden w-fit lg:block">
                         <nav className="flex items-center gap-1">
                             {links.map((l) => {
                                 const active = pathname === l.href;
@@ -62,13 +60,12 @@ export function Navbar() {
                                     <Link
                                         key={l.href}
                                         href={l.href}
-                                        className={`relative px-3.5 py-2 text-sm rounded-full transition-colors ${active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                                        className={`relative px-3.5 py-2 text-sm font-medium rounded-lg transition-colors ${active ? "text-brand" : "text-muted-foreground hover:text-foreground"
                                             }`}
                                     >
                                         {l.label}
                                         {active && (
-                                            <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full"
-                                                style={{ background: "linear-gradient(90deg, var(--brand-2), var(--brand))" }} />
+                                            <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand" />
                                         )}
                                     </Link>
                                 );
@@ -77,24 +74,20 @@ export function Navbar() {
                     </div>
 
                     {/* Right elements */}
-                    <div className="hidden lg:flex items-center gap-2">
+                    <div className="hidden lg:flex items-center gap-3">
+                        <div className="hidden xl:flex items-center gap-2">
+                            <div className="rounded-lg border border-border/60 bg-muted/50 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                                KYC-Verified Platform
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-muted/50 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" /> Real-Time Tracking
+                            </div>
+                        </div>
                         <Link
                             href="/login"
-                            className={cn(
-                                "inline-flex items-center rounded-full px-4 py-2 text-sm font-medium btn-glow btn-glow-hover",
-                                scrolled && "lg:hidden"
-                            )}
+                            className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium btn-glow btn-glow-hover"
                         >
                             Open Account
-                        </Link>
-                        <Link
-                            href="/login"
-                            className={cn(
-                                "items-center rounded-full px-4 py-2 text-sm font-medium btn-glow btn-glow-hover",
-                                scrolled ? "inline-flex animate-fade-in" : "hidden"
-                            )}
-                        >
-                            Get Started
                         </Link>
                     </div>
                 </div>
@@ -102,16 +95,16 @@ export function Navbar() {
 
             {/* Mobile menu */}
             {open && (
-                <div className="lg:hidden mx-4 mt-2 glass rounded-3xl p-4 shadow-xl border border-border/60">
+                <div className="lg:hidden mx-4 mt-2 glass rounded-2xl p-4 shadow-xl border border-border/60">
                     <div className="flex flex-col gap-1">
                         {links.map((l) => (
-                            <Link key={l.href} href={l.href} className="block px-4 py-2.5 rounded-2xl hover:bg-accent text-sm transition">
+                            <Link key={l.href} href={l.href} className="block px-4 py-2.5 rounded-lg hover:bg-accent text-sm transition">
                                 {l.label}
                             </Link>
                         ))}
                     </div>
                     <div className="flex items-center justify-between gap-2 p-2 pt-4 border-t border-border/40 mt-2">
-                        <Link href="/login" className="px-4 py-2 text-center rounded-full text-sm btn-glow flex-1">Open Account</Link>
+                        <Link href="/login" className="px-4 py-2 text-center rounded-lg text-sm btn-glow flex-1">Open Account</Link>
                     </div>
                 </div>
             )}

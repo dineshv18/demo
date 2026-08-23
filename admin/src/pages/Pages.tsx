@@ -9,17 +9,21 @@ function PageIcon({ name, className }: { name?: string; className?: string }) {
   return <Icon className={className} />;
 }
 import { env } from "../config/env";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 
 const API = env.API_URL;
 
 const categoryColors: Record<string, string> = {
-  main: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  management: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  finance: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  content: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  analytics: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
-  system: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
-  general: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+  main: "bg-[#EAF7E8] text-[#10211D]",
+  management: "bg-[#F3F8EF] text-[#10211D]",
+  finance: "bg-[#EAF7E8] text-[#00A94F]",
+  content: "bg-amber-100 text-amber-700",
+  analytics: "bg-[#F3F8EF] text-[#68736E]",
+  system: "bg-[#F3F8EF] text-[#68736E]",
+  general: "bg-[#F3F8EF] text-[#68736E]",
 };
 
 export default function PagesPage() {
@@ -98,109 +102,111 @@ export default function PagesPage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00A94F]" /></div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Pages</h1>
-          <p className="text-muted-foreground text-sm">Manage pages that can be assigned to roles</p>
+          <h1 className="text-2xl font-bold text-[#10211D]">Pages</h1>
+          <p className="text-[#68736E] text-sm">Manage pages that can be assigned to roles</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleSeed}
-            className="flex items-center gap-2 px-4 py-2 border rounded-md text-sm font-medium hover:bg-muted">
+          <Button variant="outline" className="rounded-xl border-[#DDE4DE] text-[#10211D]" onClick={handleSeed}>
             <IconRefresh size={16} /> Seed Defaults
-          </button>
-          <button onClick={() => { setEditing(null); setForm({ slug: "", name: "", description: "", icon: "", category: "general" }); setShowModal(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90">
+          </Button>
+          <Button className="rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 text-white" onClick={() => { setEditing(null); setForm({ slug: "", name: "", description: "", icon: "", category: "general" }); setShowModal(true); }}>
             <IconPlus size={16} /> Add Page
-          </button>
+          </Button>
         </div>
       </div>
 
-      {error && <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">{error}</div>}
+      {error && <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm border border-red-200">{error}</div>}
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {pages.map((page: any) => (
-          <div key={page.id} className="border rounded-lg p-4 bg-card space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <PageIcon name={page.icon} className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-semibold text-sm">{page.name}</h3>
+          <Card key={page.id} className="rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+            <CardContent className="space-y-3 p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <PageIcon name={page.icon} className="h-4 w-4 text-[#68736E] shrink-0" />
+                  <h3 className="font-semibold text-sm truncate text-[#10211D]">{page.name}</h3>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-[#68736E] hover:bg-[#F3F8EF]" onClick={() => openEdit(page)}><IconEdit size={14} /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={() => handleDelete(page.id)}><IconTrash size={14} /></Button>
+                </div>
               </div>
-              <div className="flex gap-1">
-                <button onClick={() => openEdit(page)} className="p-1 rounded hover:bg-muted"><IconEdit size={14} /></button>
-                <button onClick={() => handleDelete(page.id)} className="p-1 rounded hover:bg-destructive/10 text-destructive"><IconTrash size={14} /></button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className={`rounded-full ${categoryColors[page.category] || categoryColors.general}`}>
+                  {page.category}
+                </Badge>
+                <span className="text-xs text-[#89938E] font-mono">/{page.slug}</span>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-0.5 rounded ${categoryColors[page.category] || categoryColors.general}`}>
-                {page.category}
-              </span>
-              <span className="text-xs text-muted-foreground font-mono">/{page.slug}</span>
-            </div>
-            {page.description && <p className="text-xs text-muted-foreground">{page.description}</p>}
-            {page.roles?.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {page.roles.map((r: any) => (
-                  <span key={r.role.id} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                    {r.role.displayName}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+              {page.description && <p className="text-xs text-[#68736E]">{page.description}</p>}
+              {page.roles?.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {page.roles.map((r: any) => (
+                    <Badge key={r.role.id} variant="secondary" className="text-[10px] rounded-full bg-[#F3F8EF] text-[#68736E]">
+                      {r.role.displayName}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card border rounded-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-lg font-semibold">{editing ? "Edit Page" : "Create Page"}</h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-sm font-medium">Slug</label>
-                <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} disabled={!!editing}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm disabled:opacity-50 font-mono" placeholder="e.g. dashboard" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Name</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm" placeholder="e.g. Dashboard" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md rounded-2xl border-[#DDE4DE]">
+            <CardContent className="space-y-4 p-6">
+              <h2 className="text-lg font-semibold text-[#10211D]">{editing ? "Edit Page" : "Create Page"}</h2>
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium">Icon</label>
-                  <input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm font-mono" placeholder="IconLayoutDashboard" />
+                  <label className="text-sm font-medium text-[#10211D]">Slug</label>
+                  <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} disabled={!!editing}
+                    className="mt-1 font-mono rounded-xl border-[#DDE4DE]" placeholder="e.g. dashboard" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Category</label>
-                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background text-sm">
-                    <option value="main">Main</option>
-                    <option value="management">Management</option>
-                    <option value="finance">Finance</option>
-                    <option value="content">Content</option>
-                    <option value="analytics">Analytics</option>
-                    <option value="system">System</option>
-                    <option value="general">General</option>
-                  </select>
+                  <label className="text-sm font-medium text-[#10211D]">Name</label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="mt-1 rounded-xl border-[#DDE4DE]" placeholder="e.g. Dashboard" />
                 </div>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <button type="button" onClick={() => { setShowModal(false); setEditing(null); }} className="px-4 py-2 border rounded-md text-sm hover:bg-muted">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90">{editing ? "Update" : "Create"}</button>
-              </div>
-            </form>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-[#10211D]">Description</label>
+                  <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="mt-1 rounded-xl border-[#DDE4DE]" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-[#10211D]">Icon</label>
+                    <Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                      className="mt-1 font-mono rounded-xl border-[#DDE4DE]" placeholder="IconLayoutDashboard" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-[#10211D]">Category</label>
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full mt-1 px-3 py-2 border border-[#DDE4DE] rounded-xl bg-white text-sm text-[#10211D] focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40">
+                      <option value="main">Main</option>
+                      <option value="management">Management</option>
+                      <option value="finance">Finance</option>
+                      <option value="content">Content</option>
+                      <option value="analytics">Analytics</option>
+                      <option value="system">System</option>
+                      <option value="general">General</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button type="button" variant="outline" className="rounded-xl border-[#DDE4DE] text-[#10211D]" onClick={() => { setShowModal(false); setEditing(null); }}>Cancel</Button>
+                  <Button type="submit" className="rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 text-white">{editing ? "Update" : "Create"}</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

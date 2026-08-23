@@ -11,12 +11,16 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { indexAPI, kycAPI, type IndexData, type KycData, type IndexInvestment } from "@/lib/api";
 import InvestmentBasePopup from "@/components/site/InvestmentBasePopup";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const TIER_COLORS = [
-  "from-blue-500 to-cyan-400",
-  "from-purple-500 to-pink-400",
-  "from-amber-500 to-orange-400",
+  "from-teal-500 to-cyan-400",
   "from-emerald-500 to-teal-400",
+  "from-amber-500 to-orange-400",
+  "from-green-600 to-emerald-400",
 ];
 
 function ChartTooltipContent({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -225,11 +229,11 @@ export default function IndexPage() {
               <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Complete your KYC to view index data and returns.</p>
             </div>
           </div>
-          <Link href="/dashboard/kyc" className="shrink-0 self-start sm:self-auto rounded-lg bg-amber-500 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-600 transition-colors">
-            {kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}
-          </Link>
+          <Button asChild size="sm" className="shrink-0 self-start sm:self-auto bg-amber-500 hover:bg-amber-600">
+            <Link href="/dashboard/kyc">{kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}</Link>
+          </Button>
         </div>
-        <div className="rounded-2xl border border-border bg-card px-6 py-16 text-center">
+        <Card className="px-6 py-16 text-center">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
             <IconLock className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -239,7 +243,7 @@ export default function IndexPage() {
               ? "Your KYC is under review. Index access will be unlocked once approved."
               : "Complete your KYC verification to view index performance and investment returns."}
           </p>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -250,9 +254,9 @@ export default function IndexPage() {
         <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
-        <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent transition-colors">
+        <Button variant="outline" onClick={fetchData} className="gap-2">
           <IconRefresh className="h-4 w-4" /> Retry
-        </button>
+        </Button>
       </div>
     );
   }
@@ -295,22 +299,19 @@ export default function IndexPage() {
             <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and investment returns</p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setShowPopup(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium hover:bg-accent transition-colors"
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowPopup(true)} className="gap-1.5">
               <IconInfoCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Investment Base</span>
-            </button>
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
+            </Button>
+            <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 px-3 py-1.5 text-xs font-bold">
               <IconShieldCheck className="h-3.5 w-3.5" /> KYC Verified
-            </span>
-            <span className="sm:hidden inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
+            </Badge>
+            <Badge variant="outline" className="sm:hidden gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
               <IconShieldCheck className="h-3 w-3" /> Verified
-            </span>
-            <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-2.5 sm:px-3 py-2 text-sm font-medium hover:bg-accent transition-colors">
+            </Badge>
+            <Button variant="outline" size="icon" onClick={fetchData} className="size-9">
               <IconRefresh className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -321,10 +322,10 @@ export default function IndexPage() {
         )}
 
         {/* Wallet Balance + Tier Banner */}
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <Card className="p-4 sm:p-5 gap-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shrink-0">
+              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 shrink-0">
                 <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
               <div>
@@ -353,10 +354,10 @@ export default function IndexPage() {
               </div>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Invest in Index */}
-        <div id="invest-in-index" className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
           <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Invest in Index</h2>
 
           {activeInvestment ? (
@@ -381,9 +382,9 @@ export default function IndexPage() {
                     </p>
                   )}
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-500">
+                <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 font-bold">
                   <IconShieldCheck className="h-3.5 w-3.5" /> ACTIVE
-                </span>
+                </Badge>
               </div>
 
               {topUpSuccess && (
@@ -399,18 +400,20 @@ export default function IndexPage() {
 
               {!confirmWithdraw && (
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => { setShowTopUp((v) => !v); setTopUpError(""); setTopUpSuccess(""); }}
-                    className="rounded-lg btn-glow btn-glow-hover px-4 py-2 text-xs font-semibold text-white transition-all"
+                    className="btn-glow btn-glow-hover"
                   >
                     {showTopUp ? "Cancel" : "Add More Funds"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setConfirmWithdraw(true)}
-                    className="rounded-lg border border-border px-4 py-2 text-xs font-semibold hover:bg-accent transition-colors"
                   >
                     Withdraw Investment
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -426,23 +429,23 @@ export default function IndexPage() {
                   </p>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                    <input
+                    <Input
                       type="number"
                       min="0"
                       step="0.01"
                       value={topUpAmount}
                       onChange={(e) => setTopUpAmount(e.target.value)}
                       placeholder="Amount to add"
-                      className="w-full rounded-lg border border-border bg-background pl-7 pr-3 py-2 text-sm outline-none focus:border-brand transition-colors"
+                      className="pl-7"
                     />
                   </div>
-                  <button
+                  <Button
                     onClick={handleTopUp}
                     disabled={topUpLoading || balance <= 0}
-                    className="w-full rounded-lg bg-foreground text-background px-4 py-2 text-xs font-semibold hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                    className="w-full"
                   >
                     {topUpLoading ? "Adding..." : "Confirm Add Funds"}
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -460,19 +463,21 @@ export default function IndexPage() {
                     </p>
                   )}
                   <div className="flex gap-2 mt-2">
-                    <button
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={handleWithdraw}
                       disabled={withdrawLoading}
-                      className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:bg-destructive/90 transition-colors disabled:opacity-50"
                     >
                       {withdrawLoading ? "Withdrawing..." : "Confirm Withdrawal"}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => { setConfirmWithdraw(false); setWithdrawError(""); }}
-                      className="rounded-lg border border-border px-4 py-2 text-xs font-medium hover:bg-accent transition-colors"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -496,14 +501,14 @@ export default function IndexPage() {
               )}
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                <input
+                <Input
                   type="number"
                   min="0"
                   step="0.01"
                   value={investAmount}
                   onChange={(e) => { setInvestAmount(e.target.value); setSelectedTierId(""); }}
                   placeholder="Enter amount to invest"
-                  className="w-full rounded-lg border border-border bg-background pl-7 pr-3 py-2.5 text-sm outline-none focus:border-brand transition-colors"
+                  className="pl-7"
                 />
               </div>
 
@@ -534,19 +539,19 @@ export default function IndexPage() {
                 )
               )}
 
-              <button
+              <Button
                 onClick={handleInvest}
                 disabled={investLoading || balance <= 0 || !selectedTierId}
-                className="w-full rounded-lg btn-glow btn-glow-hover px-5 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full btn-glow btn-glow-hover gap-2"
               >
                 {investLoading ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
-                  </span>
+                  </>
                 ) : (
                   "Invest Now"
                 )}
-              </button>
+              </Button>
 
               <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
@@ -567,23 +572,23 @@ export default function IndexPage() {
               </p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Index Price Card + Chart */}
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <Card className="p-4 sm:p-6 gap-0">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <h2 className="font-display text-lg sm:text-xl font-bold">ORVANTA Index</h2>
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground tracking-wider uppercase bg-muted px-2 py-0.5 rounded-md">ORVI</span>
+                <Badge variant="secondary" className="text-[10px] sm:text-xs font-medium tracking-wider uppercase">ORVI</Badge>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">CURRENT INDEX PRICE</p>
               <div className="flex items-center gap-2 sm:gap-3 mt-1">
                 <span className="font-display text-xl sm:text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
-                <span className={`inline-flex items-center gap-1 rounded-lg px-2 sm:px-2.5 py-1 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
+                <Badge variant="outline" className={`gap-1 border-0 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
                   {priceUp ? <IconTrendingUp className="h-3 w-3" /> : <IconTrendingDown className="h-3 w-3" />}
                   ${Math.abs(currentPrice?.changeAmount || 0).toFixed(2)} ({Math.abs(currentPrice?.changePercent || 0).toFixed(2)}%)
-                </span>
+                </Badge>
               </div>
             </div>
             <span className="relative inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-bold text-white shrink-0">
@@ -622,8 +627,8 @@ export default function IndexPage() {
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="idxGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4A3AA7" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#4A3AA7" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#00A94F" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#00A94F" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" vertical={false} />
@@ -641,14 +646,14 @@ export default function IndexPage() {
                   width={64}
                 />
                 <Tooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="price" stroke="#4A3AA7" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "#4A3AA7", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "#4A3AA7", strokeWidth: 2, stroke: "var(--card)" }} />
+                <Area type="monotone" dataKey="price" stroke="#00A94F" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "#00A94F", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "#00A94F", strokeWidth: 2, stroke: "var(--card)" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
         {/* Investment Base Section — On Page */}
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <Card className="p-4 sm:p-6 gap-0">
           <div className="text-center mb-6">
             <p className="text-xs text-brand font-semibold uppercase tracking-widest mb-1">ORVANTA Financial</p>
             <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Investment Base</h2>
@@ -690,11 +695,11 @@ export default function IndexPage() {
               </p>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Index Manager */}
         {manager && (
-          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+          <Card className="p-4 sm:p-6 gap-0">
             <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Index Manager</h2>
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-2 shrink-0">
@@ -706,7 +711,7 @@ export default function IndexPage() {
                 {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-relaxed">{manager.bio}</p>}
               </div>
             </div>
-          </div>
+          </Card>
         )}
       </div>
 

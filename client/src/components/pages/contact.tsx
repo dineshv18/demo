@@ -7,22 +7,22 @@ import { CtaBanner } from "../site/CtaBanner";
 
 const contactInfo = [
     {
-        icon: Phone,
-        label: "Phone Number",
-        value: "+1 (415) 555-0182",
-        href: "tel:+14155550182",
-    },
-    {
         icon: Mail,
         label: "Email",
-        value: "hello@orvantafinancial.com",
-        href: "mailto:hello@orvantafinancial.com",
+        value: "support@orvantafinancial.com",
+        href: "mailto:support@orvantafinancial.com",
+    },
+    {
+        icon: Phone,
+        label: "Support Desk",
+        value: "Available 24/5 via your dashboard",
+        href: "/login",
     },
     {
         icon: MapPin,
-        label: "Address",
-        value: "12 Prime Wharf, London, EC2R 8AH",
-        href: "#",
+        label: "Account Support",
+        value: "Submit a ticket for the fastest response",
+        href: "/login",
     },
 ];
 
@@ -69,7 +69,9 @@ export default function ContactPage() {
                         </div>
                         <h2 className="font-display text-3xl font-bold tracking-tight">Message Sent!</h2>
                         <p className="text-muted-foreground text-sm leading-relaxed">
-                            Thanks, <span className="font-medium text-foreground">{firstName}</span>! Our team will get back to you within an hour during market hours.
+                            Thanks, <span className="font-medium text-foreground">{firstName}</span>! Our team will get back to you shortly.
+                            For account-specific issues, signing in and submitting a support ticket is
+                            usually the fastest way to get help.
                         </p>
                         <button
                             onClick={() => { setSent(false); setFirstName(""); setLastName(""); setEmail(""); setMessage(""); }}
@@ -84,8 +86,11 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen">
-            <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-20">
+        <div
+            className="min-h-screen relative"
+            style={{ background: "radial-gradient(circle at 80% 15%, rgba(0,185,86,0.08), transparent 55%)" }}
+        >
+            <div className="relative mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-20">
                 {/* Breadcrumb */}
                 <Reveal>
                     <nav className="text-sm text-muted-foreground mb-4">
@@ -97,7 +102,7 @@ export default function ContactPage() {
 
                 {/* Heading */}
                 <Reveal delay={0.05}>
-                    <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-16">
+                    <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight mb-16">
                         Contact Us
                     </h1>
                 </Reveal>
@@ -109,11 +114,13 @@ export default function ContactPage() {
                         <Reveal delay={0.1}>
                             <div className="space-y-3">
                                 <h2 className="font-display text-2xl md:text-3xl font-semibold tracking-tight leading-snug">
-                                    Need more information?<br />
+                                    Have a question?<br />
                                     Get in touch with us
                                 </h2>
                                 <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-                                    A connected set of services designed to turn strategy into scale.
+                                    Whether you're evaluating the platform or already an investor, our team
+                                    is here to help. For account-specific issues, signing in and opening a
+                                    support ticket gets you the fastest response.
                                 </p>
                             </div>
                         </Reveal>
@@ -122,8 +129,8 @@ export default function ContactPage() {
                             {contactInfo.map((item, i) => (
                                 <Reveal key={item.label} delay={0.15 + i * 0.08}>
                                     <a href={item.href} className="flex items-center gap-4 group">
-                                        <div className="grid h-12 w-12 place-items-center rounded-full bg-muted/70 border border-border/60 shrink-0 group-hover:bg-muted transition-colors">
-                                            <item.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                        <div className="grid h-12 w-12 place-items-center rounded-full bg-brand/15 text-brand shrink-0 group-hover:bg-brand/25 transition-colors">
+                                            <item.icon className="h-5 w-5" />
                                         </div>
                                         <div>
                                             <div className="text-xs font-semibold uppercase tracking-wider text-foreground">{item.label}</div>
@@ -139,9 +146,9 @@ export default function ContactPage() {
                     <Reveal delay={0.15}>
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <h3 className="font-display text-2xl font-semibold tracking-tight">Send Message</h3>
+                                <h3 className="font-display text-2xl font-semibold tracking-tight">Send a Message</h3>
                                 <p className="text-muted-foreground text-sm">
-                                    Please fill out the form below with your details and message to contact with us
+                                    Fill out the form below and we&apos;ll follow up by email.
                                 </p>
                             </div>
 
@@ -182,7 +189,7 @@ export default function ContactPage() {
                                         type="email"
                                         value={email}
                                         onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: undefined })); }}
-                                        placeholder="Email or Phone Number"
+                                        placeholder="Email Address"
                                         className={inputClass(!!errors.email)}
                                     />
                                     {errors.email && (
@@ -222,6 +229,28 @@ export default function ContactPage() {
                         </div>
                     </Reveal>
                 </div>
+
+                {/* FAQ Teaser */}
+                <Reveal delay={0.1}>
+                    <div className="mt-24 rounded-2xl border border-border/50 bg-card/50 p-8 md:p-10">
+                        <h3 className="font-display text-xl md:text-2xl font-semibold tracking-tight mb-6">
+                            Common questions
+                        </h3>
+                        <div className="grid gap-6 sm:grid-cols-2">
+                            {[
+                                { q: "How long does KYC verification take?", a: "Most accounts are verified within minutes of submitting valid ID documents." },
+                                { q: "Can I deposit with crypto or bank transfer?", a: "Both. Your wallet accepts crypto deposits and bank transfers, tracked in one balance." },
+                                { q: "Are tier terms disclosed before I invest?", a: "Yes — minimums, maximums and maturity periods are published in your dashboard before you allocate." },
+                                { q: "How does the referral program pay out?", a: "Commission is tracked automatically across five referral levels and visible in your dashboard." },
+                            ].map((f) => (
+                                <div key={f.q}>
+                                    <div className="text-sm font-semibold text-foreground">{f.q}</div>
+                                    <div className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{f.a}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Reveal>
             </div>
             <CtaBanner />
         </div>

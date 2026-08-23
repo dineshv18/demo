@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   IconHeadset, IconClock, IconCheck, IconX, IconEye, IconChevronLeft,
-  IconSearch, IconProgress, IconCircleCheck, IconPhone, IconMail,
+  IconSearch, IconProgress, IconCircleCheck, IconMail, IconPhotoOff, IconPaperclip,
 } from "@tabler/icons-react";
 import { supportTicketsAPI, type SupportTicket, type SupportTicketStatus, type SupportCategory } from "../services/api";
 
@@ -10,8 +10,8 @@ type FilterStatus = "ALL" | SupportTicketStatus;
 
 const statusConfig: Record<SupportTicketStatus, { label: string; color: string; bg: string; icon: any }> = {
   OPEN: { label: "Open", color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30", icon: IconClock },
-  IN_PROGRESS: { label: "In Progress", color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30", icon: IconProgress },
-  RESOLVED: { label: "Resolved", color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30", icon: IconCircleCheck },
+  IN_PROGRESS: { label: "In Progress", color: "text-teal-600", bg: "bg-teal-100 dark:bg-teal-900/30", icon: IconProgress },
+  RESOLVED: { label: "Resolved", color: "text-[#00A94F]", bg: "bg-[#EAF7E8] dark:bg-emerald-900/30", icon: IconCircleCheck },
   CLOSED: { label: "Closed", color: "text-gray-600", bg: "bg-gray-100 dark:bg-gray-800", icon: IconX },
 };
 
@@ -120,39 +120,39 @@ export default function SupportTickets() {
   return (
     <div className="space-y-6">
       {toast && (
-        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white transition-all ${toast.type === "success" ? "bg-[#00A94F]" : "bg-red-600"}`}>
           {toast.message}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Support Tickets</h1>
+        <h1 className="text-2xl font-bold text-[#10211D] dark:text-white">Support Tickets</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Requests submitted by users from the client dashboard.
         </p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Open</p>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#DDE4DE] dark:border-gray-800 p-4 shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] dark:text-gray-400 uppercase tracking-wider">Open</p>
           <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{counts.open}</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">In Progress</p>
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{counts.inProgress}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#DDE4DE] dark:border-gray-800 p-4 shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
+          <p className="text-xs text-[#68736E] dark:text-gray-400 uppercase tracking-wider">In Progress</p>
+          <p className="text-2xl font-bold text-teal-600 dark:text-teal-400 mt-1">{counts.inProgress}</p>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-56 shrink-0">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 space-y-2">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#DDE4DE] dark:border-gray-800 p-4 space-y-2 shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
             <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-3">
               Filter by Status
             </p>
             {filterTabs.map((tab) => (
               <button key={tab} onClick={() => setFilter(tab)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  filter === tab ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  filter === tab ? "bg-[#EAF7E8] text-[#10211D] dark:bg-[#00A94F]/10 dark:text-[#00B956]" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
                 {tab === "ALL" ? "All" : statusConfig[tab].label}
               </button>
@@ -166,11 +166,11 @@ export default function SupportTickets() {
               <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input type="text" placeholder="Search by subject, name, or email..." value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500" />
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#DDE4DE] dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00A94F]/50 focus:border-[#00A94F]" />
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#DDE4DE] dark:border-gray-800 overflow-hidden shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
             {loading ? (
               <div className="divide-y divide-gray-200 dark:divide-gray-800">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -195,37 +195,47 @@ export default function SupportTickets() {
                 </p>
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[720px]">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">User</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Subject</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Category</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Submitted</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
-                    <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Action</th>
+                  <tr className="border-b border-[#DDE4DE] dark:border-gray-800 bg-[#F3F8EF] dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">User</th>
+                    <th className="text-left px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">Subject</th>
+                    <th className="text-left px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">Category</th>
+                    <th className="text-left px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">Submitted</th>
+                    <th className="text-left px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
+                    <th className="text-right px-5 py-3 font-semibold text-[#68736E] dark:text-gray-400 text-xs uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                <tbody className="divide-y divide-[#DDE4DE] dark:divide-gray-800">
                   {filteredTickets.map((t) => (
-                    <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => openDetail(t.id)}>
+                    <tr key={t.id} className="hover:bg-[#F3F8EF] dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => openDetail(t.id)}>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          <div className="h-9 w-9 rounded-full bg-[#10211D] flex items-center justify-center text-white text-xs font-bold shrink-0">
                             {t.user?.name?.charAt(0)?.toUpperCase() || "?"}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{t.user?.name || "Unknown"}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{t.user?.email}</p>
+                            <p className="font-medium text-[#10211D] dark:text-white">{t.user?.name || "Unknown"}</p>
+                            <p className="text-xs text-[#89938E] dark:text-gray-400">{t.user?.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-gray-700 dark:text-gray-300 max-w-[220px] truncate">{t.subject}</td>
-                      <td className="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">{CATEGORY_LABELS[t.category]}</td>
-                      <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs">{formatDate(t.createdAt)}</td>
+                      <td className="px-5 py-4 text-[#10211D] dark:text-gray-300 max-w-[220px]">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate">{t.subject}</span>
+                          {t.screenshotUrls?.length > 0 && (
+                            <span className="shrink-0 inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                              <IconPaperclip size={10} /> {t.screenshotUrls.length}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-[#68736E] dark:text-gray-400 text-xs">{CATEGORY_LABELS[t.category]}</td>
+                      <td className="px-5 py-4 text-[#89938E] dark:text-gray-400 text-xs">{formatDate(t.createdAt)}</td>
                       <td className="px-5 py-4"><StatusBadge status={t.status} /></td>
                       <td className="px-5 py-4 text-right">
-                        <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors">
+                        <button className="p-1.5 rounded-lg hover:bg-[#F3F8EF] dark:hover:bg-gray-800 text-[#68736E] dark:text-gray-400 transition-colors">
                           <IconEye size={16} />
                         </button>
                       </td>
@@ -233,18 +243,19 @@ export default function SupportTickets() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 dark:border-gray-800">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Page {page} of {totalPages}</p>
+              <div className="flex items-center justify-between px-5 py-3 border-t border-[#DDE4DE] dark:border-gray-800">
+                <p className="text-xs text-[#68736E] dark:text-gray-400">Page {page} of {totalPages}</p>
                 <div className="flex gap-2">
                   <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed">
+                    className="px-3 py-1.5 text-xs font-medium rounded-xl border border-[#DDE4DE] dark:border-gray-800 text-[#10211D] dark:text-gray-400 hover:bg-[#F3F8EF] dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed">
                     Previous
                   </button>
                   <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed">
+                    className="px-3 py-1.5 text-xs font-medium rounded-xl border border-[#DDE4DE] dark:border-gray-800 text-[#10211D] dark:text-gray-400 hover:bg-[#F3F8EF] dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed">
                     Next
                   </button>
                 </div>
@@ -279,7 +290,6 @@ export default function SupportTickets() {
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-2 text-sm">
                       <div className="flex justify-between"><span className="text-gray-500">Name</span><span className="font-medium text-gray-900 dark:text-white">{selected.user?.name || "-"}</span></div>
                       <div className="flex justify-between items-center"><span className="text-gray-500 flex items-center gap-1"><IconMail size={12} /> Email</span><span className="font-medium text-gray-900 dark:text-white text-right break-all">{selected.user?.email || "-"}</span></div>
-                      <div className="flex justify-between items-center"><span className="text-gray-500 flex items-center gap-1"><IconPhone size={12} /> Phone</span><span className="font-medium text-gray-900 dark:text-white">{selected.phone || "Not provided"}</span></div>
                       <div className="flex justify-between"><span className="text-gray-500">User ID</span><span className="font-mono text-xs text-gray-900 dark:text-white">{selected.userId}</span></div>
                     </div>
                   </section>
@@ -297,11 +307,32 @@ export default function SupportTickets() {
                   </section>
 
                   <section>
+                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                      Screenshots {selected.screenshotUrls?.length > 0 && `(${selected.screenshotUrls.length})`}
+                    </h3>
+                    {selected.screenshotUrls?.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-3">
+                        {selected.screenshotUrls.map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                            className="block aspect-square rounded-xl overflow-hidden border border-[#DDE4DE] dark:border-gray-800 hover:border-[#00A94F] transition-colors">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <IconPhotoOff size={16} /> No screenshots attached
+                      </div>
+                    )}
+                  </section>
+
+                  <section>
                     <label className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Response / Internal Note</label>
                     <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Add a note visible to the user..." rows={3}
-                      className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" />
+                      className="mt-1 w-full px-3 py-2 rounded-lg border border-[#DDE4DE] dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/50 resize-none" />
                     <button onClick={() => updateTicket()} disabled={actionLoading}
-                      className="mt-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
+                      className="mt-2 px-4 py-2 rounded-xl border border-[#DDE4DE] dark:border-gray-800 text-sm font-medium text-[#10211D] dark:text-gray-300 hover:bg-[#F3F8EF] dark:hover:bg-gray-800 disabled:opacity-50">
                       Save Note
                     </button>
                   </section>
@@ -309,19 +340,19 @@ export default function SupportTickets() {
                   <section className="flex flex-wrap gap-2 pt-2">
                     {selected.status !== "IN_PROGRESS" && (
                       <button onClick={() => updateTicket("IN_PROGRESS")} disabled={actionLoading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                        className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
                         <IconProgress size={16} /> Mark In Progress
                       </button>
                     )}
                     {selected.status !== "RESOLVED" && (
                       <button onClick={() => updateTicket("RESOLVED")} disabled={actionLoading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[#00A94F] hover:bg-[#00B956] disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
                         <IconCheck size={16} /> Mark Resolved
                       </button>
                     )}
                     {selected.status !== "CLOSED" && (
                       <button onClick={() => updateTicket("CLOSED")} disabled={actionLoading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[#10211D] hover:bg-[#1a332c] disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors">
                         <IconX size={16} /> Close
                       </button>
                     )}

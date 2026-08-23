@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canEdit = useCallback((slug: string) => hasPageAccess(slug)?.canEdit ?? false, [hasPageAccess]);
   const canDelete = useCallback((slug: string) => hasPageAccess(slug)?.canDelete ?? false, [hasPageAccess]);
 
-  const roleColor = assignedRole?.color ?? "#7c3aed";
+  const roleColor = assignedRole?.color ?? "#00A94F";
   const roleTheme = assignedRole?.theme ?? "default";
 
   const value = useMemo(() => ({

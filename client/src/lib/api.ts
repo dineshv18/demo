@@ -480,7 +480,7 @@ export interface SupportTicket {
   category: SupportCategory;
   subject: string;
   message: string;
-  phone: string | null;
+  screenshotUrls: string[];
   status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
   adminNote: string | null;
   resolvedBy: string | null;
@@ -490,10 +490,17 @@ export interface SupportTicket {
 }
 
 export const supportAPI = {
-  createTicket: (data: { category: SupportCategory; subject: string; message: string; phone?: string }) =>
-    request<{ message: string; ticket: SupportTicket }>("/support", {
+  createTicket: (data: { category: SupportCategory; subject: string; message: string; screenshots?: File[] }) => {
+    const fd = new FormData();
+    fd.append("category", data.category);
+    fd.append("subject", data.subject);
+    fd.append("message", data.message);
+    (data.screenshots || []).forEach((file) => fd.append("screenshots", file));
+    return request<{ message: string; ticket: SupportTicket }>("/support", {
       method: "POST",
-      body: JSON.stringify(data),
-    }),
+      body: fd,
+      headers: {},
+    });
+  },
   getMyTickets: () => request<{ tickets: SupportTicket[] }>("/support/my-tickets"),
 };

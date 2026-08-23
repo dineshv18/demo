@@ -16,27 +16,31 @@ import {
   type Referral, type ReferralStats, type ReferralDashboardStats,
   type HierarchyItem, type ReferralEarningsBreakdown,
 } from "@/lib/api";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Tab = "referrals" | "leadership" | "howItWorks";
 
 // Validated categorical palette (dataviz skill, default order, brand violet leading) —
 // passes CVD + normal-vision floors for a 6-slot legend at scripts/validate_palette.js.
-const LEVEL_COLORS = ["#4a3aa7", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#2a78d6"];
+const LEVEL_COLORS = ["#00A94F", "#eb6834", "#1baf7a", "#eda100", "#00B956", "#0d9488"];
 
 function statusBadge(status: string) {
   const cfg: Record<string, { label: string; color: string; bg: string }> = {
     REGISTERED: { label: "Registered", color: "text-amber-600", bg: "bg-amber-100" },
-    KYC_DONE: { label: "KYC Done", color: "text-blue-600", bg: "bg-blue-100" },
+    KYC_DONE: { label: "KYC Done", color: "text-teal-600", bg: "bg-teal-100" },
     DEPOSITED: { label: "Deposited", color: "text-emerald-600", bg: "bg-emerald-100" },
     COMMISSION_PAID: { label: "Commission Paid", color: "text-emerald-600", bg: "bg-emerald-100" },
   };
   const s = cfg[status] || cfg.REGISTERED;
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${s.color} ${s.bg}`}>
+    <Badge variant="outline" className={`gap-1 border-transparent font-semibold ${s.color} ${s.bg}`}>
       {status === "COMMISSION_PAID" && <IconCheck size={10} />}
       {status === "KYC_DONE" && <IconShield size={10} />}
       {s.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -211,9 +215,9 @@ export default function ReferralPage() {
               <IconCopy className="h-4 w-4" />
             </button>
           </div>
-          <button onClick={fetchData} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors shrink-0">
+          <Button variant="outline" size="icon" onClick={fetchData} className="shrink-0">
             <IconRefresh className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -225,7 +229,7 @@ export default function ReferralPage() {
 
       {/* Stat Tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
               <IconUsers className="h-5 w-5 text-brand" />
@@ -235,8 +239,8 @@ export default function ReferralPage() {
               <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
             </div>
           </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
+        </Card>
+        <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-500/10 shrink-0">
               <IconCurrencyDollar className="h-5 w-5 text-emerald-500" />
@@ -246,19 +250,19 @@ export default function ReferralPage() {
               <p className="text-xl sm:text-2xl font-bold text-foreground">${totalEarned.toFixed(2)}</p>
             </div>
           </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
+        </Card>
+        <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-blue-500/10 shrink-0">
-              <IconShield className="h-5 w-5 text-blue-500" />
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-teal-500/10 shrink-0">
+              <IconShield className="h-5 w-5 text-teal-500" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">KYC Done</p>
               <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.kycDone}</p>
             </div>
           </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
+        </Card>
+        <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-full bg-amber-500/10 shrink-0">
               <IconWallet className="h-5 w-5 text-amber-500" />
@@ -268,36 +272,34 @@ export default function ReferralPage() {
               <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.deposited}</p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Referral Code Card */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="flex flex-col gap-4">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground mb-1">Your Referral Code</p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="font-mono text-xl sm:text-2xl font-bold tracking-widest text-brand">{code}</span>
-              <button onClick={copyCode} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors">
-                <IconCopy className="h-3.5 w-3.5" /> {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={copyLink} className="flex items-center gap-2 rounded-lg btn-glow btn-glow-hover px-4 py-2.5 text-sm font-semibold text-white transition-all">
-              <IconLink className="h-4 w-4" /> Copy Link
-            </button>
-            <button onClick={shareWhatsApp} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors">
-              <IconShare className="h-4 w-4" /> Share WhatsApp
-            </button>
+      <Card className="p-5 gap-4">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Your Referral Code</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="font-mono text-xl sm:text-2xl font-bold tracking-widest text-brand">{code}</span>
+            <Button variant="outline" size="sm" onClick={copyCode} className="gap-1.5 text-xs">
+              <IconCopy className="h-3.5 w-3.5" /> {copied ? "Copied!" : "Copy"}
+            </Button>
           </div>
         </div>
-      </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={copyLink} className="gap-2 btn-glow btn-glow-hover">
+            <IconLink className="h-4 w-4" /> Copy Link
+          </Button>
+          <Button variant="outline" onClick={shareWhatsApp} className="gap-2">
+            <IconShare className="h-4 w-4" /> Share WhatsApp
+          </Button>
+        </div>
+      </Card>
 
       {/* Earnings Chart + Level Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Earnings Over Time */}
-        <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5">
+        <Card className="lg:col-span-3 p-5 gap-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-foreground">Referral Earnings Over Time</h3>
             <span className="text-xs text-muted-foreground">Last 6 Months</span>
@@ -327,10 +329,10 @@ export default function ReferralPage() {
               <p className="text-sm text-muted-foreground">No earnings yet — invite friends to start earning</p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Earnings by Level Donut */}
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5">
+        <Card className="lg:col-span-2 p-5 gap-0">
           <div className="flex items-center gap-1.5 mb-4">
             <h3 className="text-base font-bold text-foreground">Earnings by Level</h3>
             <IconInfoCircle className="h-3.5 w-3.5 text-muted-foreground" />
@@ -380,44 +382,45 @@ export default function ReferralPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Referral Level Commission Table */}
       {levelRates.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-5 overflow-hidden">
+        <Card className="p-5 gap-0 overflow-hidden">
           <h3 className="text-base font-bold text-foreground mb-4">Referral Level Commission</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="py-2 pr-4 font-medium text-xs uppercase tracking-wider">Level</th>
-                  <th className="py-2 pr-4 font-medium text-xs uppercase tracking-wider">Commission %</th>
-                  <th className="py-2 font-medium text-xs uppercase tracking-wider text-right">Earnings</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs uppercase tracking-wider">Level</TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider">Commission %</TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider text-right">Earnings</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {levelRates.map((rate, i) => (
-                  <tr key={i}>
-                    <td className="py-3 pr-4 font-medium text-foreground">Level {i + 1}</td>
-                    <td className="py-3 pr-4">
-                      <span
-                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold"
+                  <TableRow key={i}>
+                    <TableCell className="font-medium text-foreground">Level {i + 1}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="border-transparent font-semibold"
                         style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
                       >
                         {rate.toFixed(2)}%
-                      </span>
-                    </td>
-                    <td className="py-3 text-right font-medium text-foreground">${(byLevel[i] || 0).toFixed(2)}</td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-foreground">${(byLevel[i] || 0).toFixed(2)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
           <p className="text-[11px] text-muted-foreground mt-3">
             Applies to the maintenance fee taken when a referral invests in the Index. Levels 2–5 pay the ancestor referrers in your chain.
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Tabs */}
@@ -436,7 +439,7 @@ export default function ReferralPage() {
       {/* How It Works Tab */}
       {tab === "howItWorks" && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <Card className="p-6 gap-0">
             <h3 className="text-lg font-bold text-foreground mb-5">How Referral Earnings Work</h3>
             <div className="space-y-6">
               <div className="flex gap-4">
@@ -456,7 +459,7 @@ export default function ReferralPage() {
 
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-blue-500/10 text-blue-500 font-bold text-sm shrink-0">2</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-500/10 text-teal-500 font-bold text-sm shrink-0">2</div>
                   <div className="w-px flex-1 bg-border mt-2" />
                 </div>
                 <div className="pb-6">
@@ -486,9 +489,9 @@ export default function ReferralPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <Card className="p-6 gap-0">
             <h3 className="text-lg font-bold text-foreground mb-4">Earnings Calculator</h3>
             <p className="text-sm text-muted-foreground mb-4">See how much you can earn with {commissionRate}% commission on a deposit:</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -507,9 +510,9 @@ export default function ReferralPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-brand/20 bg-brand/5 p-6">
+          <Card className="border-brand/20 bg-brand/5 p-6 gap-0">
             <h3 className="text-lg font-bold text-foreground mb-3">Pro Tips</h3>
             <ul className="space-y-2">
               {[
@@ -524,13 +527,13 @@ export default function ReferralPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Recent Referrals Tab */}
       {tab === "referrals" && (
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <Card className="p-0 gap-0 overflow-hidden">
           {referrals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-4">
               <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
@@ -542,31 +545,31 @@ export default function ReferralPage() {
           ) : (
             <>
               <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">User</th>
-                      <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Status</th>
-                      <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Joined</th>
-                      <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Commission</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider">Joined</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider">Commission</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {referrals.map((r) => (
-                      <tr key={r.id} className="hover:bg-accent/50 transition-colors">
-                        <td className="px-5 py-4">
+                      <TableRow key={r.id}>
+                        <TableCell>
                           <p className="font-medium text-foreground">{r.referred.name}</p>
                           <p className="text-xs text-muted-foreground">{r.referred.email}</p>
-                        </td>
-                        <td className="px-5 py-4">{statusBadge(r.status)}</td>
-                        <td className="px-5 py-4 text-xs text-muted-foreground">{formatDate(r.registeredAt)}</td>
-                        <td className="px-5 py-4 text-sm font-medium text-foreground">
+                        </TableCell>
+                        <TableCell>{statusBadge(r.status)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatDate(r.registeredAt)}</TableCell>
+                        <TableCell className="text-sm font-medium text-foreground">
                           ${r.commissions.reduce((sum, c) => sum + parseFloat(c.amount), 0).toFixed(2)}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
 
               <div className="sm:hidden divide-y divide-border">
@@ -590,12 +593,12 @@ export default function ReferralPage() {
               </div>
             </>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Leadership Tab */}
       {tab === "leadership" && (
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <Card className="p-4 sm:p-6 gap-0">
           {hierarchy.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
@@ -611,7 +614,7 @@ export default function ReferralPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

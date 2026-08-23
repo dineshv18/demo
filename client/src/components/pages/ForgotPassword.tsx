@@ -7,6 +7,10 @@ import { authAPI } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import { IconMail, IconLoader2, IconAlertCircle, IconArrowLeft, IconSend, IconCheck } from "@tabler/icons-react";
 import AuthShell, { AuthLogo } from "@/components/site/AuthShell";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -40,13 +44,13 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-6 text-center">
           <AuthLogo />
 
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm space-y-5">
+          <Card className="p-8 gap-5 shadow-sm rounded-2xl">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
               <IconCheck className="h-9 w-9 text-emerald-500" />
             </div>
 
             <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight">Check Your Email</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">Check Your Email</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 We&apos;ve sent a password reset link to<br />
                 <span className="font-medium text-foreground">{email}</span>
@@ -57,21 +61,22 @@ export default function ForgotPassword() {
             </div>
 
             <div className="space-y-3">
-              <Link
-                href="/login"
-                className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-3 text-sm font-semibold text-white transition-all"
-              >
-                <IconArrowLeft className="h-4 w-4" />
-                Back to Sign In
-              </Link>
-              <button
+              <Button asChild className="w-full gap-2 btn-glow btn-glow-hover" size="lg">
+                <Link href="/login">
+                  <IconArrowLeft className="h-4 w-4" />
+                  Back to Sign In
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => { setSent(false); setEmail(""); setError(""); }}
-                className="w-full rounded-lg border border-border py-3 text-sm font-medium hover:bg-accent transition-colors"
+                className="w-full"
+                size="lg"
               >
                 Try a different email
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -86,9 +91,9 @@ export default function ForgotPassword() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <Card className="p-6 sm:p-8 gap-0 shadow-sm rounded-2xl">
           <div className="text-center space-y-1.5 mb-6">
-            <h2 className="font-display text-2xl font-bold tracking-tight">Forgot Password?</h2>
+            <h2 className="font-display text-2xl font-semibold tracking-tight">Forgot Password?</h2>
             <p className="text-muted-foreground text-sm">Enter your email and we&apos;ll send you a reset link</p>
           </div>
 
@@ -101,26 +106,22 @@ export default function ForgotPassword() {
 
           <form className="space-y-5" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Email Address</label>
+              <Label className="text-sm font-medium">Email Address</Label>
               <div className="relative">
                 <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <input
+                <Input
                   type="email" value={email}
                   onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
                   placeholder="you@example.com"
-                  className={`w-full rounded-lg border pl-10 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all bg-background ${
-                    error
-                      ? "border-destructive focus:ring-destructive/30 focus:border-destructive"
-                      : "border-border focus:ring-brand/30 focus:border-brand/50"
-                  }`}
+                  className={`pl-10 ${error ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                   autoFocus
                 />
               </div>
             </div>
 
-            <button
+            <Button
               type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full gap-2 btn-glow btn-glow-hover"
             >
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />
@@ -130,9 +131,9 @@ export default function ForgotPassword() {
                   <IconSend className="h-4 w-4" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
 
         <Link
           href="/login"

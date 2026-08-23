@@ -80,10 +80,10 @@ function AppSidebar() {
         asChild
         isActive={pathname === item.to}
         tooltip={item.label}
-        className="h-9 data-[active=true]:bg-brand/10 data-[active=true]:text-brand data-[active=true]:font-semibold"
+        className="h-10 rounded-lg transition-colors data-[active=true]:bg-brand/10 data-[active=true]:text-brand data-[active=true]:font-semibold data-[active=true]:shadow-[inset_2px_0_0_0_var(--brand)]"
       >
         <Link href={item.to} onClick={() => setOpenMobile(false)}>
-          <item.icon />
+          <item.icon className="size-4.5" />
           <span>{item.label}</span>
         </Link>
       </SidebarMenuButton>
@@ -93,13 +93,13 @@ function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo */}
-      <SidebarHeader>
+      <SidebarHeader className="py-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent active:bg-transparent">
               <Link href="/dashboard" onClick={() => setOpenMobile(false)}>
                 <div
-                  className="flex aspect-square size-8 items-center justify-center rounded-lg text-white font-bold text-sm shadow-lg"
+                  className="flex aspect-square size-9 items-center justify-center rounded-xl text-white font-bold text-sm shadow-md ring-1 ring-black/5"
                   style={{ background: `linear-gradient(135deg, ${roleColor}, ${roleColor}dd)` }}
                 >
                   O
@@ -150,20 +150,23 @@ function AppSidebar() {
         <Link
           href="/dashboard/referral"
           onClick={() => setOpenMobile(false)}
-          className="block rounded-xl p-4 transition-colors hover:brightness-110"
-          style={{ background: `linear-gradient(135deg, ${roleColor}33, ${roleColor}14)`, border: `1px solid ${roleColor}40` }}
+          className="group/promo block overflow-hidden rounded-2xl p-4 shadow-sm transition-all hover:shadow-md"
+          style={{
+            background: `linear-gradient(160deg, ${roleColor}26, ${roleColor}0d)`,
+            border: `1px solid ${roleColor}38`,
+          }}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="grid h-7 w-7 place-items-center rounded-lg shrink-0" style={{ backgroundColor: `${roleColor}30` }}>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="grid h-8 w-8 place-items-center rounded-xl shrink-0 shadow-sm" style={{ backgroundColor: `${roleColor}25` }}>
               <IconGift className="h-4 w-4" style={{ color: roleColor }} />
             </div>
-            <span className="text-sm font-semibold text-sidebar-foreground">Invite & Earn</span>
+            <span className="text-sm font-semibold text-sidebar-foreground">Invite &amp; Earn</span>
           </div>
           <p className="text-xs text-sidebar-foreground/60 leading-relaxed mb-3">
             Refer your friends and earn attractive rewards.
           </p>
           <span
-            className="block text-center rounded-lg px-3 py-2 text-xs font-semibold text-white"
+            className="flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-white shadow-sm transition-transform group-hover/promo:scale-[1.02]"
             style={{ backgroundColor: roleColor }}
           >
             Refer Now
@@ -179,10 +182,10 @@ function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="rounded-lg data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <div
-                    className="flex aspect-square size-8 items-center justify-center rounded-full text-white text-xs font-bold"
+                    className="flex aspect-square size-8 items-center justify-center rounded-full text-white text-xs font-bold shadow-sm ring-1 ring-black/5"
                     style={{ background: `linear-gradient(135deg, ${roleColor}, ${roleColor}bb)` }}
                   >
                     {user?.name?.charAt(0)?.toUpperCase() || "U"}
@@ -219,7 +222,7 @@ function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                  className="cursor-pointer gap-2 text-red-500 focus:text-red-500 focus:bg-red-500/10"
                 >
                   <IconLogout className="h-4 w-4" />
                   Sign Out
@@ -261,7 +264,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SidebarProvider className="h-svh overflow-hidden">
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card/95 backdrop-blur px-3 sm:px-4 sticky top-0 z-20">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-6" />
             <h1 className="text-sm font-semibold tracking-tight truncate">
@@ -270,7 +273,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex-1" />
             <ProfileMenu />
           </header>
-          <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">{children}</div>
+          <div className="flex-1 overflow-y-auto bg-muted/20 p-3 sm:p-6 lg:p-8">{children}</div>
         </SidebarInset>
       </SidebarProvider>
       {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}

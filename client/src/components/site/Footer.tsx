@@ -1,5 +1,9 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ShieldCheck, Lock, Eye, ArrowRight, Mail } from "lucide-react";
 
 const XIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -32,66 +36,117 @@ const socialIcons = [
     { Icon: GitHubIcon, label: "GitHub" },
 ];
 
+// Only real, working routes — no placeholder Careers/Pricing/Press pages.
 const cols = [
-    { title: "Company", links: [["About", "/about"], ["Contact", "/contact"], ["Careers", "/about"]] },
-    { title: "Platform", links: [["ORVANTA Financial", "/platform"], ["Desktop", "/platform"], ["Web Dashboard", "/platform"], ["Mobile", "/platform"]] },
-    { title: "Investing", links: [["Index Overview", "/platform"], ["Investment Tiers", "/login"], ["Wallet", "/login"], ["KYC Verification", "/login"]] },
-    { title: "Legal", links: [["Terms", "/about"], ["Privacy", "/about"], ["Risk Disclosure", "/about"], ["Regulation", "/about"]] },
+    { title: "Company", links: [["About", "/about"], ["Platform", "/platform"], ["Contact Us", "/contact"]] },
+    { title: "Platform", links: [["Overview", "/platform"], ["Index Tiers", "/platform"], ["Referral Program", "/platform"], ["Web Dashboard", "/login"]] },
+    { title: "Investing", links: [["Open an Account", "/register"], ["Wallet", "/login"], ["KYC Verification", "/login"], ["Track Performance", "/login"]] },
+    { title: "Legal", links: [["Risk Disclosure", "/about"], ["Contact Support", "/contact"]] },
 ] as const;
 
+const trustBadges = [
+    { icon: ShieldCheck, label: "KYC Verified" },
+    { icon: Lock, label: "Secure Platform" },
+    { icon: Eye, label: "Transparent Operations" },
+];
+
 export function Footer() {
+    const [email, setEmail] = useState("");
+    const [submitted, setSubmitted] = useState(false);
+
+    const handleSubscribe = (e: FormEvent) => {
+        e.preventDefault();
+        if (!email.trim()) return;
+        setSubmitted(true);
+        setEmail("");
+    };
+
     return (
         <footer className="relative mt-32">
             <div className="absolute inset-x-0 -top-40 h-40 pointer-events-none"
-                style={{ background: "radial-gradient(600px 200px at 50% 100%, color-mix(in oklab, var(--brand) 25%, transparent), transparent)" }} />
-            <div className="relative border-t border-border/60 bg-gradient-to-b from-transparent to-[color-mix(in oklab,var(--brand)_6%,transparent)]">
-                <div className="mx-auto max-w-7xl px-5 lg:px-8 pt-16 pb-10">
-                    <div className="grid gap-12 lg:grid-cols-6">
-                        <div className="lg:col-span-2">
-                            <Link href="/" className="flex items-center gap-2.5">
-                                <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-20 w-auto dark:hidden" />
-                                <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-20 w-auto hidden dark:block" />
-                            </Link>
-                            <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">
-                                Institutional-grade Index investing.
-                                Transparent tiers, KYC-verified security, and real-time tracking for global investors.
-                            </p>
-                            <div className="mt-6 flex gap-2">
-                                {socialIcons.map(({ Icon, label }, i) => (
-                                    <a key={i} href="#" aria-label={label} className="grid h-9 w-9 place-items-center rounded-lg  border border-border/70 hover:bg-accent hover:text-primary transition">
-                                        <Icon className="h-4 w-4" />
-                                    </a>
+                style={{ background: "radial-gradient(600px 200px at 50% 100%, color-mix(in oklab, var(--brand) 18%, transparent), transparent)" }} />
+            <div className="relative border-t border-border/60 bg-card/40">
+                <div className="mx-auto max-w-7xl px-5 lg:px-8 pt-14 pb-10">
+                    {/* Outer bordered container matching the site's comparison-card language */}
+                    <div className="rounded-2xl border border-border/50 bg-background/60 p-6 sm:p-8 lg:p-10">
+                        <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+                            {/* Brand column */}
+                            <div className="lg:col-span-3">
+                                <Link href="/" className="flex items-center gap-2.5">
+                                    <Image src="/WhiteBlack-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto dark:hidden" />
+                                    <Image src="/dark-Photoroom.png" alt="ORVANTA Financial" width={100} height={100} className="h-16 w-auto hidden dark:block" />
+                                </Link>
+                                <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
+                                    KYC-verified Index investing with transparency at the core. Real-time
+                                    tracking, published tiers — built for investors who want to see exactly
+                                    where their capital stands.
+                                </p>
+                                <div className="mt-6 flex gap-2">
+                                    {socialIcons.map(({ Icon, label }, i) => (
+                                        <a key={i} href="#" aria-label={label} className="grid h-9 w-9 place-items-center rounded-lg border border-border/70 hover:bg-accent hover:text-brand transition">
+                                            <Icon className="h-4 w-4" />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Link columns */}
+                            <div className="lg:col-span-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
+                                {cols.map((c) => (
+                                    <div key={c.title}>
+                                        <div className="text-sm font-semibold text-foreground pb-2 border-b-2 border-brand/70 inline-block">
+                                            {c.title}
+                                        </div>
+                                        <ul className="mt-4 space-y-2.5">
+                                            {c.links.map(([label, to]) => (
+                                                <li key={label}>
+                                                    <Link href={to} className="text-sm text-muted-foreground hover:text-brand transition-colors">{label}</Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 ))}
                             </div>
-                        </div>
-                        {cols.map((c) => (
-                            <div key={c.title}>
-                                <div className="text-sm font-semibold">{c.title}</div>
-                                <ul className="mt-4 space-y-2.5">
-                                    {c.links.map(([label, to]) => (
-                                        <li key={label}>
-                                            <Link href={to} className="text-sm text-muted-foreground hover:text-foreground transition">{label}</Link>
-                                        </li>
-                                    ))}
-                                </ul>
+
+                            {/* Security First card */}
+                            <div className="lg:col-span-3">
+                                <div className="rounded-2xl border border-brand/30 bg-brand/[0.04] p-5 h-full">
+                                    <div className="grid h-10 w-10 place-items-center rounded-full bg-brand/15 text-brand">
+                                        <ShieldCheck className="h-5 w-5" />
+                                    </div>
+                                    <p className="mt-3 text-sm font-semibold text-brand">Security First</p>
+                                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                                        KYC-verified accounts, segregated wallet balances, and a fully
+                                        auditable trail on every transaction.
+                                    </p>
+                                </div>
                             </div>
-                        ))}
+                        </div>
+
+
                     </div>
 
-                    <div className="mt-14 rounded-lg glass p-5 text-xs text-muted-foreground leading-relaxed">
+                    {/* Risk disclaimer */}
+                    <div className="mt-8 rounded-lg glass p-5 text-xs text-muted-foreground leading-relaxed">
                         <strong className="text-foreground">Risk Disclaimer:</strong> Index investing
                         involves risk of loss and is not suitable for all investors. Your capital is at risk,
-                        and returns are not guaranteed. Please ensure you understand the
-                        risks involved and seek independent advice if necessary. Past performance is not indicative
-                        of future results.
+                        and returns are not guaranteed. Tier terms, minimums and maturity periods are
+                        published in your dashboard before you invest. Please ensure you understand the
+                        risks involved and seek independent advice if necessary. Past performance is not
+                        indicative of future results.
                     </div>
 
-                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-                        <div>&copy; {new Date().getFullYear()} ORVANTA Financial. All rights reserved.</div>
-                        <div className="flex gap-5">
-                            <Link href="/about">Terms</Link>
-                            <Link href="/about">Privacy</Link>
-                            <Link href="/about">Cookies</Link>
+                    {/* Bottom bar */}
+                    <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="text-xs text-muted-foreground order-2 sm:order-1">
+                            &copy; {new Date().getFullYear()} <span className="text-brand font-medium">ORVANTA Financial</span>. All rights reserved.
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 order-1 sm:order-2">
+                            {trustBadges.map((b) => (
+                                <span key={b.label} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <b.icon className="h-3.5 w-3.5 text-brand" /> {b.label}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </div>

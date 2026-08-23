@@ -7,7 +7,8 @@ const VALID_CATEGORIES = ["TECHNICAL", "BILLING", "KYC", "ACCOUNT", "OTHER"];
 
 export const createTicket = async (req, res) => {
   try {
-    const { category, subject, message, phone } = req.body;
+    const { category, subject, message } = req.body;
+    const files = req.files || [];
 
     if (!category || !VALID_CATEGORIES.includes(category)) {
       return res.status(400).json({ message: "Please select a valid category" });
@@ -18,6 +19,16 @@ export const createTicket = async (req, res) => {
     if (!message || !message.trim()) {
       return res.status(400).json({ message: "Message is required" });
     }
+    if (files.length > 3) {
+      return res.status(400).json({ message: "You can attach up to 3 screenshots" });
+    }
+
+    let screenshotUrls = [];
+    if (files.length > 0) {
+      const { uploadToR2 } = await import("../config/r2.js");
+      const uploads = await Promise.all(files.map((f) => uploadToR2(f, "support-tickets")));
+      screenshotUrls = uploads.map((u) => u.url);
+    }
 
     const ticket = await getPrisma().supportTicket.create({
       data: {
@@ -25,7 +36,7 @@ export const createTicket = async (req, res) => {
         category,
         subject: subject.trim(),
         message: message.trim(),
-        phone: phone && phone.trim() ? phone.trim() : null,
+        screenshotUrls,
       },
     });
 

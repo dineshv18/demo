@@ -8,21 +8,28 @@ import {
   platformWalletAPI,
   type PlatformWalletData, type PlatformLedgerEntry, type PlatformWithdrawalRecord,
 } from "../services/api";
+import { Card } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "../components/ui/table";
 
 type Tab = "ledger" | "withdrawals";
 
 function statusBadge(status: PlatformWithdrawalRecord["status"]) {
   const cfg: Record<PlatformWithdrawalRecord["status"], { label: string; color: string; bg: string; icon: any }> = {
-    PENDING: { label: "Pending", color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30", icon: IconClock },
-    COMPLETED: { label: "Completed", color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30", icon: IconCheck },
-    REJECTED: { label: "Rejected", color: "text-red-600", bg: "bg-red-100 dark:bg-red-900/30", icon: IconX },
+    PENDING: { label: "Pending", color: "text-amber-700", bg: "bg-amber-100", icon: IconClock },
+    COMPLETED: { label: "Completed", color: "text-[#00A94F]", bg: "bg-[#EAF7E8]", icon: IconCheck },
+    REJECTED: { label: "Rejected", color: "text-red-700", bg: "bg-red-100", icon: IconX },
   };
   const s = cfg[status];
   const Icon = s.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.bg} ${s.color}`}>
+    <Badge className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.bg} ${s.color}`}>
       <Icon size={12} /> {s.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -108,84 +115,84 @@ export default function PlatformWallet() {
   const balance = wallet ? parseFloat(wallet.balance) : 0;
 
   if (loading) {
-    return <div className="p-6 text-center text-sm text-gray-500">Loading...</div>;
+    return <div className="p-6 text-center text-sm text-[#68736E]">Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
       {toast && (
-        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white ${toast.type === "success" ? "bg-[#00A94F]" : "bg-red-600"}`}>
           {toast.message}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Wallet</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-[#10211D]">Platform Wallet</h1>
+        <p className="mt-1 text-sm text-[#68736E]">
           Accumulated maintenance-fee share from Index investments where the referral chain didn't cover all levels.
         </p>
       </div>
 
       {/* Balance Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+      <Card className="rounded-2xl border border-[#DDE4DE] p-6 shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="grid h-14 w-14 place-items-center rounded-xl bg-violet-500/10">
-              <IconWallet className="h-7 w-7 text-violet-600" />
+            <div className="grid h-14 w-14 place-items-center rounded-xl bg-[#EAF7E8]">
+              <IconWallet className="h-7 w-7 text-[#00A94F]" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Platform Balance</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-0.5">${balance.toFixed(2)}</p>
+              <p className="text-sm text-[#68736E]">Platform Balance</p>
+              <p className="text-3xl font-bold text-[#10211D] mt-0.5">${balance.toFixed(2)}</p>
             </div>
           </div>
-          <button
+          <Button
             onClick={() => setShowWithdrawForm((v) => !v)}
             disabled={balance <= 0 || !!pendingWithdrawal}
             title={pendingWithdrawal ? "A withdrawal request is already pending" : balance <= 0 ? "No balance" : undefined}
-            className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold"
+            className="px-5 py-2.5 rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold"
           >
             {showWithdrawForm ? "Cancel" : "Request Withdrawal"}
-          </button>
+          </Button>
         </div>
 
         {pendingWithdrawal && (
-          <div className="mt-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10 p-4 text-sm text-amber-700 dark:text-amber-300">
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
             A withdrawal of <strong>${parseFloat(pendingWithdrawal.amount).toFixed(2)}</strong> to <strong>{pendingWithdrawal.destination}</strong> is pending review.
           </div>
         )}
 
         {showWithdrawForm && (
-          <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+          <div className="mt-4 rounded-xl border border-[#DDE4DE] p-4 space-y-3">
             <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Amount ($) *</label>
-              <input type="number" step="0.01" min="0" max={balance} value={amount} onChange={(e) => setAmount(e.target.value)}
+              <label className="text-xs font-medium text-[#68736E]">Amount ($) *</label>
+              <Input type="number" step="0.01" min="0" max={balance} value={amount} onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+                className="mt-1 rounded-xl border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus-visible:ring-[#00A94F]/50" />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Destination (bank / UPI details) *</label>
-              <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)}
+              <label className="text-xs font-medium text-[#68736E]">Destination (bank / UPI details) *</label>
+              <Input type="text" value={destination} onChange={(e) => setDestination(e.target.value)}
                 placeholder="e.g. bank account or UPI ID"
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+                className="mt-1 rounded-xl border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus-visible:ring-[#00A94F]/50" />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Note (optional)</label>
+              <label className="text-xs font-medium text-[#68736E]">Note (optional)</label>
               <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
-                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none" />
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus:outline-none focus:ring-2 focus:ring-[#00A94F]/50 resize-none" />
             </div>
-            <button onClick={handleRequestWithdrawal} disabled={submitting}
-              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold">
+            <Button onClick={handleRequestWithdrawal} disabled={submitting}
+              className="px-5 py-2.5 rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 disabled:opacity-50 text-white text-sm font-semibold">
               {submitting ? "Submitting..." : "Submit Request"}
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Tabs */}
-      <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900">
+      <div className="inline-flex rounded-xl border border-[#DDE4DE] p-1 bg-white">
         {(["ledger", "withdrawals"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${tab === t ? "bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${tab === t ? "bg-[#EAF7E8] text-[#00A94F]" : "text-[#68736E] hover:bg-[#F3F8EF]"}`}>
             {t === "ledger" && <IconCoin size={16} />}
             {t === "withdrawals" && <IconArrowUpRight size={16} />}
             {t === "ledger" ? "Ledger" : "Withdrawal Requests"}
@@ -194,96 +201,98 @@ export default function PlatformWallet() {
       </div>
 
       {tab === "ledger" && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <Card className="rounded-2xl border border-[#DDE4DE] overflow-hidden shadow-[0_8px_30px_rgba(16,33,29,0.05)] py-0">
           {ledger.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <IconCoin className="h-8 w-8 text-gray-400 mb-2" />
-              <p className="text-sm font-medium text-gray-900 dark:text-white">No ledger entries yet</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Fee credits appear here when a referral chain doesn't cover all levels.</p>
+              <IconCoin className="h-8 w-8 text-[#89938E] mb-2" />
+              <p className="text-sm font-medium text-[#10211D]">No ledger entries yet</p>
+              <p className="text-xs text-[#68736E] mt-1">Fee credits appear here when a referral chain doesn't cover all levels.</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Type</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Investor</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Description</th>
-                  <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Amount</th>
-                  <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {ledger.map((e) => (
-                  <tr key={e.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${e.type === "FEE_CREDIT" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                        {e.type === "FEE_CREDIT" ? <IconArrowDownLeft size={14} /> : <IconArrowUpRight size={14} />}
-                        {e.type === "FEE_CREDIT" ? "Fee Credit" : "Withdrawal"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      {e.investor ? (
-                        <div>
-                          <p className="text-gray-900 dark:text-white font-medium text-xs">{e.investor.name}</p>
-                          <p className="text-gray-500 dark:text-gray-400 text-[11px]">{e.investor.email}</p>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs max-w-[240px] truncate">{e.description || "-"}</td>
-                    <td className={`px-5 py-4 text-right font-semibold ${e.type === "FEE_CREDIT" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                      {e.type === "FEE_CREDIT" ? "+" : "-"}${parseFloat(e.amount).toFixed(2)}
-                    </td>
-                    <td className="px-5 py-4 text-right text-gray-500 dark:text-gray-400 text-xs">{fmtDate(e.createdAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#F3F8EF]">
+                    <TableHead>Type</TableHead>
+                    <TableHead>Investor</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ledger.map((e) => (
+                    <TableRow key={e.id}>
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${e.type === "FEE_CREDIT" ? "text-[#00A94F]" : "text-red-600"}`}>
+                          {e.type === "FEE_CREDIT" ? <IconArrowDownLeft size={14} /> : <IconArrowUpRight size={14} />}
+                          {e.type === "FEE_CREDIT" ? "Fee Credit" : "Withdrawal"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {e.investor ? (
+                          <div>
+                            <p className="text-[#10211D] font-medium text-xs">{e.investor.name}</p>
+                            <p className="text-[#68736E] text-[11px]">{e.investor.email}</p>
+                          </div>
+                        ) : (
+                          <span className="text-[#89938E] text-xs">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-[#68736E] text-xs max-w-[240px] truncate">{e.description || "-"}</TableCell>
+                      <TableCell className={`text-right font-semibold ${e.type === "FEE_CREDIT" ? "text-[#00A94F]" : "text-red-600"}`}>
+                        {e.type === "FEE_CREDIT" ? "+" : "-"}${parseFloat(e.amount).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right text-[#68736E] text-xs">{fmtDate(e.createdAt)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
-        </div>
+        </Card>
       )}
 
       {tab === "withdrawals" && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <Card className="rounded-2xl border border-[#DDE4DE] overflow-hidden shadow-[0_8px_30px_rgba(16,33,29,0.05)] py-0">
           {withdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <IconArrowUpRight className="h-8 w-8 text-gray-400 mb-2" />
-              <p className="text-sm font-medium text-gray-900 dark:text-white">No withdrawal requests yet</p>
+              <IconArrowUpRight className="h-8 w-8 text-[#89938E] mb-2" />
+              <p className="text-sm font-medium text-[#10211D]">No withdrawal requests yet</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-800">
+            <div className="divide-y divide-[#DDE4DE]">
               {withdrawals.map((w) => (
                 <div key={w.id} className="p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-gray-900 dark:text-white">${parseFloat(w.amount).toFixed(2)}</p>
+                      <p className="font-semibold text-[#10211D]">${parseFloat(w.amount).toFixed(2)}</p>
                       {statusBadge(w.status)}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">To: {w.destination}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Requested by {w.requester?.name || "-"} on {fmtDate(w.createdAt)}</p>
+                    <p className="text-xs text-[#68736E] mt-1">To: {w.destination}</p>
+                    <p className="text-xs text-[#68736E]">Requested by {w.requester?.name || "-"} on {fmtDate(w.createdAt)}</p>
                     {w.processedAt && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Processed by {w.processor?.name || "-"} on {fmtDate(w.processedAt)}</p>
+                      <p className="text-xs text-[#68736E]">Processed by {w.processor?.name || "-"} on {fmtDate(w.processedAt)}</p>
                     )}
-                    {w.note && <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 italic">Note: {w.note}</p>}
+                    {w.note && <p className="text-xs text-[#68736E] mt-1 italic">Note: {w.note}</p>}
                   </div>
                   {w.status === "PENDING" && (
                     <div className="flex gap-2 shrink-0">
-                      <button onClick={() => handleProcess(w.id, "approve")} disabled={processingId === w.id}
-                        className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold">
+                      <Button onClick={() => handleProcess(w.id, "approve")} disabled={processingId === w.id}
+                        className="px-4 py-2 rounded-xl bg-[#00A94F] hover:bg-[#00A94F]/90 disabled:opacity-50 text-white text-xs font-semibold">
                         Approve
-                      </button>
-                      <button onClick={() => handleProcess(w.id, "reject")} disabled={processingId === w.id}
-                        className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-semibold">
+                      </Button>
+                      <Button onClick={() => handleProcess(w.id, "reject")} disabled={processingId === w.id}
+                        className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-semibold">
                         Reject
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

@@ -21,27 +21,27 @@ export function AuthBrandPanel({
 }) {
   return (
     <div className="relative hidden lg:flex lg:w-[52%] overflow-hidden rounded-r-[1.75rem]">
-      {/* Base gradient — brand violet, consistent with the app's --brand tokens */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1b1330] via-[#241a42] to-[#150f2b]" />
+      {/* Base gradient — dark green, consistent with the app's --brand tokens */}
+      <div className="absolute inset-0 bg-[#10211D]" />
 
       {/* Soft glow field */}
       <div className="absolute inset-0 opacity-70">
         <svg viewBox="0 0 800 700" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
           <defs>
             <radialGradient id="authGlow1" cx="30%" cy="20%" r="60%">
-              <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+              <stop offset="0%" stopColor="#00B956" stopOpacity="0.30" />
+              <stop offset="100%" stopColor="#00B956" stopOpacity="0" />
             </radialGradient>
             <radialGradient id="authGlow2" cx="80%" cy="75%" r="55%">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.28" />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+              <stop offset="0%" stopColor="#00A94F" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#00A94F" stopOpacity="0" />
             </radialGradient>
           </defs>
           <rect width="800" height="700" fill="url(#authGlow1)" />
           <rect width="800" height="700" fill="url(#authGlow2)" />
-          <circle cx="620" cy="180" r="180" fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="1" />
-          <circle cx="620" cy="180" r="260" fill="none" stroke="rgba(167,139,250,0.07)" strokeWidth="1" />
-          <circle cx="150" cy="560" r="140" fill="none" stroke="rgba(96,165,250,0.10)" strokeWidth="1" />
+          <circle cx="620" cy="180" r="180" fill="none" stroke="rgba(0,185,86,0.14)" strokeWidth="1" />
+          <circle cx="620" cy="180" r="260" fill="none" stroke="rgba(0,185,86,0.08)" strokeWidth="1" />
+          <circle cx="150" cy="560" r="140" fill="none" stroke="rgba(0,185,86,0.10)" strokeWidth="1" />
         </svg>
       </div>
 
@@ -54,7 +54,7 @@ export function AuthBrandPanel({
         </div>
 
         <div>
-          <h1 className="font-display text-4xl xl:text-5xl font-bold leading-[1.1] mb-5">
+          <h1 className="font-display text-4xl xl:text-5xl font-normal tracking-tight leading-[1.1] mb-5">
             {title}
           </h1>
           <p className="text-white/60 text-base max-w-sm leading-relaxed">

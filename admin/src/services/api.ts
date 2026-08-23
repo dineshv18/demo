@@ -352,7 +352,7 @@ export interface SupportTicket {
   category: SupportCategory;
   subject: string;
   message: string;
-  phone: string | null;
+  screenshotUrls: string[];
   status: SupportTicketStatus;
   adminNote: string | null;
   resolvedBy: string | null;

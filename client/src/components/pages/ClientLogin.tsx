@@ -9,6 +9,10 @@ import {
   IconEye, IconEyeOff,
 } from "@tabler/icons-react";
 import AuthShell, { AuthLogo } from "@/components/site/AuthShell";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface FormErrors {
   email?: string;
@@ -83,9 +87,9 @@ export default function ClientLogin() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <Card className="p-6 sm:p-8 gap-0 shadow-sm rounded-2xl">
           <div className="text-center space-y-1.5 mb-6">
-            <h2 className="font-display text-2xl font-bold tracking-tight">Sign In</h2>
+            <h2 className="font-display text-2xl font-semibold tracking-tight">Sign In</h2>
             <p className="text-muted-foreground text-sm">Enter your credentials to access your account</p>
           </div>
 
@@ -98,18 +102,14 @@ export default function ClientLogin() {
 
           <form className="space-y-5" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <div className="relative">
                 <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <input
+                <Input
                   id="email" type="email" value={email}
                   onChange={(e) => { setEmail(e.target.value); clearFieldError("email"); }}
                   placeholder="you@example.com"
-                  className={`w-full rounded-lg border pl-10 pr-4 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all bg-background ${
-                    errors.email
-                      ? "border-destructive focus:ring-destructive/30 focus:border-destructive"
-                      : "border-border focus:ring-brand/30 focus:border-brand/50"
-                  }`}
+                  className={`pl-10 ${errors.email ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
               </div>
               {errors.email && (
@@ -120,18 +120,14 @@ export default function ClientLogin() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium">Password</label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative">
                 <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <input
+                <Input
                   id="password" type={showPassword ? "text" : "password"} value={password}
                   onChange={(e) => { setPassword(e.target.value); clearFieldError("password"); }}
                   placeholder="Enter your password"
-                  className={`w-full rounded-lg border pl-10 pr-10 py-2.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all bg-background ${
-                    errors.password
-                      ? "border-destructive focus:ring-destructive/30 focus:border-destructive"
-                      : "border-border focus:ring-brand/30 focus:border-brand/50"
-                  }`}
+                  className={`pl-10 pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
                 <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                   {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
@@ -159,9 +155,9 @@ export default function ClientLogin() {
               </Link>
             </div>
 
-            <button
+            <Button
               type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg btn-glow btn-glow-hover py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full gap-2 btn-glow btn-glow-hover"
             >
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />
@@ -171,9 +167,9 @@ export default function ClientLogin() {
                   <IconArrowRight className="h-4 w-4" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}

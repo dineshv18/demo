@@ -15,6 +15,8 @@ import {
   IconTrendingUp, IconInfoCircle, IconChartLine, IconGift,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const currencySymbol = () => "$";
 
@@ -50,8 +52,8 @@ export default function ClientDashboard() {
     tooltipBg: "#ffffff",
     tooltipBorder: "rgba(0,0,0,0.1)",
     tooltipText: "#1e293b",
-    stroke: "#4A3AA7",
-    gradientStart: "#4A3AA7",
+    stroke: "#00A94F",
+    gradientStart: "#00A94F",
   }), []);
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function ClientDashboard() {
     <div className="space-y-6">
       {/* KYC Banners */}
       {(kycStatus === "NOT_STARTED" || kycStatus === "REJECTED") && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5">
+        <Card className="flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border-amber-500/30 bg-amber-500/10 py-4 sm:py-5 px-4 sm:px-5 flex shadow-sm">
           <div className="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
             <IconShield className="h-5 w-5 text-amber-500" />
           </div>
@@ -158,19 +160,19 @@ export default function ClientDashboard() {
           <Link href="/dashboard/kyc" className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors btn-glow btn-glow-hover w-full sm:w-auto text-center">
             Complete KYC
           </Link>
-        </div>
+        </Card>
       )}
 
       {kycStatus === "PENDING" && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 sm:p-5">
-          <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0">
-            <IconClock className="h-5 w-5 text-blue-500" />
+        <Card className="flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border-teal-500/30 bg-teal-500/10 py-4 sm:py-5 px-4 sm:px-5 flex shadow-sm">
+          <div className="h-10 w-10 rounded-lg bg-teal-500/20 flex items-center justify-center shrink-0">
+            <IconClock className="h-5 w-5 text-teal-500" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground">KYC Under Review</h3>
             <p className="text-xs sm:text-sm text-muted-foreground">Your identity verification is being reviewed. This usually takes 12-24 working hours.</p>
           </div>
-        </div>
+        </Card>
       )}
 
       <div>
@@ -180,96 +182,120 @@ export default function ClientDashboard() {
 
       {/* Top Stats: Wallet / Index / Bonus */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/dashboard/wallet" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-blue-500/10 shrink-0">
-              <IconWallet className="h-5 w-5 text-blue-500" />
+        <Link href="/dashboard/wallet">
+          <Card className="p-4 sm:p-5 gap-0 hover:border-brand/30 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="grid h-11 w-11 place-items-center rounded-full bg-teal-500/10 shrink-0">
+                <IconWallet className="h-5 w-5 text-teal-500" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Wallet</p>
             </div>
-            <p className="text-sm font-medium text-muted-foreground">Wallet</p>
-          </div>
-          <p className="text-2xl font-bold text-foreground">{sym}{balance.toFixed(2)}</p>
-          <p className="text-xs text-muted-foreground mt-1">Available balance</p>
+            <p className="text-2xl font-bold text-foreground">{sym}{balance.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Available balance</p>
+          </Card>
         </Link>
 
-        <Link href="/dashboard/index" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
-              <IconChartLine className="h-5 w-5 text-brand" />
+        <Link href="/dashboard/index">
+          <Card className="p-4 sm:p-5 gap-0 hover:border-brand/30 hover:shadow-md transition-all">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
+                <IconChartLine className="h-5 w-5 text-brand" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Index</p>
             </div>
-            <p className="text-sm font-medium text-muted-foreground">Index</p>
-          </div>
-          {activeInvestment ? (
-            <>
-              <p className="text-2xl font-bold text-foreground">{sym}{parseFloat(activeInvestment.netAmount || activeInvestment.amount).toFixed(2)}</p>
-              <p className="text-xs text-muted-foreground mt-1">{activeInvestment.tier.label} · Active</p>
-            </>
-          ) : (
-            <>
-              <p className="text-2xl font-bold text-muted-foreground">{sym}0.00</p>
-              <p className="text-xs text-muted-foreground mt-1">No active investment</p>
-            </>
-          )}
+            {activeInvestment ? (
+              <>
+                <p className="text-2xl font-bold text-foreground">{sym}{parseFloat(activeInvestment.netAmount || activeInvestment.amount).toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{activeInvestment.tier.label} · Active</p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-muted-foreground">{sym}0.00</p>
+                <p className="text-xs text-muted-foreground mt-1">No active investment</p>
+              </>
+            )}
+          </Card>
         </Link>
 
-        <Link href="/dashboard/wallet" className="bg-card rounded-2xl border border-border p-4 sm:p-5 hover:border-brand/30 transition-colors">
+        <Card className="p-4 sm:p-5 gap-0">
           <div className="flex items-center gap-3 mb-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-purple-500/10 shrink-0">
-              <IconGift className="h-5 w-5 text-purple-500" />
+            <div className="grid h-11 w-11 place-items-center rounded-full bg-amber-500/10 shrink-0">
+              <IconGift className="h-5 w-5 text-amber-500" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">Bonus</p>
           </div>
           <p className="text-2xl font-bold text-foreground">{sym}{bonusBalance.toFixed(2)}</p>
           <p className="text-xs text-muted-foreground mt-1">From referral earnings</p>
-        </Link>
+          <div className="flex gap-2 mt-3">
+            <Link
+              href="/dashboard/wallet?action=bonus-add"
+              className={`flex-1 text-center rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors min-h-10 flex items-center justify-center ${
+                bonusBalance > 0 ? "bg-brand text-white hover:bg-brand/90" : "bg-muted text-muted-foreground pointer-events-none"
+              }`}
+            >
+              Add to Wallet
+            </Link>
+            <Link
+              href="/dashboard/wallet?action=bonus-withdraw"
+              className={`flex-1 text-center rounded-lg border px-3 py-2.5 text-xs font-semibold transition-colors min-h-10 flex items-center justify-center ${
+                bonusBalance > 0 ? "border-border hover:bg-accent text-foreground" : "border-border text-muted-foreground pointer-events-none opacity-60"
+              }`}
+            >
+              Withdraw
+            </Link>
+          </div>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column: User Card + Stats */}
         <div className="space-y-4">
           {/* User Profile Card — clickable → Profile */}
-          <Link href="/dashboard/profile" className="block bg-card rounded-2xl border border-border p-4 sm:p-6 hover:border-brand/30 transition-colors cursor-pointer">
-            <div className="flex items-center gap-3 sm:gap-4 mb-4">
-              <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand shrink-0">
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
+          <Link href="/dashboard/profile" className="block">
+            <Card className="p-4 sm:p-6 gap-0 hover:border-brand/30 hover:shadow-md transition-all cursor-pointer">
+              <div className="flex items-center gap-3 sm:gap-4 mb-4">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand shrink-0">
+                  {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display text-sm sm:text-base font-bold text-foreground truncate">{user?.name || "User"}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display text-sm sm:text-base font-bold text-foreground truncate">{user?.name || "User"}</h3>
-                <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Role</span>
+                  <span className="font-medium text-foreground capitalize">{user?.role?.toLowerCase() || "User"}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">KYC Status</span>
+                  <Badge variant="outline" className={`gap-1 border-transparent ${badge.bg} ${badge.color}`}>
+                    <BadgeIcon className="h-3.5 w-3.5" /> {badge.label}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Currency</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-teal-500">
+                    $ USD
+                    {wallet?.currency && <IconLock className="h-3 w-3 opacity-40" />}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Member Since</span>
+                  <span className="font-medium text-foreground text-xs">
+                    {user ? new Date((user as unknown as Record<string, string>).createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Role</span>
-                <span className="font-medium text-foreground capitalize">{user?.role?.toLowerCase() || "User"}</span>
+              <div className="mt-4 pt-3 border-t border-border text-center">
+                <span className="text-xs font-medium text-brand hover:text-brand/80 transition-colors">View Profile →</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">KYC Status</span>
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${badge.color}`}>
-                  <BadgeIcon className="h-3.5 w-3.5" /> {badge.label}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Currency</span>
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-500">
-                  $ USD
-                  {wallet?.currency && <IconLock className="h-3 w-3 opacity-40" />}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Member Since</span>
-                <span className="font-medium text-foreground text-xs">
-                  {user ? new Date((user as unknown as Record<string, string>).createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
-                </span>
-              </div>
-            </div>
-            <div className="mt-4 pt-3 border-t border-border text-center">
-              <span className="text-xs font-medium text-brand hover:text-brand/80 transition-colors">View Profile →</span>
-            </div>
+            </Card>
           </Link>
 
           {/* Quick Stats */}
-          <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground mb-2">Quick Stats</h3>
+          <Card className="p-4 sm:p-5 gap-3">
+            <h3 className="text-sm font-semibold text-foreground mb-1">Quick Stats</h3>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Total Deposits</span>
               <span className="text-sm font-bold text-emerald-500">{sym}{totalDeposits.toFixed(2)}</span>
@@ -290,38 +316,40 @@ export default function ClientDashboard() {
                 <span className="text-sm font-bold text-muted-foreground">{sym}{frozen.toFixed(2)}</span>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Referral Stats */}
-          <Link href="/dashboard/referral" className="block bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-3 hover:border-brand/30 transition-colors">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <IconUserPlus className="h-4 w-4 text-brand" /> Referrals
-              </h3>
-              <span className="text-[10px] font-medium text-brand bg-brand/10 px-2 py-0.5 rounded-full">{referralStats?.commissionRate || 2}% commission</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Total Referrals</span>
-              <span className="text-sm font-bold text-foreground">{referralStats?.totalReferrals || 0}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Deposited</span>
-              <span className="text-sm font-bold text-emerald-500">{referralStats?.deposited || 0}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Total Earned</span>
-              <span className="text-sm font-bold text-brand">{sym}{(referralStats?.totalCommission || 0).toFixed(2)}</span>
-            </div>
-            <div className="pt-1 text-center">
-              <span className="text-[10px] font-medium text-muted-foreground hover:text-brand transition-colors">View Referral Dashboard →</span>
-            </div>
+          <Link href="/dashboard/referral" className="block">
+            <Card className="p-4 sm:p-5 gap-3 hover:border-brand/30 hover:shadow-md transition-all">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <IconUserPlus className="h-4 w-4 text-brand" /> Referrals
+                </h3>
+                <Badge className="bg-brand/10 text-brand border-transparent">{referralStats?.commissionRate || 2}% commission</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Total Referrals</span>
+                <span className="text-sm font-bold text-foreground">{referralStats?.totalReferrals || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Deposited</span>
+                <span className="text-sm font-bold text-emerald-500">{referralStats?.deposited || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Total Earned</span>
+                <span className="text-sm font-bold text-brand">{sym}{(referralStats?.totalCommission || 0).toFixed(2)}</span>
+              </div>
+              <div className="pt-1 text-center">
+                <span className="text-[10px] font-medium text-muted-foreground hover:text-brand transition-colors">View Referral Dashboard →</span>
+              </div>
+            </Card>
           </Link>
         </div>
 
         {/* Right Column: Balance + Chart + Recent Transactions */}
         <div className="lg:col-span-2 space-y-4">
           {/* Balance Card */}
-          <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+          <Card className="p-4 sm:p-6 gap-0">
             <div className="flex items-end justify-between mb-4">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Balance</p>
@@ -360,10 +388,10 @@ export default function ClientDashboard() {
                 <div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading chart...</div>
               )}
             </div>
-          </div>
+          </Card>
 
           {/* Recent Transactions */}
-          <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+          <Card className="p-4 sm:p-6 gap-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base sm:text-lg font-semibold text-foreground">Recent Transactions</h2>
               <Link href="/dashboard/wallet" className="text-xs font-medium text-brand hover:underline">View All</Link>
@@ -390,9 +418,9 @@ export default function ClientDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-foreground">{isDeposit ? "Deposit" : "Withdrawal"}</p>
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md ${st.bg} ${st.color}`}>
+                          <Badge variant="outline" className={`gap-1 border-0 text-[10px] px-1.5 py-0.5 ${st.bg} ${st.color}`}>
                             <StIcon className="h-2.5 w-2.5" /> {st.label}
-                          </span>
+                          </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{formatDateTime(tx.createdAt)}</p>
                       </div>
@@ -404,12 +432,12 @@ export default function ClientDashboard() {
                 })}
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
 
       {/* Referral Overview */}
-      <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
+      <Card className="p-4 sm:p-6 gap-0">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-1.5">
             Referral Overview
@@ -480,7 +508,7 @@ export default function ClientDashboard() {
             <p className="text-sm text-muted-foreground">No referral commission data yet</p>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

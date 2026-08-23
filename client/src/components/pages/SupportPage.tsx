@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   IconLoader2, IconAlertCircle, IconCheck, IconHeadset,
   IconClock, IconCircleCheck, IconCircleX, IconProgress,
+  IconUpload, IconX, IconPhoto,
 } from "@tabler/icons-react";
 import { supportAPI, type SupportCategory, type SupportTicket } from "@/lib/api";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CATEGORIES: { value: SupportCategory; label: string }[] = [
   { value: "TECHNICAL", label: "Technical" },
@@ -17,29 +25,39 @@ const CATEGORIES: { value: SupportCategory; label: string }[] = [
 
 const STATUS_META: Record<SupportTicket["status"], { label: string; color: string; bg: string; icon: typeof IconClock }> = {
   OPEN: { label: "Open", color: "text-amber-600", bg: "bg-amber-100", icon: IconClock },
-  IN_PROGRESS: { label: "In Progress", color: "text-blue-600", bg: "bg-blue-100", icon: IconProgress },
+  IN_PROGRESS: { label: "In Progress", color: "text-teal-600", bg: "bg-teal-100", icon: IconProgress },
   RESOLVED: { label: "Resolved", color: "text-emerald-600", bg: "bg-emerald-100", icon: IconCircleCheck },
   CLOSED: { label: "Closed", color: "text-gray-600", bg: "bg-gray-100", icon: IconCircleX },
 };
+
+const MAX_SCREENSHOTS = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function StatusBadge({ status }: { status: SupportTicket["status"] }) {
   const s = STATUS_META[status];
   const Icon = s.icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${s.color} ${s.bg}`}>
+    <Badge variant="outline" className={`gap-1 border-transparent font-semibold ${s.color} ${s.bg}`}>
       <Icon size={10} /> {s.label}
-    </span>
+    </Badge>
   );
+}
+
+interface ScreenshotFile {
+  file: File;
+  preview: string;
 }
 
 export default function SupportPage() {
   const [category, setCategory] = useState<SupportCategory>("TECHNICAL");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [phone, setPhone] = useState("");
+  const [screenshots, setScreenshots] = useState<ScreenshotFile[]>([]);
+  const [dragActive, setDragActive] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(true);
@@ -58,6 +76,51 @@ export default function SupportPage() {
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
+  // Revoke object URLs on unmount / when replaced to avoid leaking memory.
+  useEffect(() => {
+    return () => { screenshots.forEach((s) => URL.revokeObjectURL(s.preview)); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addFiles = (fileList: FileList | File[]) => {
+    const incoming = Array.from(fileList);
+    const room = MAX_SCREENSHOTS - screenshots.length;
+    if (room <= 0) {
+      setError(`You can attach up to ${MAX_SCREENSHOTS} screenshots`);
+      return;
+    }
+    const accepted: ScreenshotFile[] = [];
+    for (const file of incoming) {
+      if (accepted.length >= room) break;
+      if (!file.type.startsWith("image/")) {
+        setError("Only image files are allowed");
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        setError("Each screenshot must be under 5MB");
+        continue;
+      }
+      accepted.push({ file, preview: URL.createObjectURL(file) });
+    }
+    if (accepted.length > 0) {
+      setError("");
+      setScreenshots((prev) => [...prev, ...accepted]);
+    }
+  };
+
+  const removeScreenshot = (index: number) => {
+    setScreenshots((prev) => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+  };
+
   const handleSubmit = async () => {
     if (!subject.trim()) { setError("Please enter a subject"); return; }
     if (!message.trim()) { setError("Please describe your issue"); return; }
@@ -69,13 +132,14 @@ export default function SupportPage() {
         category,
         subject: subject.trim(),
         message: message.trim(),
-        phone: phone.trim() || undefined,
+        screenshots: screenshots.map((s) => s.file),
       });
       setSuccess(res.message);
       setSubject("");
       setMessage("");
-      setPhone("");
       setCategory("TECHNICAL");
+      screenshots.forEach((s) => URL.revokeObjectURL(s.preview));
+      setScreenshots([]);
       await fetchTickets();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit request");
@@ -100,7 +164,7 @@ export default function SupportPage() {
       </div>
 
       {/* Submit Form */}
-      <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4">
+      <Card className="p-5 sm:p-6 gap-4">
         {error && (
           <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
             <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {error}
@@ -112,76 +176,118 @@ export default function SupportPage() {
           </div>
         )}
 
-        <div>
-          <label className="text-xs font-medium text-muted-foreground">Category *</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as SupportCategory)}
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Category *</Label>
+          <Select value={category} onValueChange={(v) => setCategory(v as SupportCategory)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div>
-          <label className="text-xs font-medium text-muted-foreground">Subject *</label>
-          <input
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Subject *</Label>
+          <Input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Briefly describe your issue"
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 bg-background focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all"
           />
         </div>
 
-        <div>
-          <label className="text-xs font-medium text-muted-foreground">Message *</label>
-          <textarea
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Message *</Label>
+          <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Explain your issue in detail..."
             rows={5}
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 bg-background focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all resize-none"
+            className="resize-none"
           />
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground">Phone Number (optional)</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Add a number if you'd prefer a call back"
-            className="mt-1 w-full rounded-lg border border-border px-4 py-2.5 text-sm placeholder:text-muted-foreground/40 bg-background focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-all"
-          />
-          <p className="text-[11px] text-muted-foreground mt-1">
-            If provided, our team may contact you directly on this number.
-          </p>
+          <Label className="text-xs font-medium text-muted-foreground">
+            Screenshots (optional, up to {MAX_SCREENSHOTS})
+          </Label>
+
+          {screenshots.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {screenshots.map((s, i) => (
+                <div key={i} className="relative group rounded-lg overflow-hidden border border-border aspect-square">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.preview} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeScreenshot(i)}
+                    className="absolute top-1 right-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                  >
+                    <IconX className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {screenshots.length < MAX_SCREENSHOTS && (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={handleDrop}
+              className={`mt-2 flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
+                dragActive ? "border-brand bg-brand/5" : "border-border hover:border-brand/40 hover:bg-accent/40"
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ""; }}
+              />
+              {screenshots.length === 0 ? (
+                <IconUpload className="h-5 w-5 text-muted-foreground/60" />
+              ) : (
+                <IconPhoto className="h-5 w-5 text-muted-foreground/60" />
+              )}
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-brand">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-[10px] text-muted-foreground/70">
+                PNG, JPG, WEBP up to 5MB — {MAX_SCREENSHOTS - screenshots.length} more allowed
+              </p>
+            </div>
+          )}
         </div>
 
-        <button
+        <Button
           onClick={handleSubmit}
           disabled={submitting}
-          className="w-full rounded-lg btn-glow btn-glow-hover px-5 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full gap-2 btn-glow btn-glow-hover"
         >
           {submitting ? (
-            <span className="flex items-center justify-center gap-2">
+            <>
               <IconLoader2 className="h-4 w-4 animate-spin" /> Submitting...
-            </span>
+            </>
           ) : (
             "Submit Request"
           )}
-        </button>
+        </Button>
 
         <p className="text-[11px] text-muted-foreground text-center">
           Our team will get in touch within 2-3 working hours on business days.
         </p>
-      </div>
+      </Card>
 
       {/* My Requests */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <Card className="overflow-hidden p-0 gap-0">
         <div className="px-5 sm:px-6 py-4 border-b border-border">
           <h2 className="text-base font-semibold text-foreground">My Requests</h2>
         </div>
@@ -208,6 +314,16 @@ export default function SupportPage() {
                   <StatusBadge status={t.status} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{t.message}</p>
+                {t.screenshotUrls?.length > 0 && (
+                  <div className="flex gap-2 mt-2">
+                    {t.screenshotUrls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block h-12 w-12 rounded-lg overflow-hidden border border-border hover:border-brand/40 transition-colors">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
                 {t.adminNote && (
                   <div className="mt-2 rounded-lg bg-brand/5 border border-brand/20 px-3 py-2">
                     <p className="text-[11px] font-medium text-brand mb-0.5">Response from support</p>
@@ -218,7 +334,7 @@ export default function SupportPage() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
