@@ -199,7 +199,7 @@ export default function PlatformPage() {
                 <Reveal delay={0.15}>
                     <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                         Exact tier ranges and current maturity terms are available once you sign in —
-                        they're kept current in your dashboard rather than a static marketing page.
+                        they&apos;re kept current in your dashboard rather than a static marketing page.
                     </p>
                 </Reveal>
             </div>

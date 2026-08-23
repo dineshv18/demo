@@ -123,7 +123,37 @@ export function Footer() {
                             </div>
                         </div>
 
-
+                        {/* Newsletter row */}
+                        <div className="mt-10 rounded-2xl border border-border/50 bg-card/60 p-5 sm:p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
+                                    <Mail className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">Stay updated with ORVANTA</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">Platform updates and important account notices, straight to your inbox.</p>
+                                </div>
+                            </div>
+                            {submitted ? (
+                                <p className="text-sm font-medium text-brand shrink-0">Thanks — you&apos;re on the list.</p>
+                            ) : (
+                                <form onSubmit={handleSubscribe} className="flex gap-2 shrink-0">
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="w-full sm:w-56 rounded-lg border border-border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium btn-glow btn-glow-hover shrink-0"
+                                    >
+                                        Subscribe <ArrowRight className="h-3.5 w-3.5" />
+                                    </button>
+                                </form>
+                            )}
+                        </div>
                     </div>
 
                     {/* Risk disclaimer */}

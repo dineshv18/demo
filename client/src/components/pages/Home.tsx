@@ -3,19 +3,15 @@
 import Link from "next/link";
 
 import {
-    ArrowRight, PlayCircle, Sparkles, ShieldCheck, UserCheck, Wallet2, LineChart, Check, X, Minus,
+    ArrowRight, PlayCircle, Sparkles, ShieldCheck, UserCheck, LineChart, Check, X, Minus,
 } from "lucide-react";
 import {
-    ChartBar as TablerChartBar,
     ShieldCheck as TablerShieldCheck,
     Stack as TablerStack,
     Wallet as TablerWallet,
-    Lock as TablerLock,
     Users as TablerUsers,
-    Receipt as TablerReceipt,
-    Headphones as TablerHeadphones,
 } from "tabler-icons-react";
-import { Section, SectionTitle, Eyebrow, Reveal, AnimatedCounter } from "../site/primitives";
+import { Section, SectionTitle, Eyebrow, Reveal } from "../site/primitives";
 import { HeroDashboard } from "../site/HeroDashboard";
 import { PortfolioMockup } from "../site/PortfolioMockup";
 
@@ -266,7 +262,7 @@ export default function Home() {
                             <ShieldCheck className="h-8 w-8 text-brand mx-auto mb-6" strokeWidth={1.5} />
                             <p className="font-display text-2xl md:text-4xl font-normal tracking-tight leading-snug text-foreground">
                                 Every account is identity-verified before a single dollar moves —
-                                <span className="text-gradient"> that's the baseline, not a feature.</span>
+                                <span className="text-gradient"> that&apos;s the baseline, not a feature.</span>
                             </p>
                             <p className="mt-6 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
                                 Segregated wallet balances, role-based admin controls, and a fully auditable

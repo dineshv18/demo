@@ -59,7 +59,7 @@ export default function AboutPage() {
                 <div className="grid gap-12 lg:grid-cols-2 items-start">
                     <Reveal>
                         <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-snug">
-                            What we're building
+                            What we&apos;re building
                         </h2>
                     </Reveal>
                     <Reveal delay={0.08}>
@@ -115,7 +115,7 @@ export default function AboutPage() {
                             <Sparkles className="h-8 w-8 text-brand mx-auto mb-6" strokeWidth={1.5} />
                             <p className="font-display text-2xl md:text-4xl font-normal tracking-tight leading-snug text-foreground">
                                 We publish what other platforms bury in fine print —
-                                <span className="text-gradient"> that's the whole philosophy.</span>
+                                <span className="text-gradient"> that&apos;s the whole philosophy.</span>
                             </p>
                             <p className="mt-6 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
                                 Transparent terms, verified accounts, and a dashboard that tells the truth
@@ -141,7 +141,7 @@ export default function AboutPage() {
                                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                                     Because we published it in plain view instead. If you want a platform
                                     where verification is real, terms are disclosed, and your dashboard
-                                    tells the truth about your account, that's what we built.
+                                    tells the truth about your account, that&apos;s what we built.
                                 </p>
                                 <Link href="/platform" className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:gap-3 transition-all">
                                     See how the platform works <ArrowRight className="h-4 w-4" />

@@ -118,7 +118,7 @@ export default function ContactPage() {
                                     Get in touch with us
                                 </h2>
                                 <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-                                    Whether you're evaluating the platform or already an investor, our team
+                                    Whether you&apos;re evaluating the platform or already an investor, our team
                                     is here to help. For account-specific issues, signing in and opening a
                                     support ticket gets you the fastest response.
                                 </p>
