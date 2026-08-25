@@ -88,10 +88,18 @@ export default function IndexSettings() {
 function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefresh: () => Promise<void>; showToast: (t: "success" | "error", m: string) => void }) {
   const [editTier, setEditTier] = useState<IndexTier | null>(null);
   const [newTier, setNewTier] = useState(false);
-  const [form, setForm] = useState({ minAmount: "", maxAmount: "", label: "", durationMonths: "18", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
+  const [form, setForm] = useState({
+    minAmount: "", maxAmount: "", label: "", tagline: "", durationMonths: "18",
+    weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "",
+    maintenanceFeePercent: "5", exitFeePercent: "2", earlyExitFeePercent: "17",
+  });
   const [saving, setSaving] = useState(false);
 
-  const resetForm = () => setForm({ minAmount: "", maxAmount: "", label: "", durationMonths: "18", weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "" });
+  const resetForm = () => setForm({
+    minAmount: "", maxAmount: "", label: "", tagline: "", durationMonths: "18",
+    weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "",
+    maintenanceFeePercent: "5", exitFeePercent: "2", earlyExitFeePercent: "17",
+  });
 
   const openEdit = (tier: IndexTier) => {
     setEditTier(tier);
@@ -99,10 +107,14 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
       minAmount: tier.minAmount,
       maxAmount: tier.maxAmount,
       label: tier.label,
+      tagline: tier.tagline || "",
       durationMonths: String(tier.durationMonths ?? 18),
       weeklyReturn: tier.weeklyReturn,
       monthlyReturn: tier.monthlyReturn,
       halfYearlyReturn: tier.halfYearlyReturn,
+      maintenanceFeePercent: tier.maintenanceFeePercent ?? "5",
+      exitFeePercent: tier.exitFeePercent ?? "2",
+      earlyExitFeePercent: tier.earlyExitFeePercent ?? "17",
     });
   };
 
@@ -114,10 +126,14 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           minAmount: form.minAmount,
           maxAmount: form.maxAmount,
           label: form.label,
+          tagline: form.tagline || null,
           durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: form.weeklyReturn,
           monthlyReturn: form.monthlyReturn,
           halfYearlyReturn: form.halfYearlyReturn,
+          maintenanceFeePercent: form.maintenanceFeePercent,
+          exitFeePercent: form.exitFeePercent,
+          earlyExitFeePercent: form.earlyExitFeePercent,
         });
         showToast("success", "Tier updated");
       } else {
@@ -125,10 +141,14 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           minAmount: parseFloat(form.minAmount),
           maxAmount: parseFloat(form.maxAmount),
           label: form.label,
+          tagline: form.tagline || undefined,
           durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: parseFloat(form.weeklyReturn || "0"),
           monthlyReturn: parseFloat(form.monthlyReturn || "0"),
           halfYearlyReturn: parseFloat(form.halfYearlyReturn || "0"),
+          maintenanceFeePercent: parseFloat(form.maintenanceFeePercent || "5"),
+          exitFeePercent: parseFloat(form.exitFeePercent || "2"),
+          earlyExitFeePercent: parseFloat(form.earlyExitFeePercent || "17"),
         });
         showToast("success", "Tier created");
       }
@@ -201,6 +221,12 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               </div>
             </div>
             <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Tagline</label>
+              <input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                placeholder="e.g. New Beginner, Ideal for entry investors"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+            </div>
+            <div>
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Duration (months)</label>
               <input type="number" min="1" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })}
                 placeholder="18"
@@ -222,6 +248,24 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">6-Month Return (%)</label>
               <input type="number" step="0.01" value={form.halfYearlyReturn} onChange={(e) => setForm({ ...form, halfYearlyReturn: e.target.value })}
                 placeholder="12.00"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Maintenance Fee (%)</label>
+              <input type="number" step="0.01" value={form.maintenanceFeePercent} onChange={(e) => setForm({ ...form, maintenanceFeePercent: e.target.value })}
+                placeholder="5"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Exit Fee (%, after maturity)</label>
+              <input type="number" step="0.01" value={form.exitFeePercent} onChange={(e) => setForm({ ...form, exitFeePercent: e.target.value })}
+                placeholder="2"
+                className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Early Exit Fee (%, before maturity)</label>
+              <input type="number" step="0.01" value={form.earlyExitFeePercent} onChange={(e) => setForm({ ...form, earlyExitFeePercent: e.target.value })}
+                placeholder="17"
                 className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
             </div>
           </div>
@@ -247,6 +291,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">1W Return</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">1M Return</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">6M Return</th>
+                <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Fees</th>
                 <th className="text-center px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
                 <th className="text-right px-5 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Actions</th>
               </tr>
@@ -254,11 +299,23 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {tiers.map((tier) => (
                 <tr key={tier.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                  <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">{tier.label}</td>
+                  <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">
+                    {tier.label}
+                    {tier.tagline && (
+                      <div className="mt-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">{tier.tagline}</div>
+                    )}
+                  </td>
                   <td className="px-5 py-4 text-right text-gray-600 dark:text-gray-400">{tier.durationMonths} months</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.weeklyReturn).toFixed(2)}%</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.monthlyReturn).toFixed(2)}%</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.halfYearlyReturn).toFixed(2)}%</td>
+                  <td className="px-5 py-4 text-right">
+                    <div className="flex flex-col items-end gap-0.5 text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">Maint: <span className="font-medium text-gray-900 dark:text-white">{parseFloat(tier.maintenanceFeePercent ?? "0").toFixed(2)}%</span></span>
+                      <span className="text-gray-600 dark:text-gray-400">Exit: <span className="font-medium text-gray-900 dark:text-white">{parseFloat(tier.exitFeePercent ?? "0").toFixed(2)}%</span></span>
+                      <span className="text-gray-600 dark:text-gray-400">Early: <span className="font-medium text-gray-900 dark:text-white">{parseFloat(tier.earlyExitFeePercent ?? "0").toFixed(2)}%</span></span>
+                    </div>
+                  </td>
                   <td className="px-5 py-4 text-center">
                     <button onClick={() => handleToggleActive(tier)}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${tier.isActive ? "bg-[#EAF7E8] text-[#00A94F]" : "bg-[#F3F8EF] text-[#89938E]"}`}>
@@ -274,7 +331,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
                 </tr>
               ))}
               {tiers.length === 0 && (
-                <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">No tiers configured yet.</td></tr>
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-gray-500">No tiers configured yet.</td></tr>
               )}
             </tbody>
           </table>

@@ -162,10 +162,10 @@ async function main() {
   // 5. Seed Index Tiers
   console.log("Seeding index tiers...");
   const defaultTiers = [
-    { minAmount: 100, maxAmount: 500, label: "NOVA INDEX", weeklyReturn: 3.00, monthlyReturn: 5.00, halfYearlyReturn: 18 },
-    { minAmount: 501, maxAmount: 2000, label: "PRIME INDEX", weeklyReturn: 5.00, monthlyReturn: 7.00, halfYearlyReturn: 18 },
-    { minAmount: 2001, maxAmount: 10000, label: "VERTEX INDEX", weeklyReturn: 7.00, monthlyReturn: 9.00, halfYearlyReturn: 24 },
-    { minAmount: 10001, maxAmount: 999999999, label: "IMPERIUM INDEX", weeklyReturn: 9.00, monthlyReturn: 11.00, halfYearlyReturn: 30 },
+    { minAmount: 100, maxAmount: 500, label: "ORVANTA NOVA INDEX", tagline: "New Beginner, Ideal for entry investors", durationMonths: 15, weeklyReturn: 1.15, monthlyReturn: 5.00, halfYearlyReturn: 30, maintenanceFeePercent: 5.8, exitFeePercent: 4.5, earlyExitFeePercent: 15.7 },
+    { minAmount: 501, maxAmount: 2000, label: "ORVANTA PRIME INDEX", tagline: "Established Growth stage", durationMonths: 21, weeklyReturn: 1.62, monthlyReturn: 7.00, halfYearlyReturn: 42, maintenanceFeePercent: 5.8, exitFeePercent: 4.7, earlyExitFeePercent: 16.5 },
+    { minAmount: 2001, maxAmount: 10000, label: "ORVANTA IMPERIUM INDEX", tagline: "Prestige, Leadership, Exclusive access", durationMonths: 27, weeklyReturn: 2.08, monthlyReturn: 9.00, halfYearlyReturn: 54, maintenanceFeePercent: 5.8, exitFeePercent: 5.9, earlyExitFeePercent: 17.9 },
+    { minAmount: 10001, maxAmount: 999999999, label: "ORVANTA DYNAMIC INDEX", tagline: "High growth opportunity", durationMonths: 36, weeklyReturn: 2.77, monthlyReturn: 12.00, halfYearlyReturn: 72, maintenanceFeePercent: 5.8, exitFeePercent: 6.3, earlyExitFeePercent: 18.5 },
   ];
   const existingTierCount = await prisma.indexTier.count();
   if (existingTierCount === 0) {

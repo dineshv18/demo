@@ -260,10 +260,14 @@ export interface IndexTier {
   minAmount: string;
   maxAmount: string;
   label: string;
+  tagline: string | null;
   durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;
   halfYearlyReturn: string;
+  maintenanceFeePercent: string;
+  exitFeePercent: string;
+  earlyExitFeePercent: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -316,7 +320,7 @@ export interface IndexInvestmentRecord {
 // ─── Index API ───
 export const indexAPI = {
   getTiers: () => request<{ tiers: IndexTier[] }>("/admin/index/tiers"),
-  createTier: (data: { minAmount: number; maxAmount: number; label: string; durationMonths?: number; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number }) =>
+  createTier: (data: { minAmount: number; maxAmount: number; label: string; tagline?: string; durationMonths?: number; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number; maintenanceFeePercent?: number; exitFeePercent?: number; earlyExitFeePercent?: number }) =>
     request<{ message: string; tier: IndexTier }>("/admin/index/tiers", { method: "POST", body: JSON.stringify(data) }),
   updateTier: (id: string, data: Partial<IndexTier>) =>
     request<{ message: string; tier: IndexTier }>(`/admin/index/tiers/${id}`, { method: "PUT", body: JSON.stringify(data) }),

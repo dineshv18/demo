@@ -89,14 +89,14 @@ export default function IndexPage() {
 
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [withdrawError, setWithdrawError] = useState("");
-  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [withdrawSuccess, setWithdrawSuccess] = useState("");
 
-  const [showTopUp, setShowTopUp] = useState(false);
+  const [topUpTargetId, setTopUpTargetId] = useState<string | null>(null);
   const [topUpAmount, setTopUpAmount] = useState("");
   const [topUpLoading, setTopUpLoading] = useState(false);
   const [topUpError, setTopUpError] = useState("");
   const [topUpSuccess, setTopUpSuccess] = useState("");
+  const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -127,7 +127,7 @@ export default function IndexPage() {
   };
 
   const kycApproved = kyc?.status === "APPROVED";
-  const activeInvestment = investments.find((i) => i.status === "ACTIVE") || null;
+  const activeInvestments = investments.filter((i) => i.status === "ACTIVE");
 
   const selectTier = (minAmount: number, tierId?: string) => {
     setInvestAmount(String(minAmount));
@@ -166,6 +166,7 @@ export default function IndexPage() {
   };
 
   const handleTopUp = async () => {
+    if (!topUpTargetId) return;
     const amt = parseFloat(topUpAmount);
     if (!topUpAmount || isNaN(amt) || amt <= 0) {
       setTopUpError("Enter a valid amount");
@@ -175,10 +176,10 @@ export default function IndexPage() {
     setTopUpError("");
     setTopUpSuccess("");
     try {
-      const res = await indexAPI.topUp(amt);
+      const res = await indexAPI.topUp(amt, topUpTargetId);
       setTopUpSuccess(res.message);
       setTopUpAmount("");
-      setShowTopUp(false);
+      setTopUpTargetId(null);
       await fetchData();
     } catch (err) {
       setTopUpError(err instanceof Error ? err.message : "Failed to add funds");
@@ -188,15 +189,16 @@ export default function IndexPage() {
   };
 
   const handleWithdraw = async () => {
+    if (!withdrawTargetId) return;
     setWithdrawLoading(true);
     setWithdrawError("");
     try {
-      const res = await indexAPI.withdraw();
-      setConfirmWithdraw(false);
+      const res = await indexAPI.withdraw(withdrawTargetId);
+      setWithdrawTargetId(null);
       setWithdrawSuccess(
         res.wasMature
           ? `$${res.payoutAmount.toFixed(2)} credited to your wallet.`
-          : `$${res.payoutAmount.toFixed(2)} credited to your wallet after a $${res.earlyFee.toFixed(2)} early-withdrawal fee.`
+          : `$${res.payoutAmount.toFixed(2)} credited to your wallet after a $${res.withdrawalFee.toFixed(2)} early-exit fee.`
       );
       await fetchData();
     } catch (err) {
@@ -261,18 +263,20 @@ export default function IndexPage() {
     );
   }
 
-  const { tiers, activeTier, walletBalance, maintenanceFeePercent, earlyWithdrawalPercent: earlyWithdrawalPercentRaw, maturityWithdrawalFee: maturityWithdrawalFeeRaw, priceHistory, currentPrice, manager } = data || {};
+  const { tiers, activeTier, walletBalance, priceHistory, currentPrice, manager } = data || {};
   const priceUp = (currentPrice?.changePercent ?? 0) >= 0;
   const balance = walletBalance || 0;
-  const feePercent = maintenanceFeePercent ?? 5;
-  const earlyWithdrawalPercent = earlyWithdrawalPercentRaw ?? 17;
-  const maturityWithdrawalFee = maturityWithdrawalFeeRaw ?? 2;
   const investAmountNum = parseFloat(investAmount) || 0;
   const matchingTiers = (tiers || []).filter(
     (t) => t.isActive && investAmountNum >= parseFloat(t.minAmount) && investAmountNum <= parseFloat(t.maxAmount)
   );
+  const selectedTier = matchingTiers.find((t) => t.id === selectedTierId) || null;
 
-  const tierForProjection = activeInvestment?.tier;
+  // Chart projects off the most recently activated active investment, if any.
+  const latestActiveInvestment = activeInvestments.length > 0
+    ? [...activeInvestments].sort((a, b) => new Date(b.activatedAt).getTime() - new Date(a.activatedAt).getTime())[0]
+    : null;
+  const tierForProjection = latestActiveInvestment?.tier;
   const timeframeReturn = (tf: Timeframe) => {
     if (!tierForProjection) return 0;
     if (tf === "1W") return parseFloat(tierForProjection.weeklyReturn);
@@ -280,10 +284,10 @@ export default function IndexPage() {
     return parseFloat(tierForProjection.halfYearlyReturn);
   };
   const activeFrame = TIMEFRAMES.find((t) => t.key === timeframe);
-  const projectionSeed = activeInvestment
-    ? Array.from(activeInvestment.id).reduce((sum, ch) => sum + ch.charCodeAt(0), 0)
+  const projectionSeed = latestActiveInvestment
+    ? Array.from(latestActiveInvestment.id).reduce((sum: number, ch: string) => sum + ch.charCodeAt(0), 0)
     : 1;
-  const projectionStartDate = activeInvestment ? new Date(activeInvestment.activatedAt) : new Date();
+  const projectionStartDate = latestActiveInvestment ? new Date(latestActiveInvestment.activatedAt) : new Date();
   const chartData =
     timeframe && activeFrame && tierForProjection
       ? projectGrowth(currentPrice?.price || 0, timeframeReturn(timeframe), activeFrame.days, projectionStartDate, projectionSeed)
@@ -356,222 +360,257 @@ export default function IndexPage() {
           </div>
         </Card>
 
-        {/* Invest in Index */}
-        <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
-          <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Invest in Index</h2>
+        {/* Active Investments */}
+        {activeInvestments.length > 0 && (
+          <Card className="p-4 sm:p-6 gap-0">
+            <h2 className="font-display text-base sm:text-lg font-semibold mb-4">
+              Your Active Investments ({activeInvestments.length})
+            </h2>
 
-          {activeInvestment ? (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Active Investment</p>
-                  <p className="text-lg font-bold text-emerald-500 mt-0.5">
-                    ${parseFloat(activeInvestment.netAmount || activeInvestment.amount).toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Plan: <span className="font-medium text-foreground">{activeInvestment.tier.label} · {activeInvestment.tier.durationMonths} months</span>
-                  </p>
-                  {parseFloat(activeInvestment.feeAmount) > 0 && (
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      ${parseFloat(activeInvestment.amount).toFixed(2)} deposited − ${parseFloat(activeInvestment.feeAmount).toFixed(2)} maintenance fee
-                    </p>
-                  )}
-                  {activeInvestment.maturesAt && (
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Matures on {new Date(activeInvestment.maturesAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                    </p>
-                  )}
-                </div>
-                <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 font-bold">
-                  <IconShieldCheck className="h-3.5 w-3.5" /> ACTIVE
-                </Badge>
+            {withdrawSuccess && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
+                <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {withdrawSuccess}
               </div>
+            )}
+            {topUpSuccess && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
+                <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {topUpSuccess}
+              </div>
+            )}
 
-              {topUpSuccess && (
-                <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mt-3">
-                  <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {topUpSuccess}
-                </div>
-              )}
-              {withdrawError && (
-                <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive mt-3">
-                  <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {withdrawError}
-                </div>
-              )}
-
-              {!confirmWithdraw && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <Button
-                    size="sm"
-                    onClick={() => { setShowTopUp((v) => !v); setTopUpError(""); setTopUpSuccess(""); }}
-                    className="btn-glow btn-glow-hover"
-                  >
-                    {showTopUp ? "Cancel" : "Add More Funds"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConfirmWithdraw(true)}
-                  >
-                    Withdraw Investment
-                  </Button>
-                </div>
-              )}
-
-              {showTopUp && !confirmWithdraw && (
-                <div className="mt-3 rounded-lg border border-border bg-background px-3 py-3 space-y-2">
-                  {topUpError && (
-                    <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                      <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {topUpError}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Add funds to your existing <strong>{activeInvestment.tier.label}</strong> investment. Same {feePercent}% maintenance fee applies.
-                  </p>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={topUpAmount}
-                      onChange={(e) => setTopUpAmount(e.target.value)}
-                      placeholder="Amount to add"
-                      className="pl-7"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleTopUp}
-                    disabled={topUpLoading || balance <= 0}
-                    className="w-full"
-                  >
-                    {topUpLoading ? "Adding..." : "Confirm Add Funds"}
-                  </Button>
-                </div>
-              )}
-
-              {confirmWithdraw && (
-                <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-3">
-                  {activeInvestment.maturesAt && new Date() < new Date(activeInvestment.maturesAt) ? (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                      This investment hasn&apos;t matured yet. Withdrawing now applies a{" "}
-                      <strong>{earlyWithdrawalPercent}% early-withdrawal fee</strong>{" "}
-                      (≈${((parseFloat(activeInvestment.netAmount) * earlyWithdrawalPercent) / 100).toFixed(2)}).
-                    </p>
-                  ) : (
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                      This investment has matured. A <strong>${maturityWithdrawalFee.toFixed(2)} withdrawal fee</strong> will be applied.
-                    </p>
-                  )}
-                  <div className="flex gap-2 mt-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleWithdraw}
-                      disabled={withdrawLoading}
-                    >
-                      {withdrawLoading ? "Withdrawing..." : "Confirm Withdrawal"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => { setConfirmWithdraw(false); setWithdrawError(""); }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
             <div className="space-y-3">
-              {withdrawSuccess && (
-                <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
-                  <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {withdrawSuccess}
-                </div>
-              )}
-              {investError && (
-                <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                  <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {investError}
-                </div>
-              )}
-              {investSuccess && (
-                <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
-                  <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {investSuccess}
-                </div>
-              )}
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={investAmount}
-                  onChange={(e) => { setInvestAmount(e.target.value); setSelectedTierId(""); }}
-                  placeholder="Enter amount to invest"
-                  className="pl-7"
-                />
-              </div>
+              {activeInvestments.map((inv) => {
+                const isMature = inv.maturesAt ? new Date() >= new Date(inv.maturesAt) : false;
+                const exitPercent = isMature ? parseFloat(inv.tier.exitFeePercent) : parseFloat(inv.tier.earlyExitFeePercent);
+                const estExitFee = (parseFloat(inv.netAmount) * exitPercent) / 100;
+                const isTopUpTarget = topUpTargetId === inv.id;
+                const isWithdrawTarget = withdrawTargetId === inv.id;
 
-              {investAmountNum > 0 && (
-                matchingTiers.length > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Choose a plan</p>
-                    {matchingTiers.map((t) => (
-                      <div
-                        key={t.id}
-                        onClick={() => setSelectedTierId(t.id)}
-                        role="button"
-                        className={`rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${selectedTierId === t.id ? "border-brand bg-brand/5" : "border-border hover:bg-accent"}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold text-foreground">{t.label}</p>
-                          <span className="text-xs font-bold text-brand">{t.durationMonths} months</span>
+                return (
+                  <div key={inv.id} className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">{inv.tier.label}</p>
+                        <p className="text-lg font-bold text-emerald-500 mt-0.5">
+                          ${parseFloat(inv.netAmount || inv.amount).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Duration: <span className="font-medium text-foreground">{inv.tier.durationMonths} months</span>
+                        </p>
+                        {parseFloat(inv.feeAmount) > 0 && (
+                          <p className="text-[11px] text-muted-foreground mt-1">
+                            ${parseFloat(inv.amount).toFixed(2)} deposited − ${parseFloat(inv.feeAmount).toFixed(2)} maintenance fee
+                          </p>
+                        )}
+                        {inv.maturesAt && (
+                          <p className="text-[11px] text-muted-foreground mt-1">
+                            {isMature ? "Matured on" : "Matures on"} {new Date(inv.maturesAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 font-bold">
+                        <IconShieldCheck className="h-3.5 w-3.5" /> {isMature ? "MATURED" : "ACTIVE"}
+                      </Badge>
+                    </div>
+
+                    {isWithdrawTarget && withdrawError && (
+                      <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive mt-3">
+                        <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {withdrawError}
+                      </div>
+                    )}
+
+                    {!isWithdrawTarget && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setTopUpTargetId(isTopUpTarget ? null : inv.id);
+                            setTopUpError("");
+                            setTopUpSuccess("");
+                          }}
+                          className="btn-glow btn-glow-hover"
+                        >
+                          {isTopUpTarget ? "Cancel" : "Add More Funds"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setWithdrawTargetId(inv.id); setWithdrawError(""); }}
+                        >
+                          Withdraw
+                        </Button>
+                      </div>
+                    )}
+
+                    {isTopUpTarget && !isWithdrawTarget && (
+                      <div className="mt-3 rounded-lg border border-border bg-background px-3 py-3 space-y-2">
+                        {topUpError && (
+                          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                            <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {topUpError}
+                          </div>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Add funds to this <strong>{inv.tier.label}</strong> investment (up to ${inv.tier.maxAmount} total). Same {parseFloat(inv.tier.maintenanceFeePercent).toFixed(2)}% maintenance fee applies.
+                        </p>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={topUpAmount}
+                            onChange={(e) => setTopUpAmount(e.target.value)}
+                            placeholder="Amount to add"
+                            className="pl-7"
+                          />
                         </div>
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
-                          <span className="text-[11px] text-muted-foreground">{parseFloat(t.weeklyReturn).toFixed(2)}% / week</span>
-                          <span className="text-[11px] text-muted-foreground">{parseFloat(t.halfYearlyReturn).toFixed(2)}% / 6mo</span>
+                        <Button
+                          onClick={handleTopUp}
+                          disabled={topUpLoading || balance <= 0}
+                          className="w-full"
+                        >
+                          {topUpLoading ? "Adding..." : "Confirm Add Funds"}
+                        </Button>
+                      </div>
+                    )}
+
+                    {isWithdrawTarget && (
+                      <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-3">
+                        {!isMature ? (
+                          <p className="text-xs text-amber-600 dark:text-amber-400">
+                            This investment hasn&apos;t matured yet. Withdrawing now applies a{" "}
+                            <strong>{exitPercent.toFixed(2)}% early-exit fee</strong>{" "}
+                            (≈${estExitFee.toFixed(2)}).
+                          </p>
+                        ) : (
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                            This investment has matured. A <strong>{exitPercent.toFixed(2)}% exit fee</strong> (≈${estExitFee.toFixed(2)}) will be applied.
+                          </p>
+                        )}
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleWithdraw}
+                            disabled={withdrawLoading}
+                          >
+                            {withdrawLoading ? "Withdrawing..." : "Confirm Withdrawal"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setWithdrawTargetId(null); setWithdrawError(""); }}
+                          >
+                            Cancel
+                          </Button>
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">No plans available for this amount.</p>
-                )
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        {/* Invest in Index */}
+        <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
+          <h2 className="font-display text-base sm:text-lg font-semibold mb-4">
+            {activeInvestments.length > 0 ? "Start a New Investment" : "Invest in Index"}
+          </h2>
+
+          <div className="space-y-3">
+            {investError && (
+              <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {investError}
+              </div>
+            )}
+            {investSuccess && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
+                <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {investSuccess}
+              </div>
+            )}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={investAmount}
+                onChange={(e) => { setInvestAmount(e.target.value); setSelectedTierId(""); }}
+                placeholder="Enter amount to invest"
+                className="pl-7"
+              />
+            </div>
+
+            {investAmountNum > 0 && (
+              matchingTiers.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Choose a plan</p>
+                  {matchingTiers.map((t) => (
+                    <div
+                      key={t.id}
+                      onClick={() => setSelectedTierId(t.id)}
+                      role="button"
+                      className={`rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${selectedTierId === t.id ? "border-brand bg-brand/5" : "border-border hover:bg-accent"}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground">{t.label}</p>
+                        <span className="text-xs font-bold text-brand">{t.durationMonths} months</span>
+                      </div>
+                      {t.tagline && <p className="text-[11px] text-muted-foreground mt-0.5">{t.tagline}</p>}
+                      <div className="flex items-center gap-3 mt-1 flex-wrap">
+                        <span className="text-[11px] text-muted-foreground">{parseFloat(t.weeklyReturn).toFixed(2)}% / week</span>
+                        <span className="text-[11px] text-muted-foreground">{parseFloat(t.halfYearlyReturn).toFixed(2)}% / 6mo</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No plans available for this amount.</p>
+              )
+            )}
+
+            <Button
+              onClick={handleInvest}
+              disabled={investLoading || balance <= 0 || !selectedTierId}
+              className="w-full btn-glow btn-glow-hover gap-2"
+            >
+              {investLoading ? (
+                <>
+                  <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
+                </>
+              ) : (
+                "Invest Now"
               )}
+            </Button>
 
-              <Button
-                onClick={handleInvest}
-                disabled={investLoading || balance <= 0 || !selectedTierId}
-                className="w-full btn-glow btn-glow-hover gap-2"
-              >
-                {investLoading ? (
-                  <>
-                    <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
-                  </>
-                ) : (
-                  "Invest Now"
-                )}
-              </Button>
-
+            {selectedTier && (
               <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                  {feePercent}% fee for maintenance
+                  {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% fee for maintenance
                 </p>
                 {investAmountNum > 0 && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    ${investAmountNum.toFixed(2)} − ${((investAmountNum * feePercent) / 100).toFixed(2)} fee = $
-                    {(investAmountNum - (investAmountNum * feePercent) / 100).toFixed(2)} invested
+                    ${investAmountNum.toFixed(2)} − ${((investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} fee = $
+                    {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} invested
                   </p>
                 )}
               </div>
+            )}
+            {selectedTier ? (
               <p className="text-[11px] text-muted-foreground">
-                Withdrawing before your plan matures charges a {earlyWithdrawalPercent}% fee. Withdrawing after maturity charges a flat ${maturityWithdrawalFee.toFixed(2)} fee.
+                Withdrawing before this plan matures charges a {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}% fee. Withdrawing after maturity charges a {parseFloat(selectedTier.exitFeePercent).toFixed(2)}% fee.
               </p>
-              <p className="text-xs text-muted-foreground">
-                Amount is deducted from your wallet balance (${balance.toFixed(2)} available) and cannot exceed it.
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                Each plan discloses its own maintenance fee and exit fees before you invest.
               </p>
-            </div>
-          )}
+            )}
+            <p className="text-xs text-muted-foreground">
+              Amount is deducted from your wallet balance (${balance.toFixed(2)} available) and cannot exceed it. You can hold investments across multiple plans at once.
+            </p>
+          </div>
         </Card>
 
         {/* Index Price Card + Chart */}

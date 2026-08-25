@@ -399,10 +399,14 @@ export interface IndexTier {
   minAmount: string;
   maxAmount: string;
   label: string;
+  tagline: string | null;
   durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;
   halfYearlyReturn: string;
+  maintenanceFeePercent: string;
+  exitFeePercent: string;
+  earlyExitFeePercent: string;
   isActive: boolean;
 }
 
@@ -460,14 +464,17 @@ export const indexAPI = {
       method: "POST",
       body: JSON.stringify({ amount, tierId }),
     }),
-  topUp: (amount: number) =>
+  // investmentId identifies which of the user's (possibly several,
+  // one-per-tier) ACTIVE investments to add funds to / withdraw.
+  topUp: (amount: number, investmentId: string) =>
     request<{ message: string; investment: IndexInvestment }>("/index/top-up", {
       method: "POST",
-      body: JSON.stringify({ amount }),
+      body: JSON.stringify({ amount, investmentId }),
     }),
-  withdraw: () =>
-    request<{ message: string; payoutAmount: number; earlyFee: number; wasMature: boolean }>("/index/withdraw", {
+  withdraw: (investmentId: string) =>
+    request<{ message: string; payoutAmount: number; withdrawalFee: number; wasMature: boolean }>("/index/withdraw", {
       method: "POST",
+      body: JSON.stringify({ investmentId }),
     }),
 };
 

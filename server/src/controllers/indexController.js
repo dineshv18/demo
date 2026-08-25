@@ -208,13 +208,6 @@ export const investInIndex = async (req, res) => {
       return res.status(400).json({ message: "Insufficient wallet balance" });
     }
 
-    const existingActive = await getPrisma().indexInvestment.findFirst({
-      where: { userId: req.user.id, status: "ACTIVE" },
-    });
-    if (existingActive) {
-      return res.status(400).json({ message: "You already have an active index investment. Wait for it to mature before investing again." });
-    }
-
     const tier = await getPrisma().indexTier.findUnique({ where: { id: tierId } });
     if (!tier || !tier.isActive) {
       return res.status(400).json({ message: "Selected tier is not available" });
@@ -223,8 +216,7 @@ export const investInIndex = async (req, res) => {
       return res.status(400).json({ message: `Amount must be between $${tier.minAmount} and $${tier.maxAmount} for this tier` });
     }
 
-    const settings = await getIndexSettings(getPrisma());
-    const feePercent = parseFloat(settings.maintenanceFeePercent);
+    const feePercent = parseFloat(tier.maintenanceFeePercent);
     const feeAmount = (parsedAmount * feePercent) / 100;
     const netAmount = parsedAmount - feeAmount;
 
@@ -268,14 +260,20 @@ export const investInIndex = async (req, res) => {
 // maturity date. The tier is locked at first investment (investInIndex
 // blocks a second investInIndex call while one is ACTIVE); this is the only
 // way to grow it afterwards. The added amount goes through the identical
-// fee-cut + referral-commission pipeline as a fresh investment.
+// fee-cut + referral-commission pipeline as a fresh investment. A user can
+// hold several ACTIVE investments at once (one per tier they've entered),
+// so the target is identified explicitly by investmentId rather than
+// assumed to be "the" active one.
 export const topUpInvestment = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { amount, investmentId } = req.body;
     const parsedAmount = parseFloat(amount);
 
     if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({ message: "Invalid amount" });
+    }
+    if (!investmentId) {
+      return res.status(400).json({ message: "Please specify which investment to add funds to" });
     }
 
     const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
@@ -289,15 +287,19 @@ export const topUpInvestment = async (req, res) => {
     }
 
     const existingActive = await getPrisma().indexInvestment.findFirst({
-      where: { userId: req.user.id, status: "ACTIVE" },
+      where: { id: investmentId, userId: req.user.id, status: "ACTIVE" },
       include: { tier: true },
     });
     if (!existingActive) {
-      return res.status(400).json({ message: "You don't have an active index investment to add funds to." });
+      return res.status(400).json({ message: "Active investment not found" });
     }
 
-    const settings = await getIndexSettings(getPrisma());
-    const feePercent = parseFloat(settings.maintenanceFeePercent);
+    const newTotal = parseFloat(existingActive.amount) + parsedAmount;
+    if (newTotal > parseFloat(existingActive.tier.maxAmount)) {
+      return res.status(400).json({ message: `Adding this amount would exceed the ${existingActive.tier.label} tier maximum of $${existingActive.tier.maxAmount}` });
+    }
+
+    const feePercent = parseFloat(existingActive.tier.maintenanceFeePercent);
     const feeAmount = (parsedAmount * feePercent) / 100;
     const netAmount = parsedAmount - feeAmount;
 
@@ -331,21 +333,26 @@ export const topUpInvestment = async (req, res) => {
 
 export const withdrawInvestment = async (req, res) => {
   try {
+    const { investmentId } = req.body;
+    if (!investmentId) {
+      return res.status(400).json({ message: "Please specify which investment to withdraw" });
+    }
+
     const investment = await getPrisma().indexInvestment.findFirst({
-      where: { userId: req.user.id, status: "ACTIVE" },
+      where: { id: investmentId, userId: req.user.id, status: "ACTIVE" },
       include: { tier: true },
     });
     if (!investment) {
-      return res.status(400).json({ message: "No active investment to withdraw" });
+      return res.status(400).json({ message: "Active investment not found" });
     }
 
     const isMature = investment.maturesAt && new Date() >= investment.maturesAt;
-    const settings = await getIndexSettings(getPrisma());
     const netAmount = parseFloat(investment.netAmount);
+    const exitFeePercent = isMature
+      ? parseFloat(investment.tier.exitFeePercent)
+      : parseFloat(investment.tier.earlyExitFeePercent);
 
-    const withdrawalFee = isMature
-      ? parseFloat(settings.maturityWithdrawalFee)
-      : (netAmount * parseFloat(settings.earlyWithdrawalPercent)) / 100;
+    const withdrawalFee = (netAmount * exitFeePercent) / 100;
     const payoutAmount = Math.max(netAmount - withdrawalFee, 0);
 
     const wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
@@ -367,22 +374,22 @@ export const withdrawInvestment = async (req, res) => {
       }),
     ]);
 
-    // Withdrawal fee (early-exit % or flat maturity fee) goes entirely to the
+    // Withdrawal fee (early-exit % or maturity-exit %) goes entirely to the
     // platform — unlike the invest-time maintenance fee, it is never split
     // across the referral chain.
     await creditPlatformWallet(
       getPrisma(),
       withdrawalFee,
       isMature
-        ? `Maturity withdrawal fee — ${investment.tier.label}`
-        : `Early withdrawal fee (${parseFloat(settings.earlyWithdrawalPercent).toFixed(2)}%) — ${investment.tier.label}`,
+        ? `Maturity exit fee (${exitFeePercent.toFixed(2)}%) — ${investment.tier.label}`
+        : `Early exit fee (${exitFeePercent.toFixed(2)}%) — ${investment.tier.label}`,
       investment.id
     );
 
     return res.status(200).json({
       message: isMature
-        ? `Investment matured and withdrawn. A $${withdrawalFee.toFixed(2)} withdrawal fee was applied.`
-        : `Investment withdrawn early. A ${parseFloat(settings.earlyWithdrawalPercent).toFixed(2)}% early-withdrawal fee ($${withdrawalFee.toFixed(2)}) was applied.`,
+        ? `Investment matured and withdrawn. A ${exitFeePercent.toFixed(2)}% exit fee ($${withdrawalFee.toFixed(2)}) was applied.`
+        : `Investment withdrawn early. A ${exitFeePercent.toFixed(2)}% early-exit fee ($${withdrawalFee.toFixed(2)}) was applied.`,
       payoutAmount,
       withdrawalFee,
       wasMature: isMature,
@@ -421,7 +428,11 @@ export const adminGetTiers = async (req, res) => {
 
 export const adminCreateTier = async (req, res) => {
   try {
-    const { minAmount, maxAmount, label, durationMonths, weeklyReturn, monthlyReturn, halfYearlyReturn } = req.body;
+    const {
+      minAmount, maxAmount, label, tagline, durationMonths,
+      weeklyReturn, monthlyReturn, halfYearlyReturn,
+      maintenanceFeePercent, exitFeePercent, earlyExitFeePercent,
+    } = req.body;
     if (!minAmount || !maxAmount || !label) {
       return res.status(400).json({ message: "minAmount, maxAmount, and label are required" });
     }
@@ -431,10 +442,14 @@ export const adminCreateTier = async (req, res) => {
         minAmount: parseFloat(minAmount),
         maxAmount: parseFloat(maxAmount),
         label,
+        tagline: tagline || null,
         durationMonths: parseInt(durationMonths || 18),
         weeklyReturn: parseFloat(weeklyReturn || 0),
         monthlyReturn: parseFloat(monthlyReturn || 0),
         halfYearlyReturn: parseFloat(halfYearlyReturn || 0),
+        maintenanceFeePercent: parseFloat(maintenanceFeePercent ?? 5),
+        exitFeePercent: parseFloat(exitFeePercent ?? 2),
+        earlyExitFeePercent: parseFloat(earlyExitFeePercent ?? 17),
       },
     });
 
@@ -448,7 +463,11 @@ export const adminCreateTier = async (req, res) => {
 export const adminUpdateTier = async (req, res) => {
   try {
     const { id } = req.params;
-    const { minAmount, maxAmount, label, durationMonths, weeklyReturn, monthlyReturn, halfYearlyReturn, isActive } = req.body;
+    const {
+      minAmount, maxAmount, label, tagline, durationMonths,
+      weeklyReturn, monthlyReturn, halfYearlyReturn, isActive,
+      maintenanceFeePercent, exitFeePercent, earlyExitFeePercent,
+    } = req.body;
 
     const existing = await getPrisma().indexTier.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: "Tier not found" });
@@ -459,10 +478,14 @@ export const adminUpdateTier = async (req, res) => {
         ...(minAmount !== undefined && { minAmount: parseFloat(minAmount) }),
         ...(maxAmount !== undefined && { maxAmount: parseFloat(maxAmount) }),
         ...(label !== undefined && { label }),
+        ...(tagline !== undefined && { tagline: tagline || null }),
         ...(durationMonths !== undefined && { durationMonths: parseInt(durationMonths) }),
         ...(weeklyReturn !== undefined && { weeklyReturn: parseFloat(weeklyReturn) }),
         ...(monthlyReturn !== undefined && { monthlyReturn: parseFloat(monthlyReturn) }),
         ...(halfYearlyReturn !== undefined && { halfYearlyReturn: parseFloat(halfYearlyReturn) }),
+        ...(maintenanceFeePercent !== undefined && { maintenanceFeePercent: parseFloat(maintenanceFeePercent) }),
+        ...(exitFeePercent !== undefined && { exitFeePercent: parseFloat(exitFeePercent) }),
+        ...(earlyExitFeePercent !== undefined && { earlyExitFeePercent: parseFloat(earlyExitFeePercent) }),
         ...(isActive !== undefined && { isActive }),
       },
     });

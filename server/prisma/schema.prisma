@@ -279,10 +279,14 @@ model IndexTier {
   minAmount         Decimal  @db.Decimal(18, 2)
   maxAmount         Decimal  @db.Decimal(18, 2)
   label             String
+  tagline           String?
   durationMonths    Int      @default(18)
   weeklyReturn      Decimal  @db.Decimal(8, 4)
   monthlyReturn     Decimal  @db.Decimal(8, 4)
   halfYearlyReturn  Decimal  @db.Decimal(8, 4)
+  maintenanceFeePercent Decimal @default(5) @db.Decimal(5, 2)
+  exitFeePercent    Decimal  @default(2) @db.Decimal(5, 2)
+  earlyExitFeePercent Decimal @default(17) @db.Decimal(5, 2)
   isActive          Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
