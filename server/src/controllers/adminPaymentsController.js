@@ -1,5 +1,6 @@
 import getPrisma from "../config/db.js";
 import { logActivity } from "../middleware/activityLog.js";
+import { creditPlatformWalletFromFee } from "./walletController.js";
 
 function mapPayment(tx) {
   return {
@@ -7,6 +8,8 @@ function mapPayment(tx) {
     walletId: tx.walletId,
     type: tx.type,
     amount: tx.amount,
+    feeAmount: tx.feeAmount,
+    payoutAmount: tx.payoutAmount,
     status: tx.status,
     description: tx.description,
     screenshotUrl: tx.screenshotUrl,
@@ -114,6 +117,7 @@ export const approvePayment = async (req, res) => {
           where: { id: tx.walletId },
           data: { bonusBalance: { decrement: parseFloat(tx.amount) } },
         });
+        await creditPlatformWalletFromFee(prisma, parseFloat(tx.feeAmount || 0), `Bonus withdrawal processing fee — transaction ${tx.id}`);
       } else {
         // Withdrawal — deduct from balance (checked at request time, re-check here)
         const currentBalance = parseFloat(tx.wallet.balance);
@@ -124,6 +128,7 @@ export const approvePayment = async (req, res) => {
           where: { id: tx.walletId },
           data: { balance: { decrement: parseFloat(tx.amount) } },
         });
+        await creditPlatformWalletFromFee(prisma, parseFloat(tx.feeAmount || 0), `Withdrawal processing fee — transaction ${tx.id}`);
       }
       await prisma.transaction.update({
         where: { id: tx.id },

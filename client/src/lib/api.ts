@@ -93,8 +93,10 @@ export interface WalletData {
 export interface TransactionData {
   id: string;
   walletId: string;
-  type: "DEPOSIT" | "WITHDRAWAL" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER";
+  type: "DEPOSIT" | "WITHDRAWAL" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER" | "INTERNAL_TRANSFER_OUT" | "INTERNAL_TRANSFER_IN";
   amount: string;
+  feeAmount?: string | null;
+  payoutAmount?: string | null;
   status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
   description: string | null;
   screenshotUrl?: string | null;
@@ -232,7 +234,12 @@ export interface UsdPaymentInfo {
 // ─── Wallet API ───
 export const walletAPI = {
   getWallet: () =>
-    request<{ wallet: WalletData; upiId: string; usdPayment: UsdPaymentInfo; pendingRequest: TransactionData | null; pendingBonusRequest: TransactionData | null; currencyLocked: boolean }>("/wallet"),
+    request<{
+      wallet: WalletData; upiId: string; usdPayment: UsdPaymentInfo;
+      pendingRequest: TransactionData | null; pendingBonusRequest: TransactionData | null;
+      currencyLocked: boolean;
+      withdrawalSettings: { minWithdrawal: number; feeAmount: number };
+    }>("/wallet"),
 
   getTransactions: () =>
     request<{ transactions: TransactionData[] }>("/wallet/transactions"),

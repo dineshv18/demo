@@ -142,6 +142,18 @@ export const createTransfer = async (req, res) => {
       }),
     ]);
 
+    // Best-effort email — the transfer request is still created even if mail fails.
+    try {
+      const admins = await getPrisma().user.findMany({
+        where: { role: { in: ["SUPER_ADMIN", "ADMIN"] }, isActive: true },
+        select: { email: true },
+      });
+      const { sendTransferAdminNotification } = await import("../config/nodemailer.js");
+      await sendTransferAdminNotification(admins.map((a) => a.email), transfer);
+    } catch (mailErr) {
+      console.error("Transfer admin notification email failed:", mailErr);
+    }
+
     return res.status(201).json({
       message: "Transfer request submitted. It will be reviewed and completed within 12-24 working hours.",
       transfer: mapTransfer(transfer),
@@ -213,7 +225,13 @@ export const adminGetTransfers = async (req, res) => {
 
 export const approveTransfer = async (req, res) => {
   try {
-    const transfer = await getPrisma().internalTransfer.findUnique({ where: { id: req.params.id } });
+    const transfer = await getPrisma().internalTransfer.findUnique({
+      where: { id: req.params.id },
+      include: {
+        sender: { select: { id: true, name: true, email: true } },
+        receiver: { select: { id: true, name: true, email: true } },
+      },
+    });
     if (!transfer) return res.status(404).json({ message: "Transfer not found" });
     if (transfer.status !== "PENDING") return res.status(400).json({ message: "Transfer is not pending" });
 
@@ -225,25 +243,27 @@ export const approveTransfer = async (req, res) => {
     const netAmount = parseFloat(transfer.netAmount);
     const feeAmount = parseFloat(transfer.feeAmount);
 
-    await getPrisma().$transaction([
-      getPrisma().wallet.update({
+    await getPrisma().$transaction(async (prisma) => {
+      await prisma.wallet.update({
         where: { id: senderWallet.id },
         data: { frozen: { decrement: amount } },
-      }),
-      getPrisma().wallet.update({
+      });
+      await prisma.wallet.update({
         where: { id: receiverWallet.id },
         data: { balance: { increment: netAmount } },
-      }),
-      getPrisma().transaction.create({
+      });
+      await prisma.transaction.create({
         data: {
           walletId: senderWallet.id,
           type: "INTERNAL_TRANSFER_OUT",
           status: "COMPLETED",
           amount,
+          feeAmount,
+          payoutAmount: netAmount,
           description: `Internal transfer sent${feeAmount > 0 ? ` (fee: $${feeAmount.toFixed(2)})` : ""}`,
         },
-      }),
-      getPrisma().transaction.create({
+      });
+      await prisma.transaction.create({
         data: {
           walletId: receiverWallet.id,
           type: "INTERNAL_TRANSFER_IN",
@@ -251,12 +271,28 @@ export const approveTransfer = async (req, res) => {
           amount: netAmount,
           description: "Internal transfer received",
         },
-      }),
-      getPrisma().internalTransfer.update({
+      });
+      await prisma.internalTransfer.update({
         where: { id: transfer.id },
         data: { status: "APPROVED", processedBy: req.user.id, processedAt: new Date() },
-      }),
-    ]);
+      });
+      if (feeAmount > 0) {
+        let platformWallet = await prisma.platformWallet.findFirst();
+        if (!platformWallet) platformWallet = await prisma.platformWallet.create({ data: {} });
+        await prisma.platformWallet.update({
+          where: { id: platformWallet.id },
+          data: { balance: { increment: feeAmount } },
+        });
+        await prisma.platformLedgerEntry.create({
+          data: {
+            platformWalletId: platformWallet.id,
+            type: "FEE_CREDIT",
+            amount: feeAmount,
+            description: `Internal transfer fee — transaction ${transfer.id}`,
+          },
+        });
+      }
+    });
 
     await logActivity({
       userId: req.user.id,
@@ -265,6 +301,17 @@ export const approveTransfer = async (req, res) => {
       details: { transferId: transfer.id, senderId: transfer.senderId, receiverId: transfer.receiverId, amount },
       req,
     });
+
+    // Best-effort email — the transfer is still approved even if mail fails.
+    try {
+      const { sendTransferSenderCompleted, sendTransferReceiverCompleted } = await import("../config/nodemailer.js");
+      await Promise.allSettled([
+        sendTransferSenderCompleted(transfer),
+        sendTransferReceiverCompleted(transfer),
+      ]);
+    } catch (mailErr) {
+      console.error("Transfer completion email failed:", mailErr);
+    }
 
     return res.status(200).json({ message: "Transfer approved and funds released to the recipient" });
   } catch (error) {

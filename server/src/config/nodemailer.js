@@ -284,3 +284,122 @@ export const sendSupportTicketConfirmation = async (userEmail, userName, ticket)
     `,
   });
 };
+
+// ─── Internal Transfer: notify admins of a new pending request ───
+export const sendTransferAdminNotification = async (adminEmails, transfer) => {
+  if (!adminEmails.length) return;
+  const adminUrl = `${getEnv().ADMIN_URL || "http://localhost:5173"}/dashboard/internal-transfers`;
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: adminEmails,
+    subject: `New Internal Transfer Request: $${parseFloat(transfer.amount).toFixed(2)}`,
+    headers: getBaseHeaders(),
+    text: `A new internal transfer request needs review.\n\nFrom: ${transfer.sender.name} (${transfer.sender.email})\nTo: ${transfer.receiver.name} (${transfer.receiver.email})\nSource: ${transfer.sourceType === "BONUS" ? "Bonus balance" : "Wallet"}\nAmount: $${parseFloat(transfer.amount).toFixed(2)}\n${transfer.note ? `Note: ${transfer.note}\n` : ""}\nReview in admin panel: ${adminUrl}\n\nORVANTA Financial`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#F7F8F4;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8F4;padding:40px 0;">
+          <tr><td align="center">
+            <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(16,33,29,0.06);">
+              <tr><td style="background:#10211D;padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:20px;font-weight:700;">New Internal Transfer Request</h1>
+                <p style="color:#00B956;margin:6px 0 0;font-size:13px;">Awaiting your review</p>
+              </td></tr>
+              <tr><td style="padding:36px 40px;">
+                <div style="background:#F3F8EF;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>From:</strong> ${transfer.sender.name} (${transfer.sender.email})</p>
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>To:</strong> ${transfer.receiver.name} (${transfer.receiver.email})</p>
+                  <p style="color:#374151;font-size:13px;margin:0;"><strong>Source:</strong> ${transfer.sourceType === "BONUS" ? "Bonus balance" : "Wallet"}</p>
+                </div>
+                <p style="color:#111827;font-size:24px;font-weight:700;margin:0 0 ${transfer.note ? "8px" : "24px"};">$${parseFloat(transfer.amount).toFixed(2)}</p>
+                ${transfer.note ? `<p style="color:#6b7280;font-size:13px;margin:0 0 24px;line-height:1.6;">"${transfer.note}"</p>` : ""}
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${adminUrl}" style="display:inline-block;background:#10211D;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:12px;">Review Transfer</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#F3F8EF;padding:20px 40px;text-align:center;border-top:1px solid #DDE4DE;">
+                <p style="color:#89938E;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Internal Transfer: notify the sender their transfer completed ───
+export const sendTransferSenderCompleted = async (transfer) => {
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: transfer.sender.email,
+    subject: `Your transfer of $${parseFloat(transfer.amount).toFixed(2)} was completed`,
+    headers: getBaseHeaders(),
+    text: `Hello ${transfer.sender.name},\n\nYour internal transfer has been approved and completed.\n\nSent to: ${transfer.receiver.name} (${transfer.receiver.email})\nAmount sent: $${parseFloat(transfer.amount).toFixed(2)}\n${parseFloat(transfer.feeAmount) > 0 ? `Fee: $${parseFloat(transfer.feeAmount).toFixed(2)}\n` : ""}Amount received by recipient: $${parseFloat(transfer.netAmount).toFixed(2)}\n\nORVANTA Financial Team`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#F7F8F4;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8F4;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(16,33,29,0.06);">
+              <tr><td style="background:#10211D;padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Transfer Completed</h1>
+                <p style="color:#00B956;margin:6px 0 0;font-size:13px;">Sent successfully</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#374151;font-size:15px;margin:0 0 8px;">Hello ${transfer.sender.name},</p>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.6;">Your transfer to <strong>${transfer.receiver.name}</strong> has been reviewed and completed.</p>
+                <div style="background:#F3F8EF;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#89938E;font-size:11px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">Amount Sent</p>
+                  <p style="color:#10211D;font-size:20px;font-weight:700;margin:0 0 12px;">$${parseFloat(transfer.amount).toFixed(2)}</p>
+                  ${parseFloat(transfer.feeAmount) > 0 ? `<p style="color:#6b7280;font-size:13px;margin:0;">Fee: $${parseFloat(transfer.feeAmount).toFixed(2)} &middot; Received by recipient: $${parseFloat(transfer.netAmount).toFixed(2)}</p>` : ""}
+                </div>
+                <p style="color:#9ca3af;font-size:12px;margin:0;">No further action needed from you.</p>
+              </td></tr>
+              <tr><td style="background:#F3F8EF;padding:20px 40px;text-align:center;border-top:1px solid #DDE4DE;">
+                <p style="color:#89938E;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Internal Transfer: notify the receiver funds have arrived ───
+export const sendTransferReceiverCompleted = async (transfer) => {
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: transfer.receiver.email,
+    subject: `You received $${parseFloat(transfer.netAmount).toFixed(2)} from ${transfer.sender.name}`,
+    headers: getBaseHeaders(),
+    text: `Hello ${transfer.receiver.name},\n\nYou've received an internal transfer.\n\nFrom: ${transfer.sender.name} (${transfer.sender.email})\nAmount credited to your wallet: $${parseFloat(transfer.netAmount).toFixed(2)}\n\nORVANTA Financial Team`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#F7F8F4;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8F4;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(16,33,29,0.06);">
+              <tr><td style="background:#10211D;padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">You Received a Transfer</h1>
+                <p style="color:#00B956;margin:6px 0 0;font-size:13px;">Credited to your wallet</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#374151;font-size:15px;margin:0 0 8px;">Hello ${transfer.receiver.name},</p>
+                <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.6;"><strong>${transfer.sender.name}</strong> sent you a transfer, now credited to your wallet.</p>
+                <div style="background:#EAF7E8;border-radius:12px;padding:18px 20px;margin:0 0 20px;text-align:center;">
+                  <p style="color:#00A94F;font-size:24px;font-weight:700;margin:0;">+$${parseFloat(transfer.netAmount).toFixed(2)}</p>
+                </div>
+                <p style="color:#9ca3af;font-size:12px;margin:0;">This is now available in your Wallet balance.</p>
+              </td></tr>
+              <tr><td style="background:#F3F8EF;padding:20px 40px;text-align:center;border-top:1px solid #DDE4DE;">
+                <p style="color:#89938E;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};

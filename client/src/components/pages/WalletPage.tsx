@@ -27,6 +27,7 @@ export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [usdPayment, setUsdPayment] = useState<UsdPaymentInfo | null>(null);
   const [currencyLocked, setCurrencyLocked] = useState(false);
+  const [withdrawalSettings, setWithdrawalSettings] = useState({ minWithdrawal: 10, feeAmount: 3 });
   const [pendingRequest, setPendingRequest] = useState<TransactionData | null>(null);
   const [pendingBonusRequest, setPendingBonusRequest] = useState<TransactionData | null>(null);
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
@@ -77,6 +78,7 @@ export default function WalletPage() {
         setPendingRequest(walletRes.value.pendingRequest);
         setPendingBonusRequest(walletRes.value.pendingBonusRequest);
         setCurrencyLocked(walletRes.value.currencyLocked);
+        if (walletRes.value.withdrawalSettings) setWithdrawalSettings(walletRes.value.withdrawalSettings);
       }
       if (txRes.status === "fulfilled") setTransactions(txRes.value.transactions);
       if (kycRes.status === "fulfilled") setKyc(kycRes.value.kyc);
@@ -716,6 +718,17 @@ export default function WalletPage() {
                       <Input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
                         className="pl-8" />
                     </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Minimum {sym}{withdrawalSettings.minWithdrawal.toFixed(2)}. A flat {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee applies to every withdrawal.
+                    </p>
+                    {parseFloat(withdrawAmount) > 0 && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {sym}{parseFloat(withdrawAmount).toFixed(2)} − {sym}{withdrawalSettings.feeAmount.toFixed(2)} fee = you&apos;ll receive{" "}
+                        <span className="font-medium text-foreground">
+                          {sym}{Math.max(parseFloat(withdrawAmount) - withdrawalSettings.feeAmount, 0).toFixed(2)}
+                        </span>
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label className="text-xs font-medium text-muted-foreground mb-1">Your UPI ID (where you&apos;ll receive funds) *</Label>
