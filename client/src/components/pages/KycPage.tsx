@@ -757,7 +757,7 @@ export default function KycPage() {
     );
   }
 
-  // Ek baar submit karne ke baad form dobara nahi dikhega — sirf status
+  // Once submitted, the form doesn't show again — only the status
   const kycStatus = kyc?.status ?? "NOT_STARTED";
   const showForm =
     kycStatus === "NOT_STARTED" || (kycStatus === "REJECTED" && canResubmit());
@@ -856,7 +856,7 @@ export default function KycPage() {
             </Button>
           </div>
         ) : !showForm ? (
-          /* ─── Status View — form dobara nahi, sirf status ─── */
+          /* ─── Status View — form doesn't show again, only the status ─── */
           <div className="space-y-6 text-center py-4">
             {kycStatus === "PENDING" && (
               <>
