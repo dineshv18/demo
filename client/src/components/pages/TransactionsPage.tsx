@@ -170,6 +170,11 @@ export default function TransactionsPage() {
                       {tx.description || meta.label}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">{formatDateTime(tx.date)}</p>
+                    {(tx.type === "INDEX_INVEST" || tx.type === "INDEX_WITHDRAW") && !!tx.feeAmount && (
+                      <p className="text-[11px] text-amber-600 mt-1">
+                        ${tx.grossAmount?.toFixed(2)} − ${tx.feeAmount.toFixed(2)} {tx.type === "INDEX_INVEST" ? "maintenance fee" : "exit fee"} = ${tx.netAmount?.toFixed(2) ?? "—"}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right shrink-0">
                     <p className={`text-sm font-semibold ${isCredit ? "text-emerald-600" : "text-foreground"}`}>

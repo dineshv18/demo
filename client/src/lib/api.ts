@@ -287,6 +287,11 @@ export interface TransactionEvent {
   status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
   description: string | null;
   date: string;
+  // Present on INDEX_INVEST / INDEX_WITHDRAW events — the fee taken and the
+  // gross amount it was taken from, so the UI can show a "X - fee = Y" line.
+  grossAmount?: number;
+  feeAmount?: number;
+  netAmount?: number | null;
 }
 
 export interface TransactionHistoryResponse {

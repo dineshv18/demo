@@ -18,9 +18,29 @@ import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { Skeleton } from "../components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "../components/ui/table";
+
+function PaymentsSkeleton() {
+  return (
+    <div className="p-4 space-y-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3.5 w-1/3" />
+            <Skeleton className="h-3 w-1/4" />
+          </div>
+          <Skeleton className="h-3.5 w-16 shrink-0" />
+          <Skeleton className="h-3.5 w-20 shrink-0" />
+          <Skeleton className="h-6 w-20 rounded-full shrink-0" />
+          <Skeleton className="h-3.5 w-24 shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 type Tab = "ALL" | "DEPOSIT" | "WITHDRAWAL";
 type StatusFilter = "ALL" | "PENDING" | "COMPLETED" | "FAILED";
@@ -64,6 +84,7 @@ export default function Payments() {
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState("");
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -72,6 +93,7 @@ export default function Payments() {
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
       const params: Record<string, string> = {};
       if (tab !== "ALL") params.type = tab;
@@ -80,7 +102,7 @@ export default function Payments() {
       setPayments(data.payments || []);
       setCounts(data.counts ?? { pendingDeposits: 0, pendingWithdrawals: 0, completed: 0, rejected: 0, total: 0 });
     } catch (err: any) {
-      showToast("error", err.message || "Failed to load payments");
+      setError(err.message || "Failed to load payments");
     } finally {
       setLoading(false);
     }
@@ -160,6 +182,13 @@ export default function Payments() {
         <p className="mt-1 text-sm text-[#68736E]">Review deposit & withdrawal requests. Verify payment screenshots before approving.</p>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <IconX size={16} className="shrink-0" /> {error}
+          <button onClick={fetchPayments} className="ml-auto text-xs font-semibold underline shrink-0">Retry</button>
+        </div>
+      )}
+
       {/* Counts */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
@@ -211,7 +240,7 @@ export default function Payments() {
       {/* Table */}
       <Card className="overflow-hidden py-0 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
         {loading ? (
-          <div className="p-6 text-center text-sm text-[#68736E]">Loading...</div>
+          <PaymentsSkeleton />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="h-14 w-14 rounded-full bg-[#F3F8EF] flex items-center justify-center mb-4">
@@ -269,7 +298,11 @@ export default function Payments() {
           <div className="absolute inset-0 bg-black/40" onClick={() => !actionLoading && setSelected(null)} />
           <div className="relative w-full max-w-xl bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto">
             {detailLoading ? (
-              <div className="p-6 text-sm text-gray-500">Loading...</div>
+              <div className="p-6 space-y-4">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-24 w-full rounded-xl" />
+                <Skeleton className="h-32 w-full rounded-xl" />
+              </div>
             ) : selected ? (
               <>
                 <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between">

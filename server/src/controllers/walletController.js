@@ -95,17 +95,25 @@ function mapIndexEvents(inv) {
       category: "INDEX",
       type: "INDEX_INVEST",
       amount: parseFloat(inv.amount),
+      grossAmount: parseFloat(inv.amount),
+      feeAmount: parseFloat(inv.feeAmount || 0),
+      netAmount: parseFloat(inv.netAmount || inv.amount),
       status: "COMPLETED",
       description: `Invested in ${inv.tier.label}`,
       date: inv.activatedAt,
     },
   ];
   if (inv.withdrawnAt) {
+    const grossAmount = parseFloat(inv.netAmount || inv.amount);
+    const feeAmount = inv.withdrawalFee !== null ? parseFloat(inv.withdrawalFee) : 0;
     out.push({
       id: `index-withdraw-${inv.id}`,
       category: "INDEX",
       type: "INDEX_WITHDRAW",
       amount: inv.payoutAmount !== null ? parseFloat(inv.payoutAmount) : null,
+      grossAmount,
+      feeAmount,
+      netAmount: inv.payoutAmount !== null ? parseFloat(inv.payoutAmount) : null,
       status: inv.status === "MATURED" ? "COMPLETED" : "CANCELLED",
       description: inv.status === "MATURED"
         ? `Index investment matured — ${inv.tier.label}`

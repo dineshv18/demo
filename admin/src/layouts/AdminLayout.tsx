@@ -43,6 +43,7 @@ const allNavItems = [
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconUserCheck },
   { slug: "payments", to: "/dashboard/payments", label: "Payment Requests", icon: IconWallet },
   { slug: "index-settings", to: "/dashboard/index-settings", label: "Index Settings", icon: IconChartLine },
+  { slug: "index-investments", to: "/dashboard/index-investments", label: "Index Investments", icon: IconChartLine },
   { slug: "support", to: "/dashboard/support", label: "Support Team", icon: IconHeadset },
   { slug: "support-tickets", to: "/dashboard/support-tickets", label: "Support Tickets", icon: IconHeadset },
   { slug: "platform-wallet", to: "/dashboard/platform-wallet", label: "Platform Wallet", icon: IconWallet },

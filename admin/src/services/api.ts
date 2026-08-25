@@ -312,6 +312,10 @@ export interface IndexInvestmentRecord {
   netAmount: string;
   status: "ACTIVE" | "MATURED" | "CANCELLED";
   activatedAt: string;
+  maturesAt: string | null;
+  withdrawnAt: string | null;
+  withdrawalFee: string | null;
+  payoutAmount: string | null;
   createdAt: string;
   tier: IndexTier;
   user: { id: string; name: string; email: string };
