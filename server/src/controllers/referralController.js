@@ -12,8 +12,8 @@ export const getMyStats = async (req, res) => {
       include: { commissions: true },
     });
 
-    const settings = await getPrisma().referralSettings.findFirst();
-    const commissionRate = settings ? parseFloat(settings.commissionRate) : 2;
+    const indexSettings = await getPrisma().indexSettings.findFirst();
+    const commissionRate = indexSettings ? parseFloat(indexSettings.level1Percent) : 2;
 
     const stats = {
       totalReferrals: referrals.length,
@@ -225,65 +225,6 @@ export const getAllReferrals = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
-export async function processReferralCommission(prisma, depositTx) {
-  try {
-    const wallet = await prisma.wallet.findUnique({ where: { id: depositTx.walletId } });
-    if (!wallet) return;
-
-    const referral = await prisma.referral.findUnique({ where: { referredId: wallet.userId } });
-    if (!referral) return;
-
-    let settings = await prisma.referralSettings.findFirst();
-    if (!settings) {
-      settings = await prisma.referralSettings.create({ data: { commissionRate: 2 } });
-    }
-
-    const percentage = parseFloat(settings.commissionRate);
-    const depositAmount = parseFloat(depositTx.amount);
-    const commissionAmount = (depositAmount * percentage) / 100;
-
-    if (commissionAmount <= 0) return;
-
-    const referrerWallet = await prisma.wallet.findUnique({ where: { userId: referral.referrerId } });
-    if (!referrerWallet) return;
-
-    await prisma.wallet.update({
-      where: { id: referrerWallet.id },
-      data: { bonusBalance: { increment: commissionAmount } },
-    });
-
-    await prisma.transaction.create({
-      data: {
-        walletId: referrerWallet.id,
-        type: "BONUS_CREDIT",
-        status: "COMPLETED",
-        amount: commissionAmount,
-        description: `Referral commission from deposit`,
-      },
-    });
-
-    await prisma.referralCommission.create({
-      data: {
-        referralId: referral.id,
-        userId: referral.referrerId,
-        amount: commissionAmount,
-        percentage,
-        status: "PAID",
-        depositTxId: depositTx.id,
-      },
-    });
-
-    await prisma.referral.update({
-      where: { id: referral.id },
-      data: { status: "COMMISSION_PAID", depositedAt: new Date() },
-    });
-
-    console.log(`[REFERRAL] Commission $${commissionAmount} credited to referrer ${referral.referrerId} for deposit ${depositTx.id}`);
-  } catch (error) {
-    console.error("Process referral commission error:", error);
-  }
-}
 
 export async function processReferralKyc(userId) {
   try {

@@ -55,6 +55,15 @@ async function distributeIndexCommission(prisma, investment, feeAmount) {
     const referral = await prisma.referral.findUnique({ where: { referredId: currentUserId } });
     if (!referral) break;
 
+    // Only the investor's direct (level 1) referral relationship reflects
+    // "this person has invested" — mark it once, on their first Index investment.
+    if (level === 1 && referral.status !== "DEPOSITED" && referral.status !== "COMMISSION_PAID") {
+      await prisma.referral.update({
+        where: { id: referral.id },
+        data: { status: "COMMISSION_PAID", depositedAt: new Date() },
+      });
+    }
+
     const percent = levelPercents[level - 1];
     const commissionAmount = (feeAmount * percent) / 100;
 
