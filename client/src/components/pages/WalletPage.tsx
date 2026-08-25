@@ -141,9 +141,13 @@ export default function WalletPage() {
 
   const handleWithdraw = async () => {
     const amt = parseFloat(withdrawAmount);
+    const roundedAmt = Math.ceil(amt / 10) * 10;
     const sourceBalance = withdrawSource === "bonus" ? bonusBalance : balance;
     if (!amt || amt <= 0) { setWithdrawError("Enter a valid amount"); return; }
-    if (amt > sourceBalance) { setWithdrawError(`Insufficient ${withdrawSource === "bonus" ? "bonus" : ""} balance`); return; }
+    if (roundedAmt > sourceBalance) {
+      setWithdrawError(`Insufficient ${withdrawSource === "bonus" ? "bonus " : ""}balance — this withdrawal rounds up to $${roundedAmt.toFixed(2)}`);
+      return;
+    }
     if (!withdrawUpiId.trim()) { setWithdrawError("UPI ID is required"); return; }
     setWithdrawLoading(true);
     setWithdrawError("");
@@ -721,14 +725,29 @@ export default function WalletPage() {
                     <p className="text-[11px] text-muted-foreground mt-1">
                       Minimum {sym}{withdrawalSettings.minWithdrawal.toFixed(2)}. A flat {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee applies to every withdrawal.
                     </p>
-                    {parseFloat(withdrawAmount) > 0 && (
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {sym}{parseFloat(withdrawAmount).toFixed(2)} − {sym}{withdrawalSettings.feeAmount.toFixed(2)} fee = you&apos;ll receive{" "}
-                        <span className="font-medium text-foreground">
-                          {sym}{Math.max(parseFloat(withdrawAmount) - withdrawalSettings.feeAmount, 0).toFixed(2)}
-                        </span>
-                      </p>
-                    )}
+                    {parseFloat(withdrawAmount) > 0 && (() => {
+                      const requested = parseFloat(withdrawAmount);
+                      const roundedAmount = Math.ceil(requested / 10) * 10;
+                      const payout = Math.max(roundedAmount - withdrawalSettings.feeAmount, 0);
+                      return (
+                        <div className="mt-2 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 space-y-1">
+                          {roundedAmount !== requested && (
+                            <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                              Rounded up to {sym}{roundedAmount.toFixed(2)} to cover the {sym}{withdrawalSettings.feeAmount.toFixed(2)} fee.
+                            </p>
+                          )}
+                          <p className="text-[11px] text-muted-foreground">
+                            {sym}{roundedAmount.toFixed(2)} deducted from your {withdrawSource === "bonus" ? "bonus" : "wallet"} balance
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            − {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee
+                          </p>
+                          <p className="text-xs font-semibold text-foreground pt-1 border-t border-brand/10">
+                            = {sym}{payout.toFixed(2)} you&apos;ll receive on UPI
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div>
                     <Label className="text-xs font-medium text-muted-foreground mb-1">Your UPI ID (where you&apos;ll receive funds) *</Label>

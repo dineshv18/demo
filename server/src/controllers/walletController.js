@@ -8,6 +8,15 @@ export async function getWalletSettings(prisma) {
   return settings;
 }
 
+// Users type "how much I want to withdraw" as a round-ish figure, but the
+// flat fee doesn't divide evenly out of it — so we round the wallet-side
+// amount up to the next $10 so the fee comes out of the rounding headroom
+// rather than eating into what the user actually asked for. e.g. requesting
+// $112 rounds the wallet deduction to $120; after the $3 fee, payout is $117.
+export function roundUpToTen(amount) {
+  return Math.ceil(amount / 10) * 10;
+}
+
 export async function creditPlatformWalletFromFee(prisma, amount, description) {
   if (amount <= 0) return;
   let platformWallet = await prisma.platformWallet.findFirst();
@@ -310,14 +319,19 @@ export const requestDeposit = async (req, res) => {
 
 export const requestWithdrawal = async (req, res) => {
   try {
-    const { amount, upiId } = req.body;
+    const { amount: rawAmount, upiId } = req.body;
     const settings = await getWalletSettings(getPrisma());
     const minWithdrawal = parseFloat(settings.minWithdrawal);
     const feeAmount = parseFloat(settings.withdrawalFeeAmount);
 
-    if (!amount || amount <= 0) return res.status(400).json({ message: "Invalid amount" });
-    if (amount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
+    if (!rawAmount || rawAmount <= 0) return res.status(400).json({ message: "Invalid amount" });
+    if (rawAmount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
     if (!upiId || !upiId.trim()) return res.status(400).json({ message: "Your UPI ID is required to receive the withdrawal" });
+
+    // The amount actually deducted from the wallet is rounded up to the next
+    // $10 so the flat fee comes out of the rounding headroom rather than
+    // eating into the amount the user asked for.
+    const amount = roundUpToTen(parseFloat(rawAmount));
 
     const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
     if (!kyc || kyc.status !== "APPROVED") {
@@ -327,8 +341,8 @@ export const requestWithdrawal = async (req, res) => {
     let wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
     if (!wallet) wallet = await getPrisma().wallet.create({ data: { userId: req.user.id } });
 
-    if (parseFloat(wallet.balance) < parseFloat(amount)) {
-      return res.status(400).json({ message: "Insufficient balance" });
+    if (parseFloat(wallet.balance) < amount) {
+      return res.status(400).json({ message: `Insufficient balance — this withdrawal rounds up to $${amount.toFixed(2)}` });
     }
 
     // Block duplicate pending withdrawal
@@ -339,24 +353,24 @@ export const requestWithdrawal = async (req, res) => {
       return res.status(400).json({ message: "You already have a withdrawal request under review. Please wait until it is processed." });
     }
 
-    const payoutAmount = Math.max(parseFloat(amount) - feeAmount, 0);
+    const payoutAmount = Math.max(amount - feeAmount, 0);
 
     const transaction = await getPrisma().transaction.create({
       data: {
         walletId: wallet.id,
         type: "WITHDRAWAL",
-        amount: parseFloat(amount),
+        amount,
         feeAmount,
         payoutAmount,
         status: "PENDING",
-        description: `Withdrawal request of ${wallet.currency} ${amount} (a $${feeAmount.toFixed(2)} processing fee applies)`,
+        description: `Withdrawal request of ${wallet.currency} ${amount.toFixed(2)} (a $${feeAmount.toFixed(2)} processing fee applies)`,
         upiId: upiId.trim(),
         currency: wallet.currency,
       },
     });
 
     return res.status(201).json({
-      message: `Withdrawal request submitted. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
+      message: `Withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
       transaction,
     });
   } catch (error) {
@@ -412,14 +426,16 @@ export const transferBonusToWallet = async (req, res) => {
 // bonusBalance instead of balance. Balance is deducted at approval time.
 export const requestBonusWithdrawal = async (req, res) => {
   try {
-    const { amount, upiId } = req.body;
+    const { amount: rawAmount, upiId } = req.body;
     const settings = await getWalletSettings(getPrisma());
     const minWithdrawal = parseFloat(settings.minWithdrawal);
     const feeAmount = parseFloat(settings.withdrawalFeeAmount);
 
-    if (!amount || amount <= 0) return res.status(400).json({ message: "Invalid amount" });
-    if (amount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
+    if (!rawAmount || rawAmount <= 0) return res.status(400).json({ message: "Invalid amount" });
+    if (rawAmount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
     if (!upiId || !upiId.trim()) return res.status(400).json({ message: "Your UPI ID is required to receive the withdrawal" });
+
+    const amount = roundUpToTen(parseFloat(rawAmount));
 
     const kyc = await getPrisma().kyc.findUnique({ where: { userId: req.user.id } });
     if (!kyc || kyc.status !== "APPROVED") {
@@ -427,8 +443,8 @@ export const requestBonusWithdrawal = async (req, res) => {
     }
 
     const wallet = await getPrisma().wallet.findUnique({ where: { userId: req.user.id } });
-    if (!wallet || parseFloat(wallet.bonusBalance) < parseFloat(amount)) {
-      return res.status(400).json({ message: "Insufficient bonus balance" });
+    if (!wallet || parseFloat(wallet.bonusBalance) < amount) {
+      return res.status(400).json({ message: `Insufficient bonus balance — this withdrawal rounds up to $${amount.toFixed(2)}` });
     }
 
     const existingPending = await getPrisma().transaction.findFirst({
@@ -438,24 +454,24 @@ export const requestBonusWithdrawal = async (req, res) => {
       return res.status(400).json({ message: "You already have a bonus withdrawal request under review. Please wait until it is processed." });
     }
 
-    const payoutAmount = Math.max(parseFloat(amount) - feeAmount, 0);
+    const payoutAmount = Math.max(amount - feeAmount, 0);
 
     const transaction = await getPrisma().transaction.create({
       data: {
         walletId: wallet.id,
         type: "BONUS_WITHDRAWAL",
-        amount: parseFloat(amount),
+        amount,
         feeAmount,
         payoutAmount,
         status: "PENDING",
-        description: `Bonus withdrawal request of ${wallet.currency} ${amount} (a $${feeAmount.toFixed(2)} processing fee applies)`,
+        description: `Bonus withdrawal request of ${wallet.currency} ${amount.toFixed(2)} (a $${feeAmount.toFixed(2)} processing fee applies)`,
         upiId: upiId.trim(),
         currency: wallet.currency,
       },
     });
 
     return res.status(201).json({
-      message: `Bonus withdrawal request submitted. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
+      message: `Bonus withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
       transaction,
     });
   } catch (error) {
