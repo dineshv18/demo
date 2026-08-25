@@ -38,7 +38,7 @@ export default function ClientDashboard() {
   const [referralStats, setReferralStats] = useState<ReferralDashboardStats | null>(null);
   const [earnings, setEarnings] = useState<ReferralEarningsBreakdown | null>(null);
   const [levelRates, setLevelRates] = useState<number[]>([]);
-  const [activeInvestment, setActiveInvestment] = useState<IndexInvestment | null>(null);
+  const [investments, setInvestments] = useState<IndexInvestment[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -75,7 +75,7 @@ export default function ClientDashboard() {
         if (earnRes.status === "fulfilled") setEarnings(earnRes.value);
         if (indexRes.status === "fulfilled") setLevelRates(indexRes.value.referralLevels || []);
         if (investRes.status === "fulfilled") {
-          setActiveInvestment(investRes.value.investments.find((i) => i.status === "ACTIVE") || null);
+          setInvestments(investRes.value.investments);
         }
       } finally {
         setLoading(false);
@@ -97,6 +97,9 @@ export default function ClientDashboard() {
   const frozen = wallet ? parseFloat(wallet.frozen) : 0;
   const sym = currencySymbol();
   const kycStatus = kyc?.status || "NOT_STARTED";
+
+  const activeInvestments = investments.filter((i) => i.status === "ACTIVE");
+  const totalIndexValue = activeInvestments.reduce((sum, i) => sum + parseFloat(i.netAmount || i.amount), 0);
 
   const totalDeposits = transactions
     .filter((t) => t.type === "DEPOSIT" && t.status === "COMPLETED")
@@ -203,10 +206,24 @@ export default function ClientDashboard() {
               </div>
               <p className="text-sm font-medium text-muted-foreground">Index</p>
             </div>
-            {activeInvestment ? (
+            {activeInvestments.length > 0 ? (
               <>
-                <p className="text-2xl font-bold text-foreground">{sym}{parseFloat(activeInvestment.netAmount || activeInvestment.amount).toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-1">{activeInvestment.tier.label} · Active</p>
+                <p className="text-2xl font-bold text-foreground">{sym}{totalIndexValue.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {activeInvestments.length === 1
+                    ? `${activeInvestments[0].tier.label} · Active`
+                    : `Across ${activeInvestments.length} active plans`}
+                </p>
+                {activeInvestments.length > 1 && (
+                  <ul className="mt-2.5 space-y-1 border-t border-border pt-2.5">
+                    {activeInvestments.map((inv) => (
+                      <li key={inv.id} className="flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground truncate mr-2">{inv.tier.label}</span>
+                        <span className="font-medium text-foreground shrink-0">{sym}{parseFloat(inv.netAmount || inv.amount).toFixed(2)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </>
             ) : (
               <>
