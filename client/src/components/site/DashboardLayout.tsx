@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import InvestmentBasePopup, { useInvestmentBasePopup } from "@/components/site/InvestmentBasePopup";
+import { DashboardTour } from "@/components/site/DashboardTour";
 import ProfileMenu from "@/components/site/ProfileMenu";
 import {
   IconLayoutDashboard,
@@ -82,7 +83,7 @@ function AppSidebar() {
         tooltip={item.label}
         className="h-10 rounded-lg transition-colors data-[active=true]:bg-brand/10 data-[active=true]:text-brand data-[active=true]:font-semibold data-[active=true]:shadow-[inset_2px_0_0_0_var(--brand)]"
       >
-        <Link href={item.to} onClick={() => setOpenMobile(false)}>
+        <Link href={item.to} onClick={() => setOpenMobile(false)} data-tour={`nav-${item.slug}`}>
           <item.icon className="size-4.5" />
           <span>{item.label}</span>
         </Link>
@@ -277,6 +278,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SidebarInset>
       </SidebarProvider>
       {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}
+      <DashboardTour />
     </>
   );
 }

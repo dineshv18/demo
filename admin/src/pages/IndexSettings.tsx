@@ -269,6 +269,67 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
                 className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
             </div>
           </div>
+
+          {/* Live example — shows how these numbers translate for an actual investor */}
+          {(() => {
+            const exampleAmount = parseFloat(form.minAmount) > 0 ? parseFloat(form.minAmount) : 100;
+            const monthlyPct = parseFloat(form.monthlyReturn) || 0;
+            const maintFeePct = parseFloat(form.maintenanceFeePercent) || 0;
+            const exitFeePct = parseFloat(form.exitFeePercent) || 0;
+            const earlyFeePct = parseFloat(form.earlyExitFeePercent) || 0;
+            const durationMonths = parseInt(form.durationMonths) || 18;
+
+            const maintFee = (exampleAmount * maintFeePct) / 100;
+            const netInvested = exampleAmount - maintFee;
+            const grownValue = netInvested * (1 + monthlyPct / 100);
+            const grownAtMaturity = netInvested * Math.pow(1 + monthlyPct / 100, durationMonths);
+            const exitFeeAtMaturity = (grownAtMaturity * exitFeePct) / 100;
+            const payoutAtMaturity = grownAtMaturity - exitFeeAtMaturity;
+            const earlyFeeNow = (netInvested * earlyFeePct) / 100;
+            const payoutIfWithdrawnNow = netInvested - earlyFeeNow;
+
+            const today = new Date();
+            const maturityDate = new Date(today);
+            maturityDate.setMonth(maturityDate.getMonth() + durationMonths);
+            const fmt = (n: number) => `$${n.toFixed(2)}`;
+            const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+            return (
+              <div className="rounded-xl border border-[#00A94F]/25 bg-[#EAF7E8]/40 p-4 space-y-2.5">
+                <p className="text-xs font-semibold text-[#00A94F] uppercase tracking-wider">
+                  Live example — what an investor sees with these numbers
+                </p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Say a user invests <strong>{fmt(exampleAmount)}</strong> in this tier today ({fmtDate(today)}).
+                </p>
+                <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1.5 pl-1">
+                  <li>
+                    A <strong>{maintFeePct.toFixed(2)}%</strong> maintenance fee is taken immediately:{" "}
+                    {fmt(exampleAmount)} − {fmt(maintFee)} fee = <strong>{fmt(netInvested)}</strong> actually invested.
+                  </li>
+                  <li>
+                    Their client-side chart shows this growing at <strong>{monthlyPct.toFixed(2)}% per month</strong> — after
+                    1 month it&apos;s roughly <strong>{fmt(grownValue)}</strong>, and it keeps compounding until it matures.
+                  </li>
+                  <li>
+                    The plan matures in <strong>{durationMonths} months</strong> (on {fmtDate(maturityDate)}). If they wait
+                    until then and withdraw, the projected value is about <strong>{fmt(grownAtMaturity)}</strong>, minus a{" "}
+                    <strong>{exitFeePct.toFixed(2)}%</strong> exit fee ({fmt(exitFeeAtMaturity)}) ={" "}
+                    <strong className="text-[#00A94F]">{fmt(payoutAtMaturity)}</strong> paid to their wallet.
+                  </li>
+                  <li>
+                    If they withdraw <em>before</em> maturity instead, a higher <strong>{earlyFeePct.toFixed(2)}%</strong> early-exit
+                    fee applies — right now that would be {fmt(netInvested)} − {fmt(earlyFeeNow)} fee ={" "}
+                    <strong>{fmt(payoutIfWithdrawnNow)}</strong>.
+                  </li>
+                </ul>
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-1 border-t border-[#00A94F]/15">
+                  This updates live as you edit the fields above — use it to sanity-check the numbers before saving.
+                </p>
+              </div>
+            );
+          })()}
+
           <div className="flex gap-3 justify-end">
             <button onClick={() => { setEditTier(null); setNewTier(false); resetForm(); }}
               className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>

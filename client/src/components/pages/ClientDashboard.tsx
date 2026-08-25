@@ -185,7 +185,7 @@ export default function ClientDashboard() {
 
       {/* Top Stats: Wallet / Index / Bonus */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/dashboard/wallet">
+        <Link href="/dashboard/wallet" data-tour="stat-wallet">
           <Card className="p-4 sm:p-5 gap-0 hover:border-brand/30 hover:shadow-md transition-all">
             <div className="flex items-center gap-3 mb-3">
               <div className="grid h-11 w-11 place-items-center rounded-full bg-teal-500/10 shrink-0">
@@ -198,7 +198,7 @@ export default function ClientDashboard() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/index">
+        <Link href="/dashboard/index" data-tour="stat-index">
           <Card className="p-4 sm:p-5 gap-0 hover:border-brand/30 hover:shadow-md transition-all">
             <div className="flex items-center gap-3 mb-3">
               <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
@@ -234,7 +234,7 @@ export default function ClientDashboard() {
           </Card>
         </Link>
 
-        <Card className="p-4 sm:p-5 gap-0">
+        <Card className="p-4 sm:p-5 gap-0" data-tour="stat-bonus">
           <div className="flex items-center gap-3 mb-3">
             <div className="grid h-11 w-11 place-items-center rounded-full bg-amber-500/10 shrink-0">
               <IconGift className="h-5 w-5 text-amber-500" />
