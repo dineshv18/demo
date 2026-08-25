@@ -560,13 +560,13 @@ export default function IndexPage() {
                         isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
                           <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
                             {i + 1}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-base font-bold text-foreground">{t.label}</p>
+                            <p className="text-base font-bold text-foreground break-words">{t.label}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{t.tagline || `For amounts between $${parseFloat(t.minAmount).toLocaleString()} and $${parseFloat(t.maxAmount).toLocaleString()}`}</p>
                           </div>
                         </div>
@@ -577,7 +577,7 @@ export default function IndexPage() {
                             if (!investAmount) setInvestAmount(t.minAmount);
                           }}
                           disabled={investAmountNum > 0 && !isEligible}
-                          className={`shrink-0 gap-1.5 font-semibold ${isSelected ? "" : "btn-glow btn-glow-hover"}`}
+                          className={`w-full sm:w-auto shrink-0 gap-1.5 font-semibold ${isSelected ? "" : "btn-glow btn-glow-hover"}`}
                           variant={isSelected ? "outline" : "default"}
                         >
                           {isSelected ? (
@@ -590,18 +590,18 @@ export default function IndexPage() {
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border/60">
-                        <div className="text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Return</p>
-                          <p className="text-sm font-bold text-brand mt-0.5">{parseFloat(t.monthlyReturn).toFixed(2)}%/mo</p>
+                      <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-4 pt-4 border-t border-border/60">
+                        <div className="text-center px-0.5">
+                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Return (up to)</p>
+                          <p className="text-xs sm:text-sm font-bold text-brand mt-0.5">{parseFloat(t.monthlyReturn).toFixed(2)}%/mo</p>
                         </div>
-                        <div className="text-center border-x border-border/60">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Duration</p>
-                          <p className="text-sm font-bold text-foreground mt-0.5">{t.durationMonths} months</p>
+                        <div className="text-center px-0.5 border-x border-border/60">
+                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Duration</p>
+                          <p className="text-xs sm:text-sm font-bold text-foreground mt-0.5">{t.durationMonths} months</p>
                         </div>
-                        <div className="text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Min Invest</p>
-                          <p className="text-sm font-bold text-foreground mt-0.5">${parseFloat(t.minAmount).toLocaleString()}</p>
+                        <div className="text-center px-0.5">
+                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Min Invest</p>
+                          <p className="text-xs sm:text-sm font-bold text-foreground mt-0.5">${parseFloat(t.minAmount).toLocaleString()}</p>
                         </div>
                       </div>
                     </div>
