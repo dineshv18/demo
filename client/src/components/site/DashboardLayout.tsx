@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import InvestmentBasePopup, { useInvestmentBasePopup } from "@/components/site/InvestmentBasePopup";
-import { DashboardTour } from "@/components/site/DashboardTour";
+import { DashboardTour, triggerDashboardTour } from "@/components/site/DashboardTour";
 import ProfileMenu from "@/components/site/ProfileMenu";
 import {
   IconLayoutDashboard,
@@ -19,6 +19,7 @@ import {
   IconGift,
   IconArrowsExchange,
   IconHelpCircle,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -273,6 +274,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {currentNav?.label || "Dashboard"}
             </h1>
             <div className="flex-1" />
+            <button
+              type="button"
+              onClick={triggerDashboardTour}
+              title="Take a tour of the dashboard"
+              aria-label="Take a tour of the dashboard"
+              className="grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand hover:bg-brand/5"
+            >
+              <IconInfoCircle className="size-4" />
+            </button>
             <ProfileMenu />
           </header>
           <div className="flex-1 overflow-y-auto bg-muted/20 p-3 sm:p-6 lg:p-8">{children}</div>

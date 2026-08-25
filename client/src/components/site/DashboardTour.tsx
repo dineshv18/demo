@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { driver, type DriveStep, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -116,69 +116,109 @@ const steps: DriveStep[] = [
 
 /**
  * One-time guided tour of the client Dashboard, shown after a user's first
- * login. Skips entirely if already seen (localStorage flag) or if this
- * isn't the Dashboard route. Renders inside SidebarProvider so it can open
- * the mobile sidebar sheet before highlighting nav items that live inside
- * it, and close it again once the tour moves past them.
+ * login. Also exposes a "Take a Tour" trigger (via ref on window) so the
+ * header help icon can replay it on demand. Renders inside SidebarProvider
+ * so it can open the mobile sidebar sheet before highlighting nav items
+ * that live inside it, and close it again once the tour moves past them.
  */
 export function DashboardTour() {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
+  const tourRef = useRef<Driver | null>(null);
 
+  const startTour = () => {
+    if (isMobile) setOpenMobile(true);
+
+    const run = () => {
+      const availableSteps = steps.filter((s) =>
+        typeof s.element === "string" ? document.querySelector(s.element) : true
+      );
+      if (availableSteps.length === 0) {
+        if (isMobile) setOpenMobile(false);
+        return;
+      }
+
+      const tour = driver({
+        showProgress: true,
+        allowClose: true,
+        smoothScroll: true,
+        stagePadding: 6,
+        overlayColor: "rgba(8, 15, 13, 0.75)",
+        popoverClass: "orvanta-driver-popover",
+        steps: availableSteps,
+        onHighlightStarted: (_element, step) => {
+          if (!isMobile) return;
+          const slug = slugFromElement(step.element);
+          if (slug && SIDEBAR_STEP_SLUGS.has(slug)) setOpenMobile(true);
+        },
+        onDestroyed: () => {
+          localStorage.setItem(TOUR_SEEN_KEY, "1");
+          if (isMobile) setOpenMobile(false);
+        },
+      });
+      tourRef.current = tour;
+      tour.drive();
+    };
+
+    if (isMobile) {
+      setTimeout(run, 350);
+    } else {
+      run();
+    }
+  };
+
+  // Auto-run once for first-time users.
   useEffect(() => {
     if (pathname !== "/dashboard") return;
     if (typeof window === "undefined") return;
     if (localStorage.getItem(TOUR_SEEN_KEY)) return;
 
-    let tourInstance: Driver | null = null;
-
-    // Give the dashboard's own data fetch + layout a moment to settle so
-    // every data-tour target actually exists in the DOM before driver.js
-    // tries to attach popovers to them.
-    const timer = setTimeout(() => {
-      if (isMobile) setOpenMobile(true);
-
-      // Re-check availability after the mobile sheet (if any) has had a
-      // moment to mount its content.
-      const checkTimer = setTimeout(() => {
-        const availableSteps = steps.filter((s) =>
-          typeof s.element === "string" ? document.querySelector(s.element) : true
-        );
-        if (availableSteps.length === 0) {
-          if (isMobile) setOpenMobile(false);
-          return;
-        }
-
-        tourInstance = driver({
-          showProgress: true,
-          allowClose: true,
-          smoothScroll: true,
-          stagePadding: 6,
-          overlayColor: "rgba(8, 15, 13, 0.75)",
-          popoverClass: "orvanta-driver-popover",
-          steps: availableSteps,
-          onHighlightStarted: (element, step) => {
-            if (!isMobile) return;
-            const slug = slugFromElement(step.element);
-            if (slug && SIDEBAR_STEP_SLUGS.has(slug)) setOpenMobile(true);
-          },
-          onDestroyed: () => {
-            localStorage.setItem(TOUR_SEEN_KEY, "1");
-            if (isMobile) setOpenMobile(false);
-          },
-        });
-        tourInstance.drive();
-      }, isMobile ? 350 : 0);
-
-      return () => clearTimeout(checkTimer);
-    }, 900);
-
+    const timer = setTimeout(startTour, 900);
     return () => {
       clearTimeout(timer);
-      tourInstance?.destroy();
+      tourRef.current?.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  // Let the "Take a Tour" header button replay it on demand, from any
+  // dashboard page — redirect to /dashboard first since the tour's steps
+  // target elements that only exist there.
+  useEffect(() => {
+    const handler = () => {
+      if (pathname !== "/dashboard") {
+        window.location.href = "/dashboard?tour=1";
+        return;
+      }
+      startTour();
+    };
+    window.addEventListener("orvanta:start-tour", handler);
+    return () => window.removeEventListener("orvanta:start-tour", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, isMobile]);
+
+  // If redirected here with ?tour=1 (replay requested from another page),
+  // kick off the tour once the dashboard has settled.
+  useEffect(() => {
+    if (pathname !== "/dashboard") return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tour") !== "1") return;
+
+    const timer = setTimeout(() => {
+      startTour();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("tour");
+      window.history.replaceState({}, "", url.toString());
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   return null;
+}
+
+/** Fired by the header's "Take a Tour" button to (re)start the guided tour. */
+export function triggerDashboardTour() {
+  window.dispatchEvent(new Event("orvanta:start-tour"));
 }
