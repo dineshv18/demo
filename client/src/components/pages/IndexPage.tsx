@@ -547,7 +547,7 @@ export default function IndexPage() {
 
             {/* Plan list — always visible so users can browse without typing first */}
             {activeTiers.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {activeTiers.map((t, i) => {
                   const isSelected = selectedTierId === t.id;
                   const isEligible = investAmountNum > 0
@@ -556,35 +556,52 @@ export default function IndexPage() {
                   return (
                     <div
                       key={t.id}
-                      onClick={() => {
-                        setSelectedTierId(t.id);
-                        if (!investAmount) setInvestAmount(t.minAmount);
-                      }}
-                      role="button"
-                      className={`rounded-xl border px-3.5 py-3 cursor-pointer transition-colors ${
-                        isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border hover:bg-accent"
+                      className={`rounded-2xl border-2 p-4 sm:p-5 transition-colors ${
+                        isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`hidden sm:grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-xs font-bold`}>
-                          {i + 1}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
+                            {i + 1}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-base font-bold text-foreground">{t.label}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t.tagline || `For amounts between $${parseFloat(t.minAmount).toLocaleString()} and $${parseFloat(t.maxAmount).toLocaleString()}`}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <p className="text-sm font-semibold text-foreground">{t.label}</p>
-                            <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md shrink-0">
-                              ${parseFloat(t.minAmount).toLocaleString()} – ${parseFloat(t.maxAmount).toLocaleString()}
-                            </span>
-                          </div>
-                          {t.tagline && <p className="text-[11px] text-muted-foreground mt-0.5">{t.tagline}</p>}
-                          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand">
-                              <IconTrendingUp className="h-3 w-3" /> up to {parseFloat(t.monthlyReturn).toFixed(2)}% / month
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                              <IconClock className="h-3 w-3" /> {t.durationMonths} months to mature
-                            </span>
-                          </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTierId(t.id);
+                            if (!investAmount) setInvestAmount(t.minAmount);
+                          }}
+                          disabled={investAmountNum > 0 && !isEligible}
+                          className={`shrink-0 gap-1.5 font-semibold ${isSelected ? "" : "btn-glow btn-glow-hover"}`}
+                          variant={isSelected ? "outline" : "default"}
+                        >
+                          {isSelected ? (
+                            <>
+                              <IconCircleCheck className="h-4 w-4" /> Selected
+                            </>
+                          ) : (
+                            "Choose Plan"
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border/60">
+                        <div className="text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Return</p>
+                          <p className="text-sm font-bold text-brand mt-0.5">{parseFloat(t.monthlyReturn).toFixed(2)}%/mo</p>
+                        </div>
+                        <div className="text-center border-x border-border/60">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Duration</p>
+                          <p className="text-sm font-bold text-foreground mt-0.5">{t.durationMonths} months</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Min Invest</p>
+                          <p className="text-sm font-bold text-foreground mt-0.5">${parseFloat(t.minAmount).toLocaleString()}</p>
                         </div>
                       </div>
                     </div>
