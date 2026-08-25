@@ -27,6 +27,7 @@ const DEFAULT_PAGES = [
   { slug: "index", name: "Index", icon: "IconChartLine", category: "finance", description: "Client-side Index investment page reference." },
   { slug: "index-settings", name: "Index Settings", icon: "IconSettings", category: "management", description: "Configure Index investment tiers, price history, the index manager profile, and maintenance/withdrawal fees." },
   { slug: "index-investments", name: "Index Investments", icon: "IconChartLine", category: "finance", description: "Every user's Index investment — tier, amount, status, maturity, and fees paid at invest and withdrawal." },
+  { slug: "internal-transfers", name: "Internal Transfers", icon: "IconArrowsLeftRight", category: "finance", description: "User-to-user wallet transfer requests — approve or reject, and configure the transfer fee." },
 ];
 
 const DEFAULT_ROLES = [

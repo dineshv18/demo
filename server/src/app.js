@@ -21,6 +21,8 @@ import adminIndexRoutes from "./routes/adminIndex.js";
 import supportRoutes from "./routes/support.js";
 import adminSupportRoutes from "./routes/adminSupport.js";
 import adminPlatformWalletRoutes from "./routes/adminPlatformWallet.js";
+import transferRoutes from "./routes/transfer.js";
+import adminTransferRoutes from "./routes/adminTransfer.js";
 
 const app = express();
 
@@ -117,6 +119,8 @@ app.use("/api/admin/index", adminLimiter, adminIndexRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/admin/support-tickets", adminLimiter, adminSupportRoutes);
 app.use("/api/admin/platform-wallet", adminLimiter, adminPlatformWalletRoutes);
+app.use("/api/transfer", transferRoutes);
+app.use("/api/admin/transfers", adminLimiter, adminTransferRoutes);
 
 // ─── Health Check ───
 app.get("/api/health", (req, res) => {

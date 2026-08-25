@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   IconLoader2, IconAlertCircle, IconArrowDownLeft, IconArrowUpRight,
   IconChartLine, IconChevronLeft, IconChevronRight, IconReceipt2,
-  IconClock, IconCheck, IconX, IconBan, IconGift,
+  IconClock, IconCheck, IconX, IconBan, IconGift, IconArrowsExchange,
 } from "@tabler/icons-react";
 import { walletAPI, type TransactionEvent } from "@/lib/api";
 import { Card } from "@/components/ui/card";
@@ -29,6 +29,8 @@ const TYPE_META: Record<TransactionEvent["type"], { label: string; icon: typeof 
   BONUS_CREDIT: { label: "Bonus Credited", icon: IconGift, color: "text-amber-500", bg: "bg-amber-500/10" },
   BONUS_WITHDRAWAL: { label: "Bonus Withdrawal", icon: IconArrowUpRight, color: "text-red-500", bg: "bg-red-500/10" },
   BONUS_TRANSFER: { label: "Bonus to Wallet", icon: IconArrowDownLeft, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+  INTERNAL_TRANSFER_OUT: { label: "Sent to Another User", icon: IconArrowsExchange, color: "text-red-500", bg: "bg-red-500/10" },
+  INTERNAL_TRANSFER_IN: { label: "Received from Another User", icon: IconArrowsExchange, color: "text-emerald-600", bg: "bg-emerald-500/10" },
 };
 
 const STATUS_META: Record<TransactionEvent["status"], { label: string; color: string; bg: string; icon: typeof IconClock }> = {

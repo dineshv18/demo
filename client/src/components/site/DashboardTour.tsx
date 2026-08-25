@@ -12,7 +12,7 @@ const TOUR_SEEN_KEY = "orvanta_dashboard_tour_seen";
 // steps targeting them need the sheet opened first, or driver.js has
 // nothing visible to highlight on small screens.
 const SIDEBAR_STEP_SLUGS = new Set([
-  "nav-wallet", "nav-index", "nav-transactions", "nav-kyc", "nav-support", "nav-referral",
+  "nav-wallet", "nav-index", "nav-transfer", "nav-transactions", "nav-kyc", "nav-support", "nav-referral",
 ]);
 
 function slugFromElement(element: DriveStep["element"]): string | null {
@@ -72,6 +72,15 @@ const steps: DriveStep[] = [
     popover: {
       title: "Index",
       description: "Browse investment plans, see their returns and duration, and invest from here.",
+      side: "right",
+      align: "start",
+    },
+  },
+  {
+    element: '[data-tour="nav-transfer"]',
+    popover: {
+      title: "Send to Another User",
+      description: "Send funds from your Wallet or Bonus balance directly to another verified ORVANTA user. Requests are reviewed by an admin and completed within 12-24 working hours.",
       side: "right",
       align: "start",
     },

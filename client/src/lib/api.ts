@@ -279,10 +279,48 @@ export const walletAPI = {
     ),
 };
 
+// ─── Internal Transfer ───
+export interface TransferRecipient {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  kycApproved: boolean;
+}
+
+export interface InternalTransfer {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  sourceType: "WALLET" | "BONUS";
+  amount: string;
+  feePercent: string;
+  feeAmount: string;
+  netAmount: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  note: string | null;
+  rejectReason: string | null;
+  processedAt: string | null;
+  createdAt: string;
+  sender?: { id: string; name: string; email: string };
+  receiver?: { id: string; name: string; email: string };
+}
+
+export const transferAPI = {
+  searchRecipients: (q: string) =>
+    request<{ users: TransferRecipient[] }>(`/transfer/search?q=${encodeURIComponent(q)}`),
+  create: (data: { receiverId: string; sourceType: "WALLET" | "BONUS"; amount: number; note?: string }) =>
+    request<{ message: string; transfer: InternalTransfer }>("/transfer", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMyTransfers: () => request<{ transfers: InternalTransfer[] }>("/transfer/my-transfers"),
+};
+
 export interface TransactionEvent {
   id: string;
   category: "WALLET" | "INDEX" | "BONUS";
-  type: "DEPOSIT" | "WITHDRAWAL" | "INDEX_INVEST" | "INDEX_WITHDRAW" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER";
+  type: "DEPOSIT" | "WITHDRAWAL" | "INDEX_INVEST" | "INDEX_WITHDRAW" | "BONUS_CREDIT" | "BONUS_WITHDRAWAL" | "BONUS_TRANSFER" | "INTERNAL_TRANSFER_OUT" | "INTERNAL_TRANSFER_IN";
   amount: number | null;
   status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
   description: string | null;

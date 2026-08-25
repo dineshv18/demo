@@ -27,6 +27,8 @@ enum TransactionType {
   BONUS_CREDIT
   BONUS_WITHDRAWAL
   BONUS_TRANSFER
+  INTERNAL_TRANSFER_OUT
+  INTERNAL_TRANSFER_IN
 }
 
 enum TransactionStatus {
@@ -74,6 +76,8 @@ model User {
   commissions  ReferralCommission[] @relation("UserCommissions")
   indexInvestments IndexInvestment[]
   supportTickets   SupportTicket[]
+  sentTransfers     InternalTransfer[] @relation("TransferSender")
+  receivedTransfers InternalTransfer[] @relation("TransferReceiver")
 }
 
 model Role {
@@ -133,6 +137,53 @@ model Wallet {
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+}
+
+enum TransferSourceType {
+  WALLET
+  BONUS
+}
+
+enum InternalTransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// A user-to-user transfer within the platform — the sender's amount is
+// deducted (into Wallet.frozen) the moment the request is submitted, and
+// only reaches the receiver's wallet once an admin approves it. Both
+// parties must be KYC-approved at request time.
+model InternalTransfer {
+  id           String                  @id @default(uuid())
+  senderId     String
+  receiverId   String
+  sourceType   TransferSourceType
+  amount       Decimal                 @db.Decimal(18, 2)
+  feePercent   Decimal                 @default(0) @db.Decimal(5, 2)
+  feeAmount    Decimal                 @default(0) @db.Decimal(18, 2)
+  netAmount    Decimal                 @db.Decimal(18, 2)
+  status       InternalTransferStatus  @default(PENDING)
+  note         String?
+  rejectReason String?
+  processedBy  String?
+  processedAt  DateTime?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  sender       User @relation("TransferSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User @relation("TransferReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([status])
+}
+
+model TransferSettings {
+  id          String   @id @default(uuid())
+  feePercent  Decimal  @default(0) @db.Decimal(5, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Transaction {

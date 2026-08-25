@@ -184,6 +184,48 @@ export const paymentsAPI = {
     request<{ message: string; payment: PaymentRequest }>(`/admin/payments/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
 };
 
+// ─── Internal Transfers ───
+export interface InternalTransfer {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  sourceType: "WALLET" | "BONUS";
+  amount: string;
+  feePercent: string;
+  feeAmount: string;
+  netAmount: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  note: string | null;
+  rejectReason: string | null;
+  processedAt: string | null;
+  createdAt: string;
+  sender?: { id: string; name: string; email: string };
+  receiver?: { id: string; name: string; email: string };
+}
+
+export interface TransferListResponse {
+  transfers: InternalTransfer[];
+  total: number;
+  page: number;
+  limit: number;
+  counts: { pending: number; approved: number; rejected: number };
+}
+
+export const transfersAPI = {
+  getAll: (params?: { status?: string; page?: number; limit?: number }) =>
+    request<TransferListResponse>("/admin/transfers" + (params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : "")),
+  approve: (id: string) =>
+    request<{ message: string }>(`/admin/transfers/${id}/approve`, { method: "POST" }),
+  reject: (id: string, reason: string) =>
+    request<{ message: string }>(`/admin/transfers/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
+  getSettings: () => request<{ settings: { id: string; feePercent: string } }>("/admin/transfers/settings"),
+  updateSettings: (feePercent: number) =>
+    request<{ message: string; settings: { id: string; feePercent: string } }>("/admin/transfers/settings", {
+      method: "PUT",
+      body: JSON.stringify({ feePercent }),
+    }),
+};
+
 // ─── Users (Admin) API ───
 export interface AdminUser {
   id: string;

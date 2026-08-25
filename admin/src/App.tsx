@@ -16,6 +16,7 @@ import Users from "./pages/Users";
 import ReferralSettings from "./pages/ReferralSettings";
 import IndexSettings from "./pages/IndexSettings";
 import IndexInvestments from "./pages/IndexInvestments";
+import InternalTransfers from "./pages/InternalTransfers";
 import type { ReactNode } from "react";
 import { Card, CardContent } from "./components/ui/card";
 import { IconSettings } from "@tabler/icons-react";
@@ -70,6 +71,7 @@ function AppRoutes() {
         <Route path="referrals" element={<ReferralSettings />} />
         <Route path="index-settings" element={<IndexSettings />} />
         <Route path="index-investments" element={<IndexInvestments />} />
+        <Route path="internal-transfers" element={<InternalTransfers />} />
         <Route
           path="settings"
           element={
