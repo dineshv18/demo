@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   IconCopy, IconUsers, IconCheck, IconWallet,
   IconShare, IconLink, IconUserPlus, IconTrophy, IconRefresh,
-  IconLoader2, IconAlertCircle, IconChevronRight, IconChevronDown, IconShield,
+  IconLoader2, IconAlertCircle, IconShield,
   IconGift, IconCurrencyDollar, IconInfoCircle,
 } from "@tabler/icons-react";
 import {
@@ -44,43 +44,15 @@ function statusBadge(status: string) {
   );
 }
 
-// Recursive tree node — one card per referral, nesting its own subReferrals
-// indented underneath. Collapsed by default past level 1 so a deep 5-level
-// chain doesn't dump hundreds of rows on screen at once.
-function HierarchyNode({ item }: { item: HierarchyItem }) {
-  const [expanded, setExpanded] = useState(item.level === 1);
-  const hasChildren = !!item.subReferrals && item.subReferrals.length > 0;
-
-  return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <button
-        onClick={() => hasChildren && setExpanded((v) => !v)}
-        className={`w-full flex items-center gap-3 px-4 py-3 bg-accent/30 text-left ${hasChildren ? "cursor-pointer hover:bg-accent/50" : "cursor-default"} transition-colors`}
-      >
-        {hasChildren ? (
-          expanded ? <IconChevronDown className="h-4 w-4 text-muted-foreground shrink-0" /> : <IconChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-        ) : (
-          <span className="w-4 shrink-0" />
-        )}
-        <div className="grid h-9 w-9 place-items-center rounded-full bg-brand/10 text-brand font-bold text-xs shrink-0">
-          {item.referred.name?.charAt(0)?.toUpperCase() || "?"}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">{item.referred.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{item.referred.email}</p>
-        </div>
-        <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">L{item.level}</span>
-        {statusBadge(item.status)}
-      </button>
-      {hasChildren && expanded && (
-        <div className="pl-6 sm:pl-8 pr-2 py-2 space-y-2 bg-background/40 border-t border-border">
-          {item.subReferrals!.map((sub) => (
-            <HierarchyNode key={sub.id} item={sub} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+// Flattens the nested hierarchy tree into a flat list per level (1-5) for the
+// Leadership sub-tabs — same data as the tree view, just regrouped by depth.
+function flattenByLevel(items: HierarchyItem[], out: Record<number, HierarchyItem[]> = {}) {
+  for (const item of items) {
+    if (!out[item.level]) out[item.level] = [];
+    out[item.level].push(item);
+    if (item.subReferrals?.length) flattenByLevel(item.subReferrals, out);
+  }
+  return out;
 }
 
 function LineTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -114,11 +86,15 @@ export default function ReferralPage() {
   const [earnings, setEarnings] = useState<ReferralEarningsBreakdown | null>(null);
   const [levelRates, setLevelRates] = useState<number[]>([]);
   const [tab, setTab] = useState<Tab>("howItWorks");
+  const [leadershipLevel, setLeadershipLevel] = useState(1);
+  const [calcAmount, setCalcAmount] = useState("100");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
   const commissionRate = dashStats?.commissionRate || 2;
+  const calcAmountNum = parseFloat(calcAmount) || 0;
+  const calcEarning = (calcAmountNum * commissionRate) / 100;
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -493,23 +469,38 @@ export default function ReferralPage() {
 
           <Card className="p-6 gap-0">
             <h3 className="text-lg font-bold text-foreground mb-4">Earnings Calculator</h3>
-            <p className="text-sm text-muted-foreground mb-4">See how much you can earn with {commissionRate}% commission on a deposit:</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { deposit: 50, earning: 50 * commissionRate / 100 },
-                { deposit: 100, earning: 100 * commissionRate / 100 },
-                { deposit: 500, earning: 500 * commissionRate / 100 },
-              ].map((item) => (
-                <div key={item.deposit} className="rounded-xl border border-border p-4 text-center hover:border-brand/30 transition-colors">
-                  <p className="text-xs text-muted-foreground">Friend deposits</p>
-                  <p className="text-xl font-bold text-foreground mt-1">${item.deposit}</p>
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <IconCurrencyDollar className="h-4 w-4 text-emerald-500" />
-                    <span className="text-lg font-bold text-emerald-500">You earn ${item.earning.toFixed(2)}</span>
-                  </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Enter an investment amount to see your Level 1 commission at {commissionRate}%. Minimum investment is $100.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1">
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Friend&apos;s investment amount</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">$</span>
+                  <input
+                    type="number"
+                    min={100}
+                    step={1}
+                    value={calcAmount}
+                    onChange={(e) => setCalcAmount(e.target.value)}
+                    placeholder="100"
+                    className="w-full rounded-xl border border-border bg-background pl-7 pr-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition"
+                  />
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 px-5 py-3.5 sm:min-w-[200px]">
+                <IconCurrencyDollar className="h-5 w-5 text-emerald-500 shrink-0" />
+                <div>
+                  <p className="text-[11px] text-muted-foreground">You earn</p>
+                  <p className="text-lg font-bold text-emerald-500">
+                    ${calcEarning.toFixed(2)}
+                  </p>
+                </div>
+              </div>
             </div>
+            {calcAmountNum > 0 && calcAmountNum < 100 && (
+              <p className="mt-3 text-xs text-amber-600">Minimum investment is $100 — this amount is below the platform minimum.</p>
+            )}
           </Card>
 
           <Card className="border-brand/20 bg-brand/5 p-6 gap-0">
@@ -597,25 +588,98 @@ export default function ReferralPage() {
       )}
 
       {/* Leadership Tab */}
-      {tab === "leadership" && (
-        <Card className="p-4 sm:p-6 gap-0">
-          {hierarchy.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
-                <IconTrophy className="h-8 w-8 text-muted-foreground/40" />
-              </div>
-              <p className="text-sm font-medium text-foreground">No referrals yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Your leadership tree will appear here</p>
+      {tab === "leadership" && (() => {
+        const byLevelMap = flattenByLevel(hierarchy);
+        const levelItems = byLevelMap[leadershipLevel] || [];
+        return (
+          <div className="space-y-4">
+            {/* Level sub-tabs */}
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map((lvl) => {
+                const count = (byLevelMap[lvl] || []).length;
+                return (
+                  <button
+                    key={lvl}
+                    onClick={() => setLeadershipLevel(lvl)}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border ${
+                      leadershipLevel === lvl
+                        ? "bg-brand/10 text-brand border-brand/30"
+                        : "text-muted-foreground border-border hover:bg-accent"
+                    }`}
+                  >
+                    Level {lvl} Reports
+                    {count > 0 && (
+                      <span className="ml-1.5 text-[10px] font-semibold text-muted-foreground">({count})</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {hierarchy.map((item) => (
-                <HierarchyNode key={item.id} item={item} />
-              ))}
-            </div>
-          )}
-        </Card>
-      )}
+
+            <Card className="p-0 gap-0 overflow-hidden">
+              {levelItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                  <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
+                    <IconTrophy className="h-8 w-8 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">No referrals at Level {leadershipLevel} yet</p>
+                  <p className="text-xs text-muted-foreground mt-1 text-center">
+                    {leadershipLevel === 1
+                      ? "Referrals you invite directly will appear here."
+                      : `People invited by your Level ${leadershipLevel - 1} referrals will appear here.`}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="hidden sm:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
+                          <TableHead className="text-xs uppercase tracking-wider">Level</TableHead>
+                          <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+                          <TableHead className="text-xs uppercase tracking-wider">Joined</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {levelItems.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>
+                              <p className="font-medium text-foreground">{item.referred.name}</p>
+                              <p className="text-xs text-muted-foreground">{item.referred.email}</p>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">L{item.level}</TableCell>
+                            <TableCell>{statusBadge(item.status)}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground">{formatDate(item.registeredAt)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="sm:hidden divide-y divide-border">
+                    {levelItems.map((item) => (
+                      <div key={item.id} className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-foreground">{item.referred.name}</p>
+                            <p className="text-xs text-muted-foreground">{item.referred.email}</p>
+                          </div>
+                          {statusBadge(item.status)}
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Level {item.level}</span>
+                          <span>Joined: {formatDate(item.registeredAt)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </Card>
+          </div>
+        );
+      })()}
     </div>
   );
 }
