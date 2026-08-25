@@ -194,45 +194,92 @@ export default function IndexInvestments() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-[#F3F8EF]">
-                  <TableHead className="text-[#68736E]">Investor</TableHead>
-                  <TableHead className="text-[#68736E]">Tier</TableHead>
-                  <TableHead className="text-[#68736E]">Amount</TableHead>
-                  <TableHead className="text-[#68736E]">Maint. Fee</TableHead>
-                  <TableHead className="text-[#68736E]">Status</TableHead>
-                  <TableHead className="text-[#68736E]">Invested</TableHead>
-                  <TableHead className="text-[#68736E]">Matures</TableHead>
-                  <TableHead className="text-right text-[#68736E]">Exit Fee</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((inv) => (
-                  <TableRow
-                    key={inv.id}
-                    onClick={() => setSelected(inv)}
-                    className="cursor-pointer border-[#DDE4DE]"
-                  >
-                    <TableCell>
-                      <p className="font-medium text-[#10211D]">{inv.user?.name || "Unknown"}</p>
-                      <p className="text-xs text-[#89938E]">{inv.user?.email || "-"}</p>
-                    </TableCell>
-                    <TableCell className="text-sm text-[#10211D]">{inv.tier?.label || "-"}</TableCell>
-                    <TableCell className="font-medium text-[#10211D]">{fmtMoney(inv.amount)}</TableCell>
-                    <TableCell className="text-xs text-amber-600">{fmtMoney(inv.feeAmount)}</TableCell>
-                    <TableCell>{statusBadge(inv.status)}</TableCell>
-                    <TableCell className="text-xs text-[#68736E]">{fmtDate(inv.activatedAt)}</TableCell>
-                    <TableCell className="text-xs text-[#68736E]">{inv.maturesAt ? fmtDate(inv.maturesAt) : "-"}</TableCell>
-                    <TableCell className="text-right text-xs text-amber-600">
-                      {inv.withdrawalFee ? fmtMoney(inv.withdrawalFee) : "-"}
-                    </TableCell>
+          <>
+            {/* Desktop / tablet: full table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#F3F8EF]">
+                    <TableHead className="text-[#68736E]">Investor</TableHead>
+                    <TableHead className="text-[#68736E]">Tier</TableHead>
+                    <TableHead className="text-[#68736E]">Amount</TableHead>
+                    <TableHead className="text-[#68736E]">Maint. Fee</TableHead>
+                    <TableHead className="text-[#68736E]">Status</TableHead>
+                    <TableHead className="text-[#68736E]">Invested</TableHead>
+                    <TableHead className="text-[#68736E]">Matures</TableHead>
+                    <TableHead className="text-right text-[#68736E]">Exit Fee</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((inv) => (
+                    <TableRow
+                      key={inv.id}
+                      onClick={() => setSelected(inv)}
+                      className="cursor-pointer border-[#DDE4DE]"
+                    >
+                      <TableCell>
+                        <p className="font-medium text-[#10211D]">{inv.user?.name || "Unknown"}</p>
+                        <p className="text-xs text-[#89938E]">{inv.user?.email || "-"}</p>
+                      </TableCell>
+                      <TableCell className="text-sm text-[#10211D]">{inv.tier?.label || "-"}</TableCell>
+                      <TableCell className="font-medium text-[#10211D]">{fmtMoney(inv.amount)}</TableCell>
+                      <TableCell className="text-xs text-amber-600">{fmtMoney(inv.feeAmount)}</TableCell>
+                      <TableCell>{statusBadge(inv.status)}</TableCell>
+                      <TableCell className="text-xs text-[#68736E]">{fmtDate(inv.activatedAt)}</TableCell>
+                      <TableCell className="text-xs text-[#68736E]">{inv.maturesAt ? fmtDate(inv.maturesAt) : "-"}</TableCell>
+                      <TableCell className="text-right text-xs text-amber-600">
+                        {inv.withdrawalFee ? fmtMoney(inv.withdrawalFee) : "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile: stacked cards — the table's columns don't fit a phone width */}
+            <div className="sm:hidden divide-y divide-[#DDE4DE]">
+              {filtered.map((inv) => (
+                <button
+                  key={inv.id}
+                  onClick={() => setSelected(inv)}
+                  className="w-full text-left p-4 active:bg-[#F3F8EF] transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-[#10211D] truncate">{inv.user?.name || "Unknown"}</p>
+                      <p className="text-xs text-[#89938E] truncate">{inv.user?.email || "-"}</p>
+                    </div>
+                    {statusBadge(inv.status)}
+                  </div>
+                  <p className="text-sm text-[#68736E] mt-2">{inv.tier?.label || "-"}</p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-[#89938E]">Amount</span>
+                      <span className="font-medium text-[#10211D]">{fmtMoney(inv.amount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#89938E]">Maint. Fee</span>
+                      <span className="text-amber-600">{fmtMoney(inv.feeAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#89938E]">Invested</span>
+                      <span className="text-[#10211D]">{fmtDate(inv.activatedAt)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#89938E]">Matures</span>
+                      <span className="text-[#10211D]">{inv.maturesAt ? fmtDate(inv.maturesAt) : "-"}</span>
+                    </div>
+                    {inv.withdrawalFee && (
+                      <div className="flex justify-between col-span-2">
+                        <span className="text-[#89938E]">Exit Fee</span>
+                        <span className="text-amber-600">{fmtMoney(inv.withdrawalFee)}</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </Card>
 
