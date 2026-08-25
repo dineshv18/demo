@@ -215,27 +215,78 @@
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
-.orvanta-driver-popover button {
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  border-radius: 0.5rem;
-  text-shadow: none;
+.orvanta-driver-popover .driver-popover-footer button {
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  border-radius: 0.5rem !important;
+  text-shadow: none !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  transition: filter 0.15s ease, opacity 0.15s ease !important;
 }
 .orvanta-driver-popover .driver-popover-next-btn,
 .orvanta-driver-popover .driver-popover-prev-btn {
-  background: var(--brand);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.9rem;
+  background: var(--brand) !important;
+  color: white !important;
+  border: none !important;
+}
+.orvanta-driver-popover .driver-popover-next-btn:hover,
+.orvanta-driver-popover .driver-popover-prev-btn:not(.driver-popover-btn-disabled):hover {
+  filter: brightness(1.08);
+  background: var(--brand) !important;
+  color: white !important;
 }
 .orvanta-driver-popover .driver-popover-prev-btn {
-  background: var(--secondary);
-  color: var(--foreground);
+  background: var(--secondary) !important;
+  color: var(--foreground) !important;
+}
+.orvanta-driver-popover .driver-popover-prev-btn:not(.driver-popover-btn-disabled):hover {
+  background: var(--secondary) !important;
+  color: var(--foreground) !important;
+  filter: brightness(0.96);
+}
+.orvanta-driver-popover .driver-popover-btn-disabled,
+.orvanta-driver-popover .driver-popover-btn-disabled:hover {
+  opacity: 0.35 !important;
+  filter: none !important;
+  cursor: not-allowed !important;
+  background: var(--secondary) !important;
+  color: var(--muted-foreground) !important;
 }
 .orvanta-driver-popover .driver-popover-close-btn {
-  color: var(--muted-foreground);
+  color: var(--muted-foreground) !important;
+}
+.orvanta-driver-popover .driver-popover-close-btn:hover {
+  color: var(--foreground) !important;
 }
 .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: var(--card); }
 .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: var(--card); }
 .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: var(--card); }
 .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: var(--card); }
+
+/* Highlighted element gets a clear glowing outline against the dark overlay */
+.driver-active-element {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 0 0 4px var(--brand), 0 0 24px 4px color-mix(in oklab, var(--brand) 60%, transparent) !important;
+}
+
+/* Mobile: shrink the popover and keep it fully on-screen with comfortable padding */
+@media (max-width: 480px) {
+  .orvanta-driver-popover.driver-popover {
+    max-width: calc(100vw - 2rem) !important;
+    padding: 1rem !important;
+  }
+  .orvanta-driver-popover .driver-popover-title {
+    font-size: 0.9375rem;
+  }
+  .orvanta-driver-popover .driver-popover-description {
+    font-size: 0.78125rem;
+  }
+  .orvanta-driver-popover .driver-popover-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .orvanta-driver-popover .driver-popover-footer button {
+    padding: 0.55rem 0.85rem !important;
+  }
+}

@@ -151,6 +151,7 @@ function AppSidebar() {
         <Link
           href="/dashboard/referral"
           onClick={() => setOpenMobile(false)}
+          data-tour="nav-referral"
           className="group/promo block overflow-hidden rounded-2xl p-4 shadow-sm transition-all hover:shadow-md"
           style={{
             background: `linear-gradient(160deg, ${roleColor}26, ${roleColor}0d)`,
@@ -276,9 +277,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
           <div className="flex-1 overflow-y-auto bg-muted/20 p-3 sm:p-6 lg:p-8">{children}</div>
         </SidebarInset>
+        <DashboardTour />
       </SidebarProvider>
       {showInvestmentPopup && <InvestmentBasePopup onClose={closeInvestmentPopup} />}
-      <DashboardTour />
     </>
   );
 }

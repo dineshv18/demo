@@ -2,10 +2,24 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { driver, type DriveStep } from "driver.js";
+import { driver, type DriveStep, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const TOUR_SEEN_KEY = "orvanta_dashboard_tour_seen";
+
+// Sidebar nav items live inside a mobile Sheet that's closed by default —
+// steps targeting them need the sheet opened first, or driver.js has
+// nothing visible to highlight on small screens.
+const SIDEBAR_STEP_SLUGS = new Set([
+  "nav-wallet", "nav-index", "nav-transactions", "nav-kyc", "nav-support", "nav-referral",
+]);
+
+function slugFromElement(element: DriveStep["element"]): string | null {
+  if (typeof element !== "string") return null;
+  const match = element.match(/data-tour="([^"]+)"/);
+  return match ? match[1] : null;
+}
 
 const steps: DriveStep[] = [
   {
@@ -89,45 +103,81 @@ const steps: DriveStep[] = [
       align: "start",
     },
   },
+  {
+    element: '[data-tour="nav-referral"]',
+    popover: {
+      title: "Invite & Earn",
+      description: "Share your referral link with friends. When they invest, you earn a commission across up to 5 levels — credited straight to your Bonus balance.",
+      side: "right",
+      align: "start",
+    },
+  },
 ];
 
 /**
  * One-time guided tour of the client Dashboard, shown after a user's first
  * login. Skips entirely if already seen (localStorage flag) or if this
- * isn't the Dashboard route (so it never fires mid-tour navigation issues
- * on other pages).
+ * isn't the Dashboard route. Renders inside SidebarProvider so it can open
+ * the mobile sidebar sheet before highlighting nav items that live inside
+ * it, and close it again once the tour moves past them.
  */
 export function DashboardTour() {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   useEffect(() => {
     if (pathname !== "/dashboard") return;
     if (typeof window === "undefined") return;
     if (localStorage.getItem(TOUR_SEEN_KEY)) return;
 
+    let tourInstance: Driver | null = null;
+
     // Give the dashboard's own data fetch + layout a moment to settle so
     // every data-tour target actually exists in the DOM before driver.js
     // tries to attach popovers to them.
     const timer = setTimeout(() => {
-      const availableSteps = steps.filter((s) =>
-        typeof s.element === "string" ? document.querySelector(s.element) : true
-      );
-      if (availableSteps.length === 0) return;
+      if (isMobile) setOpenMobile(true);
 
-      const tour = driver({
-        showProgress: true,
-        allowClose: true,
-        overlayColor: "rgba(16, 33, 29, 0.65)",
-        popoverClass: "orvanta-driver-popover",
-        steps: availableSteps,
-        onDestroyed: () => {
-          localStorage.setItem(TOUR_SEEN_KEY, "1");
-        },
-      });
-      tour.drive();
+      // Re-check availability after the mobile sheet (if any) has had a
+      // moment to mount its content.
+      const checkTimer = setTimeout(() => {
+        const availableSteps = steps.filter((s) =>
+          typeof s.element === "string" ? document.querySelector(s.element) : true
+        );
+        if (availableSteps.length === 0) {
+          if (isMobile) setOpenMobile(false);
+          return;
+        }
+
+        tourInstance = driver({
+          showProgress: true,
+          allowClose: true,
+          smoothScroll: true,
+          stagePadding: 6,
+          overlayColor: "rgba(8, 15, 13, 0.75)",
+          popoverClass: "orvanta-driver-popover",
+          steps: availableSteps,
+          onHighlightStarted: (element, step) => {
+            if (!isMobile) return;
+            const slug = slugFromElement(step.element);
+            if (slug && SIDEBAR_STEP_SLUGS.has(slug)) setOpenMobile(true);
+          },
+          onDestroyed: () => {
+            localStorage.setItem(TOUR_SEEN_KEY, "1");
+            if (isMobile) setOpenMobile(false);
+          },
+        });
+        tourInstance.drive();
+      }, isMobile ? 350 : 0);
+
+      return () => clearTimeout(checkTimer);
     }, 900);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      tourInstance?.destroy();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return null;
