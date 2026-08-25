@@ -5,8 +5,8 @@ import Link from "next/link";
 import {
   IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
   IconTrendingUp, IconTrendingDown, IconUser,
-  IconRefresh, IconWallet, IconCoin, IconInfoCircle,
-  IconClock,
+  IconRefresh, IconWallet, IconInfoCircle,
+  IconClock, IconCircleCheck,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { indexAPI, kycAPI, type IndexData, type KycData, type IndexInvestment } from "@/lib/api";
@@ -128,6 +128,7 @@ export default function IndexPage() {
 
   const kycApproved = kyc?.status === "APPROVED";
   const activeInvestments = investments.filter((i) => i.status === "ACTIVE");
+  const hasAnyInvestment = investments.length > 0;
 
   const selectTier = (minAmount: number, tierId?: string) => {
     setInvestAmount(String(minAmount));
@@ -221,14 +222,14 @@ export default function IndexPage() {
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <div>
           <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">ORVANTA Index</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and investment returns</p>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Grow your money by investing in a plan — track it here.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <div className="flex items-start sm:items-center gap-3 flex-1">
             <IconAlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
             <div>
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">KYC verification required</p>
-              <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Complete your KYC to view index data and returns.</p>
+              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">One quick step first: verify your identity</p>
+              <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">This keeps your account and funds secure. It only takes a couple of minutes.</p>
             </div>
           </div>
           <Button asChild size="sm" className="shrink-0 self-start sm:self-auto bg-amber-500 hover:bg-amber-600">
@@ -239,11 +240,11 @@ export default function IndexPage() {
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
             <IconLock className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h2 className="font-display text-xl font-semibold">Index Locked</h2>
+          <h2 className="font-display text-xl font-semibold">Investing is Locked for Now</h2>
           <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
             {kyc?.status === "PENDING"
-              ? "Your KYC is under review. Index access will be unlocked once approved."
-              : "Complete your KYC verification to view index performance and investment returns."}
+              ? "We're reviewing your documents. This unlocks automatically once your KYC is approved."
+              : "Verify your identity (KYC) to unlock investing and start growing your money."}
           </p>
         </Card>
       </div>
@@ -263,14 +264,15 @@ export default function IndexPage() {
     );
   }
 
-  const { tiers, activeTier, walletBalance, priceHistory, currentPrice, manager } = data || {};
+  const { tiers, walletBalance, priceHistory, currentPrice, manager } = data || {};
   const priceUp = (currentPrice?.changePercent ?? 0) >= 0;
   const balance = walletBalance || 0;
   const investAmountNum = parseFloat(investAmount) || 0;
-  const matchingTiers = (tiers || []).filter(
-    (t) => t.isActive && investAmountNum >= parseFloat(t.minAmount) && investAmountNum <= parseFloat(t.maxAmount)
+  const activeTiers = (tiers || []).filter((t) => t.isActive);
+  const matchingTiers = activeTiers.filter(
+    (t) => investAmountNum >= parseFloat(t.minAmount) && investAmountNum <= parseFloat(t.maxAmount)
   );
-  const selectedTier = matchingTiers.find((t) => t.id === selectedTierId) || null;
+  const selectedTier = activeTiers.find((t) => t.id === selectedTierId) || null;
 
   // Chart projects off the most recently activated active investment, if any.
   const latestActiveInvestment = activeInvestments.length > 0
@@ -297,75 +299,78 @@ export default function IndexPage() {
     <>
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
             <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">ORVANTA Index</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">Track index performance and investment returns</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+              {hasAnyInvestment ? "Track your investments and grow your money further." : "Grow your money — pick a plan and invest in a few taps."}
+            </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="outline" size="sm" onClick={() => setShowPopup(true)} className="gap-1.5">
-              <IconInfoCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Investment Base</span>
-            </Button>
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 px-3 py-1.5 text-xs font-bold">
               <IconShieldCheck className="h-3.5 w-3.5" /> KYC Verified
             </Badge>
             <Badge variant="outline" className="sm:hidden gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
               <IconShieldCheck className="h-3 w-3" /> Verified
             </Badge>
-            <Button variant="outline" size="icon" onClick={fetchData} className="size-9">
+            <Button variant="outline" size="icon" onClick={fetchData} className="size-9 shrink-0">
               <IconRefresh className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {error && (
-          <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
-          </div>
+        {/* Simple 3-step guide — only shown to first-time / no-investment users */}
+        {!hasAnyInvestment && (
+          <Card className="p-4 sm:p-5 gap-0 border-brand/20 bg-brand/[0.03]">
+            <p className="text-sm font-semibold text-foreground mb-3">How investing works, in 3 steps</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { n: "1", title: "Add money to your Wallet", desc: "Deposit funds first — you invest from your Wallet balance." },
+                { n: "2", title: "Pick a plan below", desc: "Each plan shows its return, duration, and fees upfront." },
+                { n: "3", title: "Invest & track it here", desc: "Watch your investment grow until it matures, then withdraw." },
+              ].map((s) => (
+                <div key={s.n} className="flex gap-3">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-white text-xs font-bold">{s.n}</div>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">{s.title}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
 
-        {/* Wallet Balance + Tier Banner */}
+        {/* Wallet Balance */}
         <Card className="p-4 sm:p-5 gap-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 shrink-0">
                 <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
                 <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">
                   <span className="text-gradient">${balance.toFixed(2)}</span>
                 </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">This is the money available to invest</p>
               </div>
             </div>
-            {activeTier ? (
-              <div className="flex items-center gap-3">
-                <div className="text-center sm:text-right">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Your Tier</p>
-                  <p className="text-sm font-bold text-brand mt-0.5">{activeTier.label}</p>
-                </div>
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand/10 shrink-0">
-                  <IconCoin className="h-6 w-6 text-brand" />
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-dashed border-border px-4 py-3 text-center">
-                <p className="text-xs text-muted-foreground">Deposit funds to unlock returns</p>
-                <Link href="/dashboard/wallet" className="text-xs font-semibold text-brand hover:underline mt-1 inline-block">
-                  Add Funds →
-                </Link>
-              </div>
+            {balance <= 0 && (
+              <Button asChild size="sm" className="shrink-0 btn-glow btn-glow-hover">
+                <Link href="/dashboard/wallet">Add Funds</Link>
+              </Button>
             )}
           </div>
         </Card>
 
-        {/* Active Investments */}
+        {/* Active / Matured Investments */}
         {activeInvestments.length > 0 && (
           <Card className="p-4 sm:p-6 gap-0">
-            <h2 className="font-display text-base sm:text-lg font-semibold mb-4">
-              Your Active Investments ({activeInvestments.length})
+            <h2 className="font-display text-base sm:text-lg font-semibold mb-1">
+              Your Investments ({activeInvestments.length})
             </h2>
+            <p className="text-xs text-muted-foreground mb-4">Each one grows independently and matures on its own date.</p>
 
             {withdrawSuccess && (
               <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
@@ -387,11 +392,11 @@ export default function IndexPage() {
                 const isWithdrawTarget = withdrawTargetId === inv.id;
 
                 return (
-                  <div key={inv.id} className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div>
+                  <div key={inv.id} className={`rounded-xl border p-4 ${isMature ? "border-brand/30 bg-brand/5" : "border-emerald-500/30 bg-emerald-500/5"}`}>
+                    <div className="flex items-start justify-between flex-wrap gap-2">
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{inv.tier.label}</p>
-                        <p className="text-lg font-bold text-emerald-500 mt-0.5">
+                        <p className={`text-lg font-bold mt-0.5 ${isMature ? "text-brand" : "text-emerald-500"}`}>
                           ${parseFloat(inv.netAmount || inv.amount).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -399,17 +404,21 @@ export default function IndexPage() {
                         </p>
                         {parseFloat(inv.feeAmount) > 0 && (
                           <p className="text-[11px] text-muted-foreground mt-1">
-                            ${parseFloat(inv.amount).toFixed(2)} deposited − ${parseFloat(inv.feeAmount).toFixed(2)} maintenance fee
+                            ${parseFloat(inv.amount).toFixed(2)} invested − ${parseFloat(inv.feeAmount).toFixed(2)} fee at start
                           </p>
                         )}
                         {inv.maturesAt && (
                           <p className="text-[11px] text-muted-foreground mt-1">
-                            {isMature ? "Matured on" : "Matures on"} {new Date(inv.maturesAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                            {isMature ? "Ready to withdraw since" : "Matures on"} {new Date(inv.maturesAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                           </p>
                         )}
                       </div>
-                      <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 font-bold">
-                        <IconShieldCheck className="h-3.5 w-3.5" /> {isMature ? "MATURED" : "ACTIVE"}
+                      <Badge
+                        variant="outline"
+                        className={`gap-1 shrink-0 font-bold ${isMature ? "border-brand/30 bg-brand/10 text-brand" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"}`}
+                      >
+                        {isMature ? <IconCircleCheck className="h-3.5 w-3.5" /> : <IconClock className="h-3.5 w-3.5" />}
+                        {isMature ? "MATURED — READY" : "GROWING"}
                       </Badge>
                     </div>
 
@@ -450,7 +459,7 @@ export default function IndexPage() {
                           </div>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          Add funds to this <strong>{inv.tier.label}</strong> investment (up to ${inv.tier.maxAmount} total). Same {parseFloat(inv.tier.maintenanceFeePercent).toFixed(2)}% maintenance fee applies.
+                          Add funds to this <strong>{inv.tier.label}</strong> investment (up to ${inv.tier.maxAmount} total). Same {parseFloat(inv.tier.maintenanceFeePercent).toFixed(2)}% fee applies, just like your first investment.
                         </p>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
@@ -478,13 +487,13 @@ export default function IndexPage() {
                       <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-3">
                         {!isMature ? (
                           <p className="text-xs text-amber-600 dark:text-amber-400">
-                            This investment hasn&apos;t matured yet. Withdrawing now applies a{" "}
-                            <strong>{exitPercent.toFixed(2)}% early-exit fee</strong>{" "}
-                            (≈${estExitFee.toFixed(2)}).
+                            This hasn&apos;t matured yet. Withdrawing early charges a{" "}
+                            <strong>{exitPercent.toFixed(2)}% fee</strong>{" "}
+                            (about ${estExitFee.toFixed(2)}). Waiting until the maturity date avoids most of this fee.
                           </p>
                         ) : (
                           <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                            This investment has matured. A <strong>{exitPercent.toFixed(2)}% exit fee</strong> (≈${estExitFee.toFixed(2)}) will be applied.
+                            This has matured — you can withdraw now. A small <strong>{exitPercent.toFixed(2)}% exit fee</strong> (about ${estExitFee.toFixed(2)}) applies, then the rest goes straight to your wallet.
                           </p>
                         )}
                         <div className="flex gap-2 mt-2">
@@ -513,11 +522,16 @@ export default function IndexPage() {
           </Card>
         )}
 
-        {/* Invest in Index */}
+        {/* Invest / Choose a Plan */}
         <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
-          <h2 className="font-display text-base sm:text-lg font-semibold mb-4">
-            {activeInvestments.length > 0 ? "Start a New Investment" : "Invest in Index"}
+          <h2 className="font-display text-base sm:text-lg font-semibold mb-1">
+            {hasAnyInvestment ? "Start a New Investment" : "Choose a Plan"}
           </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            {hasAnyInvestment
+              ? "You can hold investments in several plans at once — each grows and matures on its own."
+              : "Type how much you want to invest, and we'll show you which plans it qualifies for."}
+          </p>
 
           <div className="space-y-3">
             {investError && (
@@ -530,6 +544,57 @@ export default function IndexPage() {
                 <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {investSuccess}
               </div>
             )}
+
+            {/* Plan list — always visible so users can browse without typing first */}
+            {activeTiers.length > 0 ? (
+              <div className="space-y-2">
+                {activeTiers.map((t, i) => {
+                  const isSelected = selectedTierId === t.id;
+                  const isEligible = investAmountNum > 0
+                    ? investAmountNum >= parseFloat(t.minAmount) && investAmountNum <= parseFloat(t.maxAmount)
+                    : true;
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => {
+                        setSelectedTierId(t.id);
+                        if (!investAmount) setInvestAmount(t.minAmount);
+                      }}
+                      role="button"
+                      className={`rounded-xl border px-3.5 py-3 cursor-pointer transition-colors ${
+                        isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border hover:bg-accent"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`hidden sm:grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-xs font-bold`}>
+                          {i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <p className="text-sm font-semibold text-foreground">{t.label}</p>
+                            <span className="text-[11px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md shrink-0">
+                              ${parseFloat(t.minAmount).toLocaleString()} – ${parseFloat(t.maxAmount).toLocaleString()}
+                            </span>
+                          </div>
+                          {t.tagline && <p className="text-[11px] text-muted-foreground mt-0.5">{t.tagline}</p>}
+                          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand">
+                              <IconTrendingUp className="h-3 w-3" /> up to {parseFloat(t.monthlyReturn).toFixed(2)}% / month
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                              <IconClock className="h-3 w-3" /> {t.durationMonths} months to mature
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground py-4 text-center">No investment plans available right now.</p>
+            )}
+
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
               <Input
@@ -537,38 +602,13 @@ export default function IndexPage() {
                 min="0"
                 step="0.01"
                 value={investAmount}
-                onChange={(e) => { setInvestAmount(e.target.value); setSelectedTierId(""); }}
+                onChange={(e) => setInvestAmount(e.target.value)}
                 placeholder="Enter amount to invest"
                 className="pl-7"
               />
             </div>
-
-            {investAmountNum > 0 && (
-              matchingTiers.length > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Choose a plan</p>
-                  {matchingTiers.map((t) => (
-                    <div
-                      key={t.id}
-                      onClick={() => setSelectedTierId(t.id)}
-                      role="button"
-                      className={`rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${selectedTierId === t.id ? "border-brand bg-brand/5" : "border-border hover:bg-accent"}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-foreground">{t.label}</p>
-                        <span className="text-xs font-bold text-brand">{t.durationMonths} months</span>
-                      </div>
-                      {t.tagline && <p className="text-[11px] text-muted-foreground mt-0.5">{t.tagline}</p>}
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-[11px] text-muted-foreground">{parseFloat(t.weeklyReturn).toFixed(2)}% / week</span>
-                        <span className="text-[11px] text-muted-foreground">{parseFloat(t.halfYearlyReturn).toFixed(2)}% / 6mo</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">No plans available for this amount.</p>
-              )
+            {investAmountNum > 0 && matchingTiers.length === 0 && (
+              <p className="text-xs text-amber-600">No plan matches this amount — check the ranges above.</p>
             )}
 
             <Button
@@ -580,6 +620,10 @@ export default function IndexPage() {
                 <>
                   <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
                 </>
+              ) : balance <= 0 ? (
+                "Add funds to your wallet first"
+              ) : !selectedTierId ? (
+                "Pick a plan above to continue"
               ) : (
                 "Invest Now"
               )}
@@ -588,41 +632,34 @@ export default function IndexPage() {
             {selectedTier && (
               <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                  {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% fee for maintenance
+                  A {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% one-time fee applies when you invest
                 </p>
                 {investAmountNum > 0 && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     ${investAmountNum.toFixed(2)} − ${((investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} fee = $
-                    {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} invested
+                    {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} actually invested
                   </p>
                 )}
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Withdrawing early costs {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}%. Waiting until it matures costs only {parseFloat(selectedTier.exitFeePercent).toFixed(2)}%.
+                </p>
               </div>
             )}
-            {selectedTier ? (
-              <p className="text-[11px] text-muted-foreground">
-                Withdrawing before this plan matures charges a {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}% fee. Withdrawing after maturity charges a {parseFloat(selectedTier.exitFeePercent).toFixed(2)}% fee.
-              </p>
-            ) : (
-              <p className="text-[11px] text-muted-foreground">
-                Each plan discloses its own maintenance fee and exit fees before you invest.
-              </p>
-            )}
             <p className="text-xs text-muted-foreground">
-              Amount is deducted from your wallet balance (${balance.toFixed(2)} available) and cannot exceed it. You can hold investments across multiple plans at once.
+              Amount comes out of your wallet balance (${balance.toFixed(2)} available).
             </p>
           </div>
         </Card>
 
         {/* Index Price Card + Chart */}
         <Card className="p-4 sm:p-6 gap-0">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <h2 className="font-display text-lg sm:text-xl font-bold">ORVANTA Index</h2>
+          <div className="flex items-start justify-between mb-1 gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h2 className="font-display text-lg sm:text-xl font-bold">ORVANTA Index Price</h2>
                 <Badge variant="secondary" className="text-[10px] sm:text-xs font-medium tracking-wider uppercase">ORVI</Badge>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2">CURRENT INDEX PRICE</p>
-              <div className="flex items-center gap-2 sm:gap-3 mt-1">
+              <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap">
                 <span className="font-display text-xl sm:text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
                 <Badge variant="outline" className={`gap-1 border-0 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
                   {priceUp ? <IconTrendingUp className="h-3 w-3" /> : <IconTrendingDown className="h-3 w-3" />}
@@ -630,14 +667,15 @@ export default function IndexPage() {
                 </Badge>
               </div>
             </div>
-            <span className="relative inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-bold text-white shrink-0">
-              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-400 animate-pulse" />
-              SOLD OUT
-            </span>
           </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {tierForProjection
+              ? "This chart shows how your active investment is projected to grow over time."
+              : "This chart tracks the Index price history. Invest in a plan to see your own growth projection here."}
+          </p>
 
           {/* Timeframe Selector */}
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-2 mt-4 flex-wrap">
             <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/30">
               <button
                 onClick={() => setTimeframe(null)}
@@ -657,7 +695,7 @@ export default function IndexPage() {
               ))}
             </div>
             {!tierForProjection && (
-              <span className="text-[11px] text-muted-foreground">Invest to unlock return projections</span>
+              <span className="text-[11px] text-muted-foreground">Invest to unlock your own growth projection</span>
             )}
           </div>
 
@@ -691,51 +729,6 @@ export default function IndexPage() {
           </div>
         </Card>
 
-        {/* Investment Base Section — On Page */}
-        <Card className="p-4 sm:p-6 gap-0">
-          <div className="text-center mb-6">
-            <p className="text-xs text-brand font-semibold uppercase tracking-widest mb-1">ORVANTA Financial</p>
-            <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Investment Base</h2>
-            <div className="w-16 h-0.5 bg-gradient-to-r from-brand to-brand-2 mx-auto mt-3" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {(tiers || []).filter((t) => t.isActive).map((item, i) => (
-              <div
-                key={item.id}
-                onClick={() => selectTier(parseFloat(item.minAmount), item.id)}
-                role="button"
-                className="group relative rounded-xl border border-border bg-background/50 p-4 hover:border-brand/40 hover:bg-brand/5 transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
-                    {i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-sm font-bold tracking-wide text-foreground">{item.label}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ${parseFloat(item.minAmount).toLocaleString()} - ${parseFloat(item.maxAmount).toLocaleString()}
-                    </p>
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-brand">
-                        <IconTrendingUp className="h-3 w-3" /> {parseFloat(item.weeklyReturn).toFixed(2)}% / week
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <IconClock className="h-3 w-3" /> {item.durationMonths} months
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {(!tiers || tiers.filter((t) => t.isActive).length === 0) && (
-              <p className="col-span-full text-center text-sm text-muted-foreground py-6">
-                No investment tiers available right now.
-              </p>
-            )}
-          </div>
-        </Card>
-
         {/* Index Manager */}
         {manager && (
           <Card className="p-4 sm:p-6 gap-0">
@@ -744,7 +737,7 @@ export default function IndexPage() {
               <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-2 shrink-0">
                 <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="font-semibold text-sm sm:text-base text-foreground">{manager.name}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground">{manager.title}</p>
                 {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-relaxed">{manager.bio}</p>}
@@ -752,9 +745,18 @@ export default function IndexPage() {
             </div>
           </Card>
         )}
+
+        {/* Help footer */}
+        <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/20 px-4 py-3">
+          <IconInfoCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            Every plan&apos;s fee, return, and duration is shown before you invest — nothing hidden. Need help? Reach out from the{" "}
+            <Link href="/dashboard/support" className="text-brand font-medium hover:underline">Support</Link> page.
+          </p>
+        </div>
       </div>
 
-      {/* Investment Base Popup */}
+      {/* Investment Base Popup — first-visit intro only */}
       {showPopup && (
         <InvestmentBasePopup
           onClose={() => { setShowPopup(false); localStorage.setItem("orvanta_investment_base_seen", "1"); }}
