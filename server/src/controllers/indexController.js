@@ -67,7 +67,16 @@ async function distributeIndexCommission(prisma, investment, feeAmount) {
     const percent = levelPercents[level - 1];
     const commissionAmount = (feeAmount * percent) / 100;
 
-    if (commissionAmount > 0) {
+    // A referrer only earns commission on their downline's Index investment
+    // if they have purchased the Index themselves — an unqualified referrer
+    // (and everyone above them, once the chain breaks) is skipped entirely,
+    // and their share falls through to the platform wallet as leftover.
+    const referrerHasInvested = commissionAmount > 0 && (await prisma.indexInvestment.findFirst({
+      where: { userId: referral.referrerId },
+      select: { id: true },
+    }));
+
+    if (commissionAmount > 0 && referrerHasInvested) {
       const referrerWallet = await prisma.wallet.findUnique({ where: { userId: referral.referrerId } });
       if (referrerWallet) {
         await prisma.wallet.update({
