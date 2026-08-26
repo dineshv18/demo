@@ -167,12 +167,12 @@ export default function InternalTransfers() {
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#10211D]">Internal Transfers</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#10211D]">Internal Transaction</h1>
           <p className="mt-1 text-sm text-[#68736E]">User-to-user wallet transfers — review and approve or reject each request.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowFeeSettings((v) => !v)} className="gap-2 rounded-xl border-[#DDE4DE]">
-            <IconSettings size={15} /> Transfer Fee
+            <IconSettings size={15} /> Transaction Fee
           </Button>
           <Button variant="outline" size="sm" onClick={fetchTransfers} disabled={loading} className="gap-2 rounded-xl border-[#DDE4DE]">
             <IconRefresh size={15} className={loading ? "animate-spin" : ""} /> Refresh
@@ -182,7 +182,7 @@ export default function InternalTransfers() {
 
       {showFeeSettings && (
         <Card className="p-4 rounded-2xl border-[#DDE4DE] shadow-[0_8px_30px_rgba(16,33,29,0.05)]">
-          <p className="text-sm font-semibold text-[#10211D] mb-1">Internal Transfer Fee</p>
+          <p className="text-sm font-semibold text-[#10211D] mb-1">Internal Transaction Fee</p>
           <p className="text-xs text-[#68736E] mb-3">
             Percentage taken from every internal transfer at approval time. Set to 0 to charge nothing.
           </p>
