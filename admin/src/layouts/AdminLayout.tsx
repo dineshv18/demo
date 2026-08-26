@@ -188,9 +188,12 @@ export default function AdminLayout() {
   }, []);
 
   useEffect(() => {
-    fetchPendingCounts();
+    const timeout = setTimeout(fetchPendingCounts, 0);
     const interval = setInterval(fetchPendingCounts, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [fetchPendingCounts]);
 
   return (
