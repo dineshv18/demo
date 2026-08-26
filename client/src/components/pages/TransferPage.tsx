@@ -172,7 +172,7 @@ export default function TransferPage() {
     return (
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transaction</h1>
+          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transfer</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user&apos;s wallet.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
@@ -214,7 +214,7 @@ export default function TransferPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-8">
       <div>
-        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transaction</h1>
+        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transfer</h1>
         <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user — reviewed and completed within 12-24 working hours.</p>
       </div>
 

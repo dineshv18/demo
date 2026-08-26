@@ -53,7 +53,7 @@ const allNavItems = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main", alwaysVisible: true },
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main", alwaysVisible: true },
   { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main", alwaysVisible: true },
-  { slug: "transfer", to: "/dashboard/transfer", label: "Internal Transaction", icon: IconSend, group: "main", alwaysVisible: true },
+  { slug: "transfer", to: "/dashboard/transfer", label: "Internal Transfer", icon: IconSend, group: "main", alwaysVisible: true },
   // { slug: "referral", to: "/dashboard/referral", label: "Referrals", icon: IconUserPlus, group: "main", alwaysVisible: true },
   { slug: "transactions", to: "/dashboard/transactions", label: "Transactions", icon: IconArrowsExchange, group: "main", alwaysVisible: true },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other", alwaysVisible: true },
