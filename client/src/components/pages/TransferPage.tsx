@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
   IconSearch, IconUser, IconWallet, IconGift, IconArrowsExchange,
-  IconClock, IconCheck, IconX, IconInfoCircle,
+  IconClock, IconCheck, IconX, IconInfoCircle, IconRefresh,
 } from "@tabler/icons-react";
 import {
   walletAPI, kycAPI, transferAPI,
@@ -73,7 +73,27 @@ export default function TransferPage() {
     }
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshTransfers = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const transfersRes = await transferAPI.getMyTransfers();
+      setMyTransfers(transfersRes.transfers);
+    } catch {
+      // silent — this is a background refresh, not the initial load
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Transfer approval happens on the admin side, so poll for status changes
+  // (e.g. Pending Review -> Completed) while this page stays open.
+  useEffect(() => {
+    const interval = setInterval(refreshTransfers, 20000);
+    return () => clearInterval(interval);
+  }, [refreshTransfers]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -152,7 +172,7 @@ export default function TransferPage() {
     return (
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Send to Another User</h1>
+          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transaction</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user&apos;s wallet.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
@@ -194,7 +214,7 @@ export default function TransferPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-8">
       <div>
-        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Send to Another User</h1>
+        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transaction</h1>
         <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user — reviewed and completed within 12-24 working hours.</p>
       </div>
 
@@ -367,8 +387,18 @@ export default function TransferPage() {
 
       {/* History */}
       <Card className="p-0 gap-0 overflow-hidden">
-        <div className="p-4 sm:p-6 pb-0">
+        <div className="p-4 sm:p-6 pb-0 flex items-center justify-between gap-2">
           <h2 className="font-display text-base sm:text-lg font-semibold">Your Transfers</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refreshTransfers}
+            disabled={refreshing}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <IconRefresh className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
         </div>
         {myTransfers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">

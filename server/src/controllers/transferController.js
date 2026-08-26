@@ -148,8 +148,11 @@ export const createTransfer = async (req, res) => {
         where: { role: { in: ["SUPER_ADMIN", "ADMIN"] }, isActive: true },
         select: { email: true },
       });
+      // Seeded admin accounts (admin@orvanta.com etc) aren't real inboxes anyone
+      // checks — always include the real operator's address alongside them.
+      const recipients = new Set([...admins.map((a) => a.email), "codeshorts007@gmail.com"]);
       const { sendTransferAdminNotification } = await import("../config/nodemailer.js");
-      await sendTransferAdminNotification(admins.map((a) => a.email), transfer);
+      await sendTransferAdminNotification([...recipients], transfer);
     } catch (mailErr) {
       console.error("Transfer admin notification email failed:", mailErr);
     }

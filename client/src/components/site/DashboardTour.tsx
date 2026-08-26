@@ -79,7 +79,7 @@ const steps: DriveStep[] = [
   {
     element: '[data-tour="nav-transfer"]',
     popover: {
-      title: "Send to Another User",
+      title: "Internal Transaction",
       description: "Send funds from your Wallet or Bonus balance directly to another verified ORVANTA user. Requests are reviewed by an admin and completed within 12-24 working hours.",
       side: "right",
       align: "start",
