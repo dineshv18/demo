@@ -34,11 +34,19 @@ async function creditPlatformWallet(prisma, amount, description, investmentId) {
   });
 }
 
+// Fixed admin cut of every investment's capital, on top of whatever levels
+// go unfilled (no referrer, or a referrer who hasn't invested themselves).
+// Total commission pool is always level1Percent + level2..5Percent×4 +
+// ADMIN_FLAT_PERCENT of the capital — e.g. 2 + 0.5×4 + 1.8 = 5.8%.
+const ADMIN_FLAT_PERCENT = 1.8;
+
 // Walks the referral chain up to 5 levels from the investor and pays each
-// ancestor their configured cut of the maintenance fee. Whatever the fee
-// doesn't cover — a chain shorter than 5, or no referrer at all — is
-// credited to the platform wallet instead of silently disappearing.
-async function distributeIndexCommission(prisma, investment, feeAmount) {
+// qualified ancestor their configured cut of the invested CAPITAL (not the
+// maintenance fee). A fixed 1.8% of the capital always goes to the platform
+// wallet, and so does any level's share left unpaid — no referrer at that
+// level, chain shorter than 5, or a referrer who hasn't invested in Index
+// themselves — so the pool always adds up to exactly 5.8% of the capital.
+async function distributeIndexCommission(prisma, investment, capitalAmount) {
   const settings = await getIndexSettings(prisma);
   const levelPercents = [
     parseFloat(settings.level1Percent),
@@ -47,6 +55,8 @@ async function distributeIndexCommission(prisma, investment, feeAmount) {
     parseFloat(settings.level4Percent),
     parseFloat(settings.level5Percent),
   ];
+  const totalPoolPercent = levelPercents.reduce((sum, p) => sum + p, 0) + ADMIN_FLAT_PERCENT;
+  const totalPoolAmount = (capitalAmount * totalPoolPercent) / 100;
 
   let distributedAmount = 0;
   let currentUserId = investment.userId;
@@ -65,7 +75,7 @@ async function distributeIndexCommission(prisma, investment, feeAmount) {
     }
 
     const percent = levelPercents[level - 1];
-    const commissionAmount = (feeAmount * percent) / 100;
+    const commissionAmount = (capitalAmount * percent) / 100;
 
     // A referrer only earns commission on their downline's Index investment
     // if they have purchased the Index themselves — an unqualified referrer
@@ -111,14 +121,14 @@ async function distributeIndexCommission(prisma, investment, feeAmount) {
     currentUserId = referral.referrerId;
   }
 
-  const leftover = feeAmount - distributedAmount;
+  const leftover = totalPoolAmount - distributedAmount;
   if (leftover > 0) {
     await creditPlatformWallet(
       prisma,
       leftover,
       level === 1
-        ? "Maintenance fee — investor has no referrer"
-        : `Maintenance fee — referral chain ended at level ${level - 1}`,
+        ? "Referral commission pool — investor has no referrer"
+        : `Referral commission pool — unfilled levels + fixed admin share`,
       investment.id
     );
   }
@@ -253,7 +263,7 @@ export const investInIndex = async (req, res) => {
       }),
     ]);
 
-    await distributeIndexCommission(getPrisma(), investment, feeAmount);
+    await distributeIndexCommission(getPrisma(), investment, parsedAmount);
 
     return res.status(201).json({
       message: `Investment activated successfully. A ${feePercent}% maintenance fee ($${feeAmount.toFixed(2)}) was applied.`,
@@ -328,7 +338,7 @@ export const topUpInvestment = async (req, res) => {
       }),
     ]);
 
-    await distributeIndexCommission(getPrisma(), investment, feeAmount);
+    await distributeIndexCommission(getPrisma(), investment, parsedAmount);
 
     return res.status(200).json({
       message: `$${parsedAmount.toFixed(2)} added to your investment. A ${feePercent}% maintenance fee ($${feeAmount.toFixed(2)}) was applied.`,
