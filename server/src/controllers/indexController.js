@@ -156,7 +156,7 @@ export const getIndexData = async (req, res) => {
 
     const prices = await prisma.indexPrice.findMany({
       orderBy: { recordedAt: "desc" },
-      take: 30,
+      take: 365,
     });
 
     const latestPrice = prices.length > 0 ? prices[0] : null;
