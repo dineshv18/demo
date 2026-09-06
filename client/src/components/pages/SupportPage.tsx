@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeading } from "@/components/dashboard/SectionCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CATEGORIES: { value: SupportCategory; label: string }[] = [
@@ -24,10 +25,10 @@ const CATEGORIES: { value: SupportCategory; label: string }[] = [
 ];
 
 const STATUS_META: Record<SupportTicket["status"], { label: string; color: string; bg: string; icon: typeof IconClock }> = {
-  OPEN: { label: "Open", color: "text-amber-600", bg: "bg-amber-100", icon: IconClock },
-  IN_PROGRESS: { label: "In Progress", color: "text-teal-600", bg: "bg-teal-100", icon: IconProgress },
-  RESOLVED: { label: "Resolved", color: "text-emerald-600", bg: "bg-emerald-100", icon: IconCircleCheck },
-  CLOSED: { label: "Closed", color: "text-gray-600", bg: "bg-gray-100", icon: IconCircleX },
+  OPEN: { label: "Open", color: "text-warning", bg: "bg-warning", icon: IconClock },
+  IN_PROGRESS: { label: "In Progress", color: "text-info", bg: "bg-info", icon: IconProgress },
+  RESOLVED: { label: "Resolved", color: "text-success", bg: "bg-success", icon: IconCircleCheck },
+  CLOSED: { label: "Closed", color: "text-muted-foreground", bg: "bg-muted", icon: IconCircleX },
 };
 
 const MAX_SCREENSHOTS = 3;
@@ -153,25 +154,22 @@ export default function SupportPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight flex items-center gap-2">
-          <IconHeadset className="h-6 w-6 text-brand" /> Support
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Have an issue or question? Send us the details and our team will get back to you within 2-3 working hours.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
+      <PageHeading
+        eyebrow="Help"
+        title="Support"
+        description="Have an issue or question? Send us the details and our team will get back to you within 2-3 working hours."
+      />
 
       {/* Submit Form */}
       <Card className="p-5 sm:p-6 gap-4">
         {error && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
             <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {error}
           </div>
         )}
         {success && (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
+          <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success">
             <IconCheck className="h-3.5 w-3.5 shrink-0" /> {success}
           </div>
         )}
@@ -220,12 +218,12 @@ export default function SupportPage() {
             <div className="mt-2 grid grid-cols-3 gap-2">
               {screenshots.map((s, i) => (
                 <div key={i} className="relative group rounded-lg overflow-hidden border border-border aspect-square">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  { }
                   <img src={s.preview} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeScreenshot(i)}
-                    className="absolute top-1 right-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    className="absolute top-1 right-1 grid h-5 w-5 place-items-center rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
                   >
                     <IconX className="h-3 w-3" />
                   </button>
@@ -318,7 +316,7 @@ export default function SupportPage() {
                   <div className="flex gap-2 mt-2">
                     {t.screenshotUrls.map((url, i) => (
                       <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block h-12 w-12 rounded-lg overflow-hidden border border-border hover:border-brand/40 transition-colors">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        { }
                         <img src={url} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
                       </a>
                     ))}

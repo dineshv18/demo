@@ -7,10 +7,10 @@ import {
 import { indexAPI, type IndexTier } from "@/lib/api";
 
 const TIER_COLORS = [
-  "from-emerald-500 to-teal-400",
-  "from-brand to-emerald-400",
-  "from-amber-500 to-orange-400",
-  "from-teal-500 to-emerald-300",
+  "from-navy-600 to-navy-400",
+  "from-navy-500 to-gold-700",
+  "from-gold-700 to-gold-500",
+  "from-gold-600 to-gold-400",
 ];
 
 export function useInvestmentBasePopup() {
@@ -58,14 +58,14 @@ export default function InvestmentBasePopup({
       {/* Modal */}
       <div
         className={`relative w-full sm:max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden transition-all duration-500 ease-out
-          bg-gradient-to-b from-card via-card to-card/95
-          sm:rounded-3xl rounded-t-3xl border border-border/50
+          bg-linear-to-b from-card via-card to-card/95
+          sm:rounded-2xl rounded-t-3xl border border-border/50
           shadow-[0_-8px_40px_rgba(0,0,0,0.3)]
           ${visible ? "translate-y-0 sm:scale-100" : "translate-y-8 sm:translate-y-0 sm:scale-95"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Glow accent top */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-brand to-transparent" />
 
         {/* Close */}
         <button
@@ -86,7 +86,7 @@ export default function InvestmentBasePopup({
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
               Investment<span className="text-gradient ml-2">Base</span>
             </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-brand to-brand-2 mx-auto mt-4 rounded-full" />
+            <div className="w-20 h-1 bg-linear-to-r from-brand to-brand-2 mx-auto mt-4 rounded-full" />
           </div>
 
           {/* Tier Cards */}
@@ -102,11 +102,11 @@ export default function InvestmentBasePopup({
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
                   {/* Left accent bar */}
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${color}`} />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b ${color}`} />
 
                   <div className="flex items-center gap-4 p-4 pl-5">
                     {/* Number badge */}
-                    <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                       {i + 1}
                     </div>
 

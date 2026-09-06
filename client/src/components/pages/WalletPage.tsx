@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   IconPlus, IconMinus, IconLoader2, IconAlertCircle,
@@ -17,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/dashboard/SectionCard";
+import { PanelSkeleton, TableSkeleton } from "@/components/dashboard/Skeletons";
+import { KycLockedState } from "@/components/dashboard/LockedState";
 
 const currencySymbol = () => "$";
 
@@ -27,7 +30,11 @@ export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [usdPayment, setUsdPayment] = useState<UsdPaymentInfo | null>(null);
   const [currencyLocked, setCurrencyLocked] = useState(false);
-  const [withdrawalSettings, setWithdrawalSettings] = useState({ minWithdrawal: 10, feeAmount: 3 });
+  // Null until the wallet API reports the real limits. These figures are quoted
+  // to the user as the fee they'll actually be charged, so they must never fall
+  // back to a hardcoded guess.
+  const [withdrawalSettings, setWithdrawalSettings] =
+    useState<{ minWithdrawal: number; feeAmount: number } | null>(null);
   const [pendingRequest, setPendingRequest] = useState<TransactionData | null>(null);
   const [pendingBonusRequest, setPendingBonusRequest] = useState<TransactionData | null>(null);
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
@@ -254,96 +261,79 @@ export default function WalletPage() {
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const statusColor = (s: string) => {
-    if (s === "COMPLETED") return "text-emerald-500";
-    if (s === "PENDING") return "text-amber-500";
+    if (s === "COMPLETED") return "text-success";
+    if (s === "PENDING") return "text-warning";
     if (s === "FAILED") return "text-destructive";
     return "text-muted-foreground";
   };
 
   if (loading) {
-    return (<div className="flex min-h-[60vh] items-center justify-center"><IconLoader2 className="h-8 w-8 animate-spin text-brand" /></div>);
+    return (
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <PanelSkeleton lines={2} />
+        <PanelSkeleton lines={2} />
+        <TableSkeleton rows={5} />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">Wallet</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your funds and transactions</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Currency Badge */}
-          {wallet?.currency && (
-            <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-xs font-bold border-teal-500/30 bg-teal-500/10 text-teal-500">
-              $ USD
-              {currencyLocked && <IconLock className="h-3 w-3 opacity-50" />}
-            </Badge>
-          )}
-          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-            <IconRefresh className="h-4 w-4" /> Refresh
-          </Button>
-        </div>
-      </div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <PageHeading
+        eyebrow="Funds"
+        title="My Wallet"
+        description="Manage your balance, deposits and withdrawals."
+        actions={
+          <>
+            {wallet?.currency && (
+              <Badge variant="outline" className="gap-1.5 border-border px-3 py-1.5 text-xs font-bold text-foreground">
+                $ {wallet.currency}
+                {currencyLocked && <IconLock className="h-3 w-3 opacity-50" />}
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+              <IconRefresh className="h-4 w-4" /> Refresh
+            </Button>
+          </>
+        }
+      />
 
       {error && (
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div role="alert" className="flex items-center gap-3 rounded-xl border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
           <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
 
       {!kycApproved ? (
-        <>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-            <div className="flex items-start sm:items-center gap-3 flex-1">
-              <IconAlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
-              <div>
-                <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Complete KYC verification to deposit and withdraw funds</p>
-                <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Your identity needs to be verified before you can access wallet features.</p>
-              </div>
-            </div>
-            <Link href="/dashboard/kyc" className="shrink-0 self-start sm:self-auto">
-              <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
-                {kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}
-              </Button>
-            </Link>
-          </div>
-
-          <Card className="px-6 py-16 text-center gap-0">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
-              <IconLock className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h2 className="font-display text-xl font-semibold">Wallet Locked</h2>
-            <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
-              {kyc?.status === "PENDING"
-                ? "Your KYC is under review. Wallet access will be unlocked within 12-24 working hours once approved."
-                : "Complete your KYC verification to view your balance, add funds, and make withdrawals."}
-            </p>
-            {kyc?.status === "PENDING" && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-xs font-medium text-amber-600 dark:text-amber-400 mx-auto">
-                <IconClock className="h-4 w-4" /> KYC Under Review — 12-24 working hours
-              </div>
-            )}
-          </Card>
-        </>
+        <KycLockedState
+          status={kyc?.status ?? "NOT_STARTED"}
+          title="Wallet Locked"
+          description="Complete your KYC verification to view your balance, add funds, and make withdrawals."
+          pendingDescription="Your KYC is under review. Wallet access unlocks within 12–24 working hours once approved."
+        />
       ) : (
         <>
-          <div className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
-            <IconShieldCheck className="h-5 w-5 text-emerald-500 shrink-0" />
-            <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">KYC verified — full wallet access enabled</p>
+          <div className="flex items-center gap-3 rounded-lg border border-success/25 bg-success-soft px-4 py-3">
+            <IconShieldCheck className="h-5 w-5 text-success shrink-0" />
+            <p className="text-sm font-medium text-success">KYC verified — full wallet access enabled</p>
           </div>
 
           {/* Pending Request Banner */}
           {hasPending && (
-            <Card className="border-amber-500/30 bg-amber-500/5 p-4 gap-0">
+            <Card className="border-warning/25 bg-warning-soft p-4 gap-0">
               <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-500/10 shrink-0">
-                  <IconClock className="h-5 w-5 text-amber-500" />
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-warning-soft shrink-0">
+                  <IconClock className="h-5 w-5 text-warning" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                  <p className="text-sm font-semibold text-warning">
                     {pendingRequest?.type === "DEPOSIT" ? "Deposit" : "Withdrawal"} Request Pending
                   </p>
-                  <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1">
+                  <p className="text-xs text-warning/70 mt-1">
                     {pendingRequest?.type === "DEPOSIT"
                       ? "Your payment is being verified. Please wait 12-24 working hours. Do not make another payment until this is processed."
                       : `Your withdrawal of ${sym}${parseFloat(pendingRequest?.amount || "0").toFixed(2)} is being processed. You will receive funds within 12-24 working hours.`}
@@ -357,64 +347,79 @@ export default function WalletPage() {
             </Card>
           )}
 
-          {/* Balance Card */}
-          <Card className="p-6 sm:p-8 gap-0">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          {/* Primary balance — the page's headline figure, on the navy ground */}
+          <section className="surface-navy relative overflow-hidden rounded-2xl p-6 sm:p-8">
+            <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-brand/12 blur-3xl"
+            />
+            <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Total Balance</p>
-                <p className="font-display text-4xl font-bold tracking-tight">
-                  <span className="text-gradient">{sym}{balance.toFixed(2)}</span>
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/50">
+                  Wallet Balance
                 </p>
-                {frozen > 0 && (
-                  <div className="flex items-center gap-1.5 mt-2 text-sm text-muted-foreground">
-                    <IconMinus className="h-4 w-4" /> {sym}{frozen.toFixed(2)} frozen
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">{wallet?.currency || "USD"}</p>
+                <p className="text-money mt-2 text-4xl leading-none text-white sm:text-5xl">
+                  {sym}{balance.toFixed(2)}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/55">
+                  <span>{wallet?.currency || "USD"}</span>
+                  {frozen > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <IconLock className="h-3.5 w-3.5" /> {sym}{frozen.toFixed(2)} locked
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button onClick={openDeposit} disabled={hasPending}
+                  size="lg"
                   className="gap-2 btn-glow btn-glow-hover"
                   title={hasPending ? "You have a pending request" : undefined}>
                   <IconPlus className="h-4 w-4" /> Add Funds
                 </Button>
-                <Button variant="outline" onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
+                <Button onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
+                  size="lg"
                   title={balance <= 0 ? "No balance" : hasPending ? "You have a pending request" : undefined}
+                  className="gap-2 border border-white/20 bg-transparent text-white hover:border-brand/50 hover:bg-white/5 hover:text-gold-400">
+                  <IconMinus className="h-4 w-4" /> Withdraw
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Bonus Card */}
+          <Card className="gap-0 border-brand/25 bg-linear-to-br from-accent to-transparent p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid size-8 place-items-center rounded-lg bg-brand/15 text-brand">
+                    <IconGift className="h-4 w-4" />
+                  </span>
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Bonus Balance
+                  </p>
+                </div>
+                <p className="text-money mt-2.5 text-3xl leading-none text-foreground sm:text-4xl">
+                  {sym}{bonusBalance.toFixed(2)}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">Earned from your referral commissions</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={openTransfer} disabled={bonusBalance <= 0}
+                  title={bonusBalance <= 0 ? "No bonus balance" : undefined}
+                  className="gap-2">
+                  <IconArrowRight className="h-4 w-4" /> Add to Wallet
+                </Button>
+                <Button variant="outline" onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
+                  title={bonusBalance <= 0 ? "No bonus balance" : pendingBonusRequest ? "You have a pending bonus withdrawal" : undefined}
                   className="gap-2">
                   <IconMinus className="h-4 w-4" /> Withdraw
                 </Button>
               </div>
             </div>
-          </Card>
-
-          {/* Bonus Card */}
-          <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-6 sm:p-8 gap-0">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <IconGift className="h-4 w-4 text-amber-500" />
-                  <p className="text-sm font-medium text-muted-foreground">Bonus Balance</p>
-                </div>
-                <p className="font-display text-3xl font-bold tracking-tight text-amber-600 dark:text-amber-400">
-                  {sym}{bonusBalance.toFixed(2)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Earned from your referral commissions</p>
-              </div>
-              <div className="flex gap-3">
-                <Button onClick={openTransfer} disabled={bonusBalance <= 0}
-                  title={bonusBalance <= 0 ? "No bonus balance" : undefined}
-                  className="gap-2 bg-amber-600 hover:bg-amber-700 text-white">
-                  <IconArrowRight className="h-4 w-4" /> Add to Wallet
-                </Button>
-                <Button variant="outline" onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
-                  title={bonusBalance <= 0 ? "No bonus balance" : pendingBonusRequest ? "You have a pending bonus withdrawal" : undefined}
-                  className="gap-2 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
-                  <IconMinus className="h-4 w-4" /> Withdraw
-                </Button>
-              </div>
-            </div>
             {pendingBonusRequest && (
-              <div className="mt-4 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+              <div className="mt-4 flex items-center gap-2 text-xs text-warning">
                 <IconClock className="h-3.5 w-3.5" />
                 Bonus withdrawal of {sym}{parseFloat(pendingBonusRequest.amount).toFixed(2)} is under review.
               </div>
@@ -458,15 +463,15 @@ export default function WalletPage() {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               {isCredit ? (
-                                <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500/10"><IconArrowDownLeft className="h-4 w-4 text-emerald-500" /></div>
+                                <div className="grid h-8 w-8 place-items-center rounded-lg bg-success-soft"><IconArrowDownLeft className="h-4 w-4 text-success" /></div>
                               ) : (
-                                <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-500/10"><IconArrowUpRight className="h-4 w-4 text-amber-500" /></div>
+                                <div className="grid h-8 w-8 place-items-center rounded-lg bg-warning-soft"><IconArrowUpRight className="h-4 w-4 text-warning" /></div>
                               )}
                               <span className="font-medium">{txLabel}</span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className={`font-medium ${isCredit ? "text-emerald-500" : "text-foreground"}`}>
+                            <span className={`font-medium ${isCredit ? "text-success" : "text-foreground"}`}>
                               {isCredit ? "+" : "-"}{sym}{parseFloat(tx.amount).toFixed(2)}
                             </span>
                           </TableCell>
@@ -500,14 +505,14 @@ export default function WalletPage() {
                     return (
                       <div key={tx.id} className="p-4 flex items-center gap-3">
                         {isCredit ? (
-                          <div className="grid h-9 w-9 place-items-center rounded-full bg-emerald-500/10 shrink-0"><IconArrowDownLeft className="h-4 w-4 text-emerald-500" /></div>
+                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-success-soft shrink-0"><IconArrowDownLeft className="h-4 w-4 text-success" /></div>
                         ) : (
-                          <div className="grid h-9 w-9 place-items-center rounded-full bg-amber-500/10 shrink-0"><IconArrowUpRight className="h-4 w-4 text-amber-500" /></div>
+                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-warning-soft shrink-0"><IconArrowUpRight className="h-4 w-4 text-warning" /></div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-sm font-semibold truncate">{txLabel}</p>
-                            <span className={`text-sm font-bold shrink-0 ${isCredit ? "text-emerald-500" : "text-foreground"}`}>
+                            <span className={`text-sm font-bold shrink-0 ${isCredit ? "text-success" : "text-foreground"}`}>
                               {isCredit ? "+" : "-"}{sym}{parseFloat(tx.amount).toFixed(2)}
                             </span>
                           </div>
@@ -540,10 +545,10 @@ export default function WalletPage() {
           <div className="space-y-4">
             {depositSuccess ? (
               <div className="text-center py-6 space-y-3">
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                  <IconCheck className="h-8 w-8 text-emerald-500" />
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25">
+                  <IconCheck className="h-8 w-8 text-success" />
                 </div>
-                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Payment Request Submitted!</p>
+                <p className="text-sm font-semibold text-success">Payment Request Submitted!</p>
                 <p className="text-xs text-muted-foreground">Your payment is now being processed. It will be verified within 12-24 working hours. Do not make another payment until this is processed.</p>
                 <Button onClick={closeDeposit} className="w-full">Done</Button>
               </div>
@@ -580,7 +585,7 @@ export default function WalletPage() {
                   </div>
                 </div>
 
-                <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+                <p className="text-xs text-warning text-center">
                   After payment, click &quot;I&apos;ve Paid&quot; to submit your transaction details
                 </p>
 
@@ -596,7 +601,7 @@ export default function WalletPage() {
                 <p className="text-sm text-muted-foreground">Enter your transaction details to verify payment</p>
 
                 {depositError && (
-                  <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                     <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {depositError}
                   </div>
                 )}
@@ -633,7 +638,7 @@ export default function WalletPage() {
                       onClick={() => fileInputRef.current?.click()}
                       className={`mt-1 relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 cursor-pointer transition-all ${
                         screenshot
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/25 bg-success-soft"
                           : "border-border hover:border-brand/50 hover:bg-accent/50"
                       }`}
                     >
@@ -694,10 +699,10 @@ export default function WalletPage() {
           <div className="space-y-4">
             {withdrawSuccess ? (
               <div className="text-center py-6 space-y-3">
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                  <IconCheck className="h-8 w-8 text-emerald-500" />
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25">
+                  <IconCheck className="h-8 w-8 text-success" />
                 </div>
-                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Withdrawal Request Submitted!</p>
+                <p className="text-sm font-semibold text-success">Withdrawal Request Submitted!</p>
                 <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your bank account within 12-24 working hours.</p>
                 <Button onClick={closeWithdraw} className="w-full">Done</Button>
               </div>
@@ -710,7 +715,7 @@ export default function WalletPage() {
                   </span>
                 </p>
                 {withdrawError && (
-                  <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                     <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {withdrawError}
                   </div>
                 )}
@@ -722,17 +727,19 @@ export default function WalletPage() {
                       <Input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
                         className="pl-8" />
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Minimum {sym}{withdrawalSettings.minWithdrawal.toFixed(2)}. A flat {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee applies to every withdrawal.
-                    </p>
-                    {parseFloat(withdrawAmount) > 0 && (() => {
+                    {withdrawalSettings && (
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        Minimum {sym}{withdrawalSettings.minWithdrawal.toFixed(2)}. A flat {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee applies to every withdrawal.
+                      </p>
+                    )}
+                    {withdrawalSettings && parseFloat(withdrawAmount) > 0 && (() => {
                       const requested = parseFloat(withdrawAmount);
                       const roundedAmount = Math.ceil(requested / 10) * 10;
                       const payout = Math.max(roundedAmount - withdrawalSettings.feeAmount, 0);
                       return (
                         <div className="mt-2 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 space-y-1">
                           {roundedAmount !== requested && (
-                            <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                            <p className="text-[11px] text-warning">
                               Rounded up to {sym}{roundedAmount.toFixed(2)} to cover the {sym}{withdrawalSettings.feeAmount.toFixed(2)} fee.
                             </p>
                           )}
@@ -776,10 +783,10 @@ export default function WalletPage() {
           <div className="space-y-4">
             {transferSuccess ? (
               <div className="text-center py-6 space-y-3">
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                  <IconCheck className="h-8 w-8 text-emerald-500" />
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25">
+                  <IconCheck className="h-8 w-8 text-success" />
                 </div>
-                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Bonus Added to Wallet!</p>
+                <p className="text-sm font-semibold text-success">Bonus Added to Wallet!</p>
                 <p className="text-xs text-muted-foreground">The amount is now available in your main wallet balance.</p>
                 <Button onClick={closeTransfer} className="w-full">Done</Button>
               </div>
@@ -789,7 +796,7 @@ export default function WalletPage() {
                   Available bonus balance: <span className="font-medium text-foreground">{sym}{bonusBalance.toFixed(2)}</span>
                 </p>
                 {transferError && (
-                  <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                     <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {transferError}
                   </div>
                 )}
@@ -804,7 +811,7 @@ export default function WalletPage() {
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={closeTransfer} className="flex-1">Cancel</Button>
                   <Button onClick={handleTransfer} disabled={transferLoading}
-                    className="flex-1 gap-2 bg-amber-600 hover:bg-amber-700 text-white">
+                    className="flex-1 gap-2 bg-warning text-white hover:brightness-110">
                     {transferLoading ? <><IconLoader2 className="h-4 w-4 animate-spin" /> Processing...</> : "Add to Wallet"}
                   </Button>
                 </div>

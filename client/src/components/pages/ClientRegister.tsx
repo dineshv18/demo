@@ -13,7 +13,8 @@ import AuthShell, { AuthLogo } from "@/components/site/AuthShell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { SheenButton } from "@/components/marketing/SheenButton";
+import { cn } from "@/lib/utils";
 
 interface FormErrors { name?: string; email?: string; password?: string; confirmPassword?: string; otp?: string; general?: string }
 
@@ -93,6 +94,35 @@ export default function ClientRegister() {
     if (v && i < 5) document.getElementById(`otp-${i + 1}`)?.focus();
   };
 
+  /** Backspace on an empty box steps back; arrows move between boxes. */
+  const handleOTPKeyDown = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[i] && i > 0) {
+      e.preventDefault();
+      const n = [...otp]; n[i - 1] = ""; setOtp(n);
+      document.getElementById(`otp-${i - 1}`)?.focus();
+    }
+    if (e.key === "ArrowLeft" && i > 0) {
+      e.preventDefault();
+      document.getElementById(`otp-${i - 1}`)?.focus();
+    }
+    if (e.key === "ArrowRight" && i < 5) {
+      e.preventDefault();
+      document.getElementById(`otp-${i + 1}`)?.focus();
+    }
+  };
+
+  /** Pasting the whole code from an email fills every box at once. */
+  const handleOTPPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!digits) return;
+    e.preventDefault();
+    const n = ["", "", "", "", "", ""];
+    for (let j = 0; j < digits.length; j++) n[j] = digits[j];
+    setOtp(n);
+    clearFieldError("otp");
+    document.getElementById(`otp-${Math.min(digits.length, 5)}`)?.focus();
+  };
+
   const handleVerifyOTP = async () => {
     const s = otp.join("");
     if (s.length !== 6) { setErrors({ otp: "Please enter the complete 6-digit code" }); return; }
@@ -121,34 +151,39 @@ export default function ClientRegister() {
   // ─── SUCCESS VIEW ───
   if (view === "success") {
     return (
-      <div className="flex min-h-screen w-full bg-background items-center justify-center px-6">
-        <div className="w-full max-w-md space-y-6 text-center">
+      <AuthShell
+        brandEyebrow="Welcome Aboard"
+        brandTitle={<>Your account<br />is verified</>}
+        brandDescription="Sign in to fund your wallet, complete KYC, and choose the Index tier that fits your goals."
+      >
+        <div className="space-y-6">
           <AuthLogo />
-          <Card className="p-8 gap-5 shadow-sm rounded-2xl">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <IconCircleCheck className="h-9 w-9 text-emerald-500" />
+          <Card className="gap-6 rounded-xl p-8 text-center shadow-lifted">
+            <div className="mx-auto grid size-16 place-items-center rounded-xl bg-success-soft ring-1 ring-success/25">
+              <IconCircleCheck className="size-8 text-success" stroke={1.75} />
             </div>
             <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight">Account Verified!</h2>
-              <p className="mt-2 text-muted-foreground text-sm">
-                Your email has been verified. You can now sign in to your account.
+              <p className="text-eyebrow">Verified</p>
+              <h2 className="mt-1.5 font-display text-2xl font-semibold tracking-tight">
+                Account Verified
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Your email has been confirmed. You can now sign in to your ORVANTA account.
               </p>
             </div>
-            <Button
-              onClick={() => router.push("/login")}
-              className="w-full btn-glow btn-glow-hover"
-              size="lg"
-            >
+            <SheenButton onClick={() => router.push("/login")} size="lg" className="w-full">
               Go to Sign In
-            </Button>
+            </SheenButton>
           </Card>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   // ─── OTP VIEW ───
   if (view === "otp") {
+    const filledCount = otp.filter(Boolean).length;
+
     return (
       <AuthShell
         brandEyebrow="Almost There"
@@ -158,54 +193,85 @@ export default function ClientRegister() {
         <div className="space-y-6">
           <AuthLogo />
 
-          <Card className="p-6 sm:p-8 gap-5 shadow-sm rounded-2xl">
+          <Card className="gap-5 rounded-xl p-7 shadow-lifted sm:p-8">
             <button onClick={() => setView("register")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <IconArrowLeft className="h-4 w-4" /> Back to registration
             </button>
 
             <div className="text-center">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand/10 ring-1 ring-brand/20 mb-4">
-                <IconShield className="h-7 w-7 text-brand" />
+              <div className="mx-auto mb-4 grid size-14 place-items-center rounded-xl bg-accent text-brand ring-1 ring-brand/20">
+                <IconShield className="size-7" stroke={1.75} />
               </div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight">Verify Your Email</h2>
-              <p className="mt-2 text-muted-foreground text-sm">
-                Enter the 6-digit code sent to<br />
-                <span className="font-medium text-foreground">{email}</span>
+              <p className="text-eyebrow">Step 2 of 2</p>
+              <h2 className="mt-1.5 font-display text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
+                Verify Your Email
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter the 6-digit code we sent to
               </p>
+              <p className="mt-1 break-all font-semibold text-foreground">{email}</p>
+            </div>
+
+            {/* Fill progress — a quiet cue that doesn't require counting boxes */}
+            <div className="mx-auto flex w-full max-w-55 gap-1.5" aria-hidden>
+              {otp.map((_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1 flex-1 rounded-full transition-colors",
+                    i < filledCount ? "bg-brand" : "bg-muted"
+                  )}
+                />
+              ))}
             </div>
 
             {errors.general && (
-              <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                <IconAlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div role="alert" className="flex items-start gap-3 rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
+                <IconAlertCircle className="mt-0.5 size-4 shrink-0" />
                 <span>{errors.general}</span>
               </div>
             )}
 
-            <div className="flex justify-center gap-2 sm:gap-3">
+            {/* Paste the whole code into any box and every field fills */}
+            <div className="flex justify-center gap-2 sm:gap-2.5">
               {otp.map((d, i) => (
                 <input
-                  key={i} id={`otp-${i}`} type="text" inputMode="numeric" maxLength={1} value={d}
+                  key={i}
+                  id={`otp-${i}`}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete={i === 0 ? "one-time-code" : "off"}
+                  maxLength={1}
+                  value={d}
+                  aria-label={`Verification code digit ${i + 1}`}
                   onChange={(e) => { handleOTPChange(i, e.target.value.replace(/\D/g, "")); if (errors.otp) clearFieldError("otp"); }}
-                  className={`h-13 w-11 sm:h-14 sm:w-12 text-center text-xl font-bold rounded-lg border transition-all focus:outline-none focus:ring-2 ${
+                  onKeyDown={(e) => handleOTPKeyDown(i, e)}
+                  onPaste={handleOTPPaste}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className={cn(
+                    "h-14 w-11 rounded-lg border-2 bg-surface-2 text-center font-display text-2xl font-semibold tabular-nums text-foreground transition-all sm:h-16 sm:w-13",
+                    "focus:outline-none focus:ring-2",
                     errors.otp
-                      ? "border-destructive focus:ring-destructive/30"
-                      : "border-border focus:ring-brand/40 focus:border-brand/50"
-                  } bg-muted/50 text-foreground`}
+                      ? "border-destructive focus:border-destructive focus:ring-destructive/25"
+                      : d
+                        ? "border-brand bg-accent text-brand focus:ring-brand/25"
+                        : "border-border focus:border-brand focus:ring-brand/25"
+                  )}
                 />
               ))}
             </div>
 
             {errors.otp && (
-              <p className="flex items-center justify-center gap-1.5 text-xs text-destructive">
-                <IconAlertCircle className="h-3 w-3" />{errors.otp}
+              <p className="flex items-center justify-center gap-1.5 text-xs text-danger">
+                <IconAlertCircle className="size-3" />{errors.otp}
               </p>
             )}
 
-            <Button
+            <SheenButton
               onClick={handleVerifyOTP}
               disabled={otpLoading || otp.join("").length !== 6}
-              className="w-full gap-2 btn-glow btn-glow-hover"
               size="lg"
+              className="w-full gap-2"
             >
               {otpLoading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />
@@ -215,7 +281,7 @@ export default function ClientRegister() {
                   <IconCircleCheck className="h-4 w-4" />
                 </>
               )}
-            </Button>
+            </SheenButton>
 
             <p className="text-center text-sm text-muted-foreground">
               Didn&apos;t receive the code?{" "}
@@ -237,20 +303,20 @@ export default function ClientRegister() {
   return (
     <AuthShell
       brandEyebrow="Get Started"
-      brandTitle={<>Create your<br />trading account</>}
-      brandDescription="Join thousands of traders on our institutional-grade platform. Free to register, KYC-verified in hours."
+      brandTitle={<>Create your<br />investment account</>}
+      brandDescription="Open an ORVANTA account in minutes. Registration is free, and KYC verification unlocks deposits and withdrawals."
     >
       <div className="space-y-6">
         <AuthLogo />
 
-        <Card className="p-6 sm:p-8 gap-0 shadow-sm rounded-2xl">
+        <Card className="gap-0 rounded-xl p-7 shadow-lifted sm:p-8">
           <div className="text-center space-y-1.5 mb-6">
             <h2 className="font-display text-2xl font-semibold tracking-tight">Create Account</h2>
             <p className="text-muted-foreground text-sm">Fill in the details to get started</p>
           </div>
 
           {errors.general && (
-            <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mb-5">
+            <div className="flex items-start gap-3 rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger mb-5">
               <IconAlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{errors.general}</span>
             </div>
@@ -258,58 +324,58 @@ export default function ClientRegister() {
 
           <form className="space-y-4" onSubmit={handleRegister} noValidate>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Full Name</Label>
+              <Label htmlFor="reg-name" className="text-sm font-medium">Full Name</Label>
               <div className="relative">
                 <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
-                  type="text" value={name}
+                  id="reg-name" type="text" value={name}
                   onChange={(e) => { setName(e.target.value); clearFieldError("name"); }}
                   placeholder="John Doe"
                   className={`pl-10 ${errors.name ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
               </div>
-              {errors.name && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.name}</p>}
+              {errors.name && <p className="flex items-center gap-1.5 text-xs text-danger mt-1"><IconAlertCircle className="h-3 w-3" />{errors.name}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Email</Label>
+              <Label htmlFor="reg-email" className="text-sm font-medium">Email</Label>
               <div className="relative">
                 <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
-                  type="email" value={email}
+                  id="reg-email" type="email" value={email}
                   onChange={(e) => { setEmail(e.target.value); clearFieldError("email"); }}
                   placeholder="you@example.com"
                   className={`pl-10 ${errors.email ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
               </div>
-              {errors.email && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.email}</p>}
+              {errors.email && <p className="flex items-center gap-1.5 text-xs text-danger mt-1"><IconAlertCircle className="h-3 w-3" />{errors.email}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Password</Label>
+              <Label htmlFor="reg-password" className="text-sm font-medium">Password</Label>
               <div className="relative">
                 <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
-                  type={showPassword ? "text" : "password"} value={password}
+                  id="reg-password" type={showPassword ? "text" : "password"} value={password}
                   onChange={(e) => { setPassword(e.target.value); clearFieldError("password"); }}
                   placeholder="Create a strong password"
                   className={`pl-10 pr-11 ${errors.password ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                   {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.password && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.password}</p>}
+              {errors.password && <p className="flex items-center gap-1.5 text-xs text-danger mt-1"><IconAlertCircle className="h-3 w-3" />{errors.password}</p>}
               {password.length > 0 && (
                 <>
                   <div className="flex gap-1 pt-1">
                     {passwordRules.map((r, i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${r.test(password) ? "bg-emerald-500" : "bg-muted"}`} />
+                      <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${r.test(password) ? "bg-success" : "bg-muted"}`} />
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1">
                     {passwordRules.map((r, i) => (
-                      <span key={i} className={`text-[11px] flex items-center gap-1 ${r.test(password) ? "text-emerald-500" : "text-muted-foreground/60"}`}>
+                      <span key={i} className={`text-[11px] flex items-center gap-1 ${r.test(password) ? "text-success" : "text-muted-foreground/60"}`}>
                         <IconCircleCheck className={`h-3 w-3 ${r.test(password) ? "opacity-100" : "opacity-30"}`} />{r.label}
                       </span>
                     ))}
@@ -319,26 +385,23 @@ export default function ClientRegister() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Confirm Password</Label>
+              <Label htmlFor="reg-confirm" className="text-sm font-medium">Confirm Password</Label>
               <div className="relative">
                 <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
-                  type={showConfirm ? "text" : "password"} value={confirmPassword}
+                  id="reg-confirm" type={showConfirm ? "text" : "password"} value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); clearFieldError("confirmPassword"); }}
                   placeholder="Re-enter password"
                   className={`pl-10 pr-11 ${errors.confirmPassword ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
-                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                <button type="button" aria-label={showConfirm ? "Hide password" : "Show password"} onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                   {showConfirm ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="flex items-center gap-1.5 text-xs text-destructive mt-1"><IconAlertCircle className="h-3 w-3" />{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="flex items-center gap-1.5 text-xs text-danger mt-1"><IconAlertCircle className="h-3 w-3" />{errors.confirmPassword}</p>}
             </div>
 
-            <Button
-              type="submit" disabled={loading}
-              className="w-full gap-2 btn-glow btn-glow-hover mt-2"
-            >
+            <SheenButton type="submit" disabled={loading} size="lg" className="w-full gap-2 mt-2">
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -347,7 +410,7 @@ export default function ClientRegister() {
                   <IconArrowRight className="h-4 w-4" />
                 </>
               )}
-            </Button>
+            </SheenButton>
           </form>
         </Card>
 

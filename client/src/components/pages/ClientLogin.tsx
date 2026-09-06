@@ -6,13 +6,13 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import {
   IconMail, IconLock, IconArrowRight, IconLoader2, IconAlertCircle,
-  IconEye, IconEyeOff,
+  IconEye, IconEyeOff, IconShieldCheck,
 } from "@tabler/icons-react";
 import AuthShell, { AuthLogo } from "@/components/site/AuthShell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { SheenButton } from "@/components/marketing/SheenButton";
 
 interface FormErrors {
   email?: string;
@@ -87,14 +87,18 @@ export default function ClientLogin() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <Card className="p-6 sm:p-8 gap-0 shadow-sm rounded-2xl">
-          <div className="text-center space-y-1.5 mb-6">
-            <h2 className="font-display text-2xl font-semibold tracking-tight">Sign In</h2>
+        <Card className="gap-0 rounded-xl p-7 shadow-lifted sm:p-8">
+          <div className="mb-7 flex flex-col items-center gap-2 text-center">
+            <span className="grid size-11 place-items-center rounded-xl bg-accent text-brand ring-1 ring-brand/15">
+              <IconShieldCheck className="size-5" stroke={1.75} />
+            </span>
+            <p className="text-eyebrow mt-1">Investor access</p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Sign In</h2>
             <p className="text-muted-foreground text-sm">Enter your credentials to access your account</p>
           </div>
 
           {errors.general && (
-            <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mb-5">
+            <div role="alert" className="mb-5 flex items-start gap-3 rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
               <IconAlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{errors.general}</span>
             </div>
@@ -113,7 +117,7 @@ export default function ClientLogin() {
                 />
               </div>
               {errors.email && (
-                <p className="flex items-center gap-1.5 text-xs text-destructive">
+                <p className="flex items-center gap-1.5 text-xs text-danger">
                   <IconAlertCircle className="h-3 w-3" />{errors.email}
                 </p>
               )}
@@ -129,12 +133,12 @@ export default function ClientLogin() {
                   placeholder="Enter your password"
                   className={`pl-10 pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                 />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                   {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="flex items-center gap-1.5 text-xs text-destructive">
+                <p className="flex items-center gap-1.5 text-xs text-danger">
                   <IconAlertCircle className="h-3 w-3" />{errors.password}
                 </p>
               )}
@@ -155,10 +159,7 @@ export default function ClientLogin() {
               </Link>
             </div>
 
-            <Button
-              type="submit" disabled={loading}
-              className="w-full gap-2 btn-glow btn-glow-hover"
-            >
+            <SheenButton type="submit" size="lg" disabled={loading} className="w-full">
               {loading ? (
                 <IconLoader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -167,7 +168,7 @@ export default function ClientLogin() {
                   <IconArrowRight className="h-4 w-4" />
                 </>
               )}
-            </Button>
+            </SheenButton>
           </form>
         </Card>
 

@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
 import {
-  IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
+  IconLoader2, IconAlertCircle, IconShieldCheck,
   IconSearch, IconUser, IconWallet, IconGift, IconArrowsExchange,
   IconClock, IconCheck, IconX, IconInfoCircle, IconRefresh,
 } from "@tabler/icons-react";
@@ -15,14 +14,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/dashboard/SectionCard";
+import { KycLockedState } from "@/components/dashboard/LockedState";
+import { ListSkeleton, PanelSkeleton } from "@/components/dashboard/Skeletons";
 
 type SourceType = "WALLET" | "BONUS";
 
 function statusBadge(status: InternalTransfer["status"]) {
   const cfg: Record<InternalTransfer["status"], { label: string; color: string; bg: string; icon: typeof IconClock }> = {
-    PENDING: { label: "Pending Review", color: "text-amber-600", bg: "bg-amber-100", icon: IconClock },
-    APPROVED: { label: "Completed", color: "text-emerald-600", bg: "bg-emerald-100", icon: IconCheck },
-    REJECTED: { label: "Rejected", color: "text-red-600", bg: "bg-red-100", icon: IconX },
+    PENDING: { label: "Pending Review", color: "text-warning", bg: "bg-warning", icon: IconClock },
+    APPROVED: { label: "Completed", color: "text-success", bg: "bg-success", icon: IconCheck },
+    REJECTED: { label: "Rejected", color: "text-danger", bg: "bg-danger", icon: IconX },
   };
   const s = cfg[status];
   const Icon = s.icon;
@@ -162,49 +165,41 @@ export default function TransferPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <IconLoader2 className="h-8 w-8 animate-spin text-brand" />
+      <div className="mx-auto max-w-3xl space-y-5">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-8 w-56" />
+        </div>
+        <PanelSkeleton lines={5} />
+        <ListSkeleton rows={3} />
       </div>
     );
   }
 
   if (!kycApproved) {
     return (
-      <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
-        <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transfer</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user&apos;s wallet.</p>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <div className="flex items-start sm:items-center gap-3 flex-1">
-            <IconAlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
-            <div>
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">One quick step first: verify your identity</p>
-              <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Both you and the recipient need approved KYC before sending or receiving an internal transfer.</p>
-            </div>
-          </div>
-          <Button asChild size="sm" className="shrink-0 self-start sm:self-auto bg-amber-500 hover:bg-amber-600">
-            <Link href="/dashboard/kyc">{kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}</Link>
-          </Button>
-        </div>
-        <Card className="px-6 py-16 text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
-            <IconLock className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h2 className="font-display text-xl font-semibold">Transfers Locked for Now</h2>
-          <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
-            Verify your identity (KYC) to send funds to another verified user.
-          </p>
-        </Card>
+      <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
+        <PageHeading
+          eyebrow="Move funds"
+          title="Internal Transfer"
+          description="Send funds directly to another ORVANTA user's wallet."
+        />
+        <KycLockedState
+          status={kyc?.status ?? "NOT_STARTED"}
+          title="Transfers Locked for Now"
+          description="Verify your identity (KYC) to send funds to another verified user. Both you and the recipient need approved KYC."
+          pendingDescription="Your verification is being reviewed. Transfers unlock automatically once it's approved."
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto space-y-4">
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
+      <div className="mx-auto max-w-3xl space-y-4">
+        <PageHeading eyebrow="Move funds" title="Internal Transfer" />
+        <div role="alert" className="flex items-center gap-3 rounded-xl border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
+          <IconAlertCircle className="size-4 shrink-0" /> {error}
         </div>
         <Button variant="outline" onClick={fetchData} className="gap-2">Retry</Button>
       </div>
@@ -212,23 +207,29 @@ export default function TransferPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-8">
-      <div>
-        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">Internal Transfer</h1>
-        <p className="text-muted-foreground text-xs sm:text-sm mt-1">Transfer funds directly to another ORVANTA user — reviewed and completed within 12-24 working hours.</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-5 pb-8 sm:space-y-6">
+      <PageHeading
+        eyebrow="Move funds"
+        title="Internal Transfer"
+        description="Send funds to another ORVANTA user — reviewed and completed within 12–24 working hours."
+      />
 
       {/* Send form */}
-      <Card className="p-4 sm:p-6 gap-0">
-        <h2 className="font-display text-base sm:text-lg font-semibold mb-4">New Transfer</h2>
+      <Card className="gap-0 p-4 sm:p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-brand ring-1 ring-brand/15">
+            <IconArrowsExchange className="size-[18px]" stroke={1.75} />
+          </span>
+          <h2 className="text-section">New Transfer</h2>
+        </div>
 
         {sendError && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive mb-3">
+          <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive mb-3">
             <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {sendError}
           </div>
         )}
         {sendSuccess && (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
+          <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success mb-3">
             <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {sendSuccess}
           </div>
         )}
@@ -240,7 +241,7 @@ export default function TransferPage() {
             {recipient ? (
               <div className="flex items-center justify-between gap-3 rounded-xl border border-brand/30 bg-brand/5 px-3.5 py-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand/10 text-brand font-bold text-xs">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand font-bold text-xs">
                     {recipient.name?.charAt(0)?.toUpperCase() || "?"}
                   </div>
                   <div className="min-w-0">
@@ -276,7 +277,7 @@ export default function TransferPage() {
                           onClick={() => selectRecipient(u)}
                           className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-accent transition-colors"
                         >
-                          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground font-bold text-xs">
+                          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground font-bold text-xs">
                             {u.name?.charAt(0)?.toUpperCase() || <IconUser className="h-4 w-4" />}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -284,7 +285,7 @@ export default function TransferPage() {
                             <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                           </div>
                           {!u.kycApproved && (
-                            <span className="text-[10px] text-amber-600 shrink-0">Not KYC-verified</span>
+                            <span className="text-[10px] text-warning shrink-0">Not KYC-verified</span>
                           )}
                         </button>
                       ))
@@ -306,8 +307,8 @@ export default function TransferPage() {
                 onClick={() => setSourceType("WALLET")}
                 className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-left transition-colors ${sourceType === "WALLET" ? "border-brand bg-brand/5" : "border-border hover:bg-accent"}`}
               >
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-teal-500/10">
-                  <IconWallet className="h-4 w-4 text-teal-500" />
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-info-soft">
+                  <IconWallet className="h-4 w-4 text-info" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-foreground">Wallet</p>
@@ -319,8 +320,8 @@ export default function TransferPage() {
                 onClick={() => setSourceType("BONUS")}
                 className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-left transition-colors ${sourceType === "BONUS" ? "border-brand bg-brand/5" : "border-border hover:bg-accent"}`}
               >
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-amber-500/10">
-                  <IconGift className="h-4 w-4 text-amber-500" />
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-warning-soft">
+                  <IconGift className="h-4 w-4 text-warning" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-foreground">Bonus</p>
@@ -402,7 +403,7 @@ export default function TransferPage() {
         </div>
         {myTransfers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
+            <div className="grid h-16 w-16 place-items-center rounded-lg bg-muted mb-4">
               <IconArrowsExchange className="h-8 w-8 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground">No transfers yet</p>
@@ -413,8 +414,8 @@ export default function TransferPage() {
             {myTransfers.map((t) => {
               return (
                 <div key={t.id} className="flex items-center gap-3 p-4">
-                  <div className={`grid h-10 w-10 place-items-center rounded-full shrink-0 ${t.senderId === kyc?.userId ? "bg-red-500/10" : "bg-emerald-500/10"}`}>
-                    <IconArrowsExchange className={`h-5 w-5 ${t.senderId === kyc?.userId ? "text-red-500" : "text-emerald-500"}`} />
+                  <div className={`grid h-10 w-10 place-items-center rounded-lg shrink-0 ${t.senderId === kyc?.userId ? "bg-danger-soft" : "bg-success-soft"}`}>
+                    <IconArrowsExchange className={`h-5 w-5 ${t.senderId === kyc?.userId ? "text-danger" : "text-success"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
@@ -428,7 +429,7 @@ export default function TransferPage() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-sm font-semibold ${t.senderId === kyc?.userId ? "text-foreground" : "text-emerald-600"}`}>
+                    <p className={`text-sm font-semibold ${t.senderId === kyc?.userId ? "text-foreground" : "text-success"}`}>
                       {t.senderId === kyc?.userId ? "−" : "+"}${parseFloat(t.senderId === kyc?.userId ? t.amount : t.netAmount).toFixed(2)}
                     </p>
                     <div className="mt-1">{statusBadge(t.status)}</div>

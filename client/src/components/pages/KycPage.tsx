@@ -10,6 +10,7 @@ import {
   IconChevronDown, IconSearch, IconRefresh,
 } from "@tabler/icons-react";
 import { kycAPI, type KycData } from "@/lib/api";
+import { PanelSkeleton } from "@/components/dashboard/Skeletons";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -731,16 +732,14 @@ export default function KycPage() {
 
   if (fetching) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <IconLoader2 className="h-8 w-8 animate-spin text-brand" />
-      </div>
+      <div className="mx-auto max-w-2xl space-y-5"><PanelSkeleton lines={2} /><PanelSkeleton lines={6} /></div>
     );
   }
 
   if (fetchFailed) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-        <div className="grid h-16 w-16 place-items-center rounded-full bg-destructive/10 ring-1 ring-destructive/20">
+        <div className="grid h-16 w-16 place-items-center rounded-lg bg-destructive/10 ring-1 ring-destructive/20">
           <IconAlertCircle className="h-8 w-8 text-destructive" />
         </div>
         <div>
@@ -766,7 +765,7 @@ export default function KycPage() {
     <div className="mx-auto w-full max-w-2xl space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+        <h1 className="text-page-title text-foreground">
           KYC Verification
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -780,27 +779,50 @@ export default function KycPage() {
 
       {/* Step Indicators — sirf form mode mein */}
       {!submitted && showForm && (
-        <div className="flex items-center gap-2">
-          {[1, 2, 3, 4].map((s) => (
-            <div key={s} className="flex-1">
-              <div
-                className={`h-1.5 rounded-full transition-colors ${s <= step ? "bg-brand" : "bg-muted"
-                  }`}
-              />
-              <p
-                className={`mt-1.5 hidden sm:block text-[11px] font-medium ${s === step ? "text-foreground" : "text-muted-foreground"
-                  }`}
+        <ol className="flex items-start gap-2" aria-label="Verification steps">
+          {[1, 2, 3, 4].map((s) => {
+            const done = s < step;
+            const current = s === step;
+            return (
+              <li
+                key={s}
+                className="flex-1"
+                aria-current={current ? "step" : undefined}
               >
-                {STEP_TITLES[s as Step]}
-              </p>
-            </div>
-          ))}
-        </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`grid size-6 shrink-0 place-items-center rounded-lg text-[0.625rem] font-bold tabular-nums transition-colors ${
+                      done
+                        ? "bg-brand text-brand-foreground"
+                        : current
+                          ? "bg-accent text-brand ring-1 ring-brand/40"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {done ? <IconCheck className="size-3.5" stroke={3} /> : String(s).padStart(2, "0")}
+                  </span>
+                  <span
+                    className={`h-1 flex-1 rounded-full transition-colors ${
+                      s <= step ? "bg-brand" : "bg-muted"
+                    }`}
+                  />
+                </div>
+                <p
+                  className={`mt-2 hidden text-[0.6875rem] font-semibold sm:block ${
+                    current ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {STEP_TITLES[s as Step]}
+                </p>
+              </li>
+            );
+          })}
+        </ol>
       )}
 
       {/* Rejection reminder — resubmission form ke upar */}
       {showForm && kyc?.status === "REJECTED" && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-destructive">
           <div className="flex items-center gap-2">
             <IconX className="h-4 w-4 shrink-0" />
             <span className="font-medium">Your previous submission was rejected</span>
@@ -816,11 +838,11 @@ export default function KycPage() {
 
       {/* Under 18 Block */}
       {showForm && isUnder18 && step >= 1 && !submitted && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-4">
+        <div className="rounded-lg border border-warning/25 bg-warning-soft px-4 py-4">
           <div className="flex items-start gap-3">
-            <IconAlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+            <IconAlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+              <p className="text-sm font-semibold text-warning">
                 Age Restriction
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -836,11 +858,11 @@ export default function KycPage() {
       <Card className="p-4 sm:p-6 lg:p-8 gap-0 shadow-sm rounded-2xl">
         {submitted ? (
           <div className="space-y-6 text-center py-4">
-            <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <IconCheck className="h-10 w-10 text-emerald-500" />
+            <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25">
+              <IconCheck className="h-10 w-10 text-success" />
             </div>
             <div>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+              <h2 className="text-page-title text-foreground">
                 KYC Submitted!
               </h2>
               <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
@@ -860,15 +882,15 @@ export default function KycPage() {
           <div className="space-y-6 text-center py-4">
             {kycStatus === "PENDING" && (
               <>
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-amber-500/10 ring-1 ring-amber-500/20">
-                  <IconClock className="h-10 w-10 text-amber-500" />
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-warning-soft ring-1 ring-warning/25">
+                  <IconClock className="h-10 w-10 text-warning" />
                 </div>
                 <div>
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                    <h2 className="text-page-title text-foreground">
                       KYC Under Review
                     </h2>
-                    <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">Pending</Badge>
+                    <Badge variant="outline" className="border-warning/25 bg-warning-soft text-warning">Pending</Badge>
                   </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Your documents were submitted
@@ -880,7 +902,7 @@ export default function KycPage() {
                     You&apos;ll receive an email once verified.
                   </p>
                 </div>
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+                <div className="rounded-lg border border-warning/25 bg-warning-soft px-4 py-3 text-sm text-warning flex items-center justify-center gap-2">
                   <IconClock className="h-4 w-4 shrink-0" />
                   Estimated review time: 12-24 working hours
                 </div>
@@ -898,15 +920,15 @@ export default function KycPage() {
 
             {kycStatus === "APPROVED" && (
               <>
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                  <IconShieldCheck className="h-10 w-10 text-emerald-500" />
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25">
+                  <IconShieldCheck className="h-10 w-10 text-success" />
                 </div>
                 <div>
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                    <h2 className="text-page-title text-foreground">
                       KYC Approved!
                     </h2>
-                    <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Verified</Badge>
+                    <Badge variant="outline" className="border-success/25 bg-success-soft text-success">Verified</Badge>
                   </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Your identity has been verified. You now have full access to
@@ -924,28 +946,28 @@ export default function KycPage() {
 
             {kycStatus === "REJECTED" && !canResubmit() && (
               <>
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-destructive/10 ring-1 ring-destructive/20">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-destructive/10 ring-1 ring-destructive/20">
                   <IconX className="h-10 w-10 text-destructive" />
                 </div>
                 <div>
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                    <h2 className="text-page-title text-foreground">
                       KYC Rejected
                     </h2>
-                    <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">Rejected</Badge>
+                    <Badge variant="outline" className="border-danger/25 bg-destructive/10 text-destructive">Rejected</Badge>
                   </div>
                   <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                     Unfortunately, your submission could not be approved.
                   </p>
                 </div>
                 {kyc?.rejectionReason && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-left">
+                  <div className="rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-destructive text-left">
                     <p className="font-medium">Reason:</p>
                     <p className="mt-1 text-xs opacity-90">{kyc.rejectionReason}</p>
                   </div>
                 )}
                 {kyc?.resubmitAfter && (
-                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+                  <div className="rounded-lg border border-warning/25 bg-warning-soft px-4 py-3 text-sm text-warning flex items-center justify-center gap-2">
                     <IconClock className="h-4 w-4 shrink-0" />
                     You can resubmit after {format(new Date(kyc.resubmitAfter), "PPp")}
                   </div>
@@ -957,7 +979,7 @@ export default function KycPage() {
           <div className="space-y-6">
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              <div className="flex items-center gap-3 rounded-lg border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-destructive">
                 <IconAlertCircle className="h-4 w-4 shrink-0" />
                 {error}
               </div>
@@ -1125,13 +1147,13 @@ export default function KycPage() {
                 </div>
 
                 {dob && isUnder18 && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <p className="text-xs text-warning flex items-center gap-1">
                     <IconAlertTriangle className="h-3 w-3" />
                     You must be 18 years or older to proceed
                   </p>
                 )}
                 {age !== null && !isUnder18 && dob && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <p className="text-xs text-success flex items-center gap-1">
                     <IconCheck className="h-3 w-3" />
                     Age: {age} years
                   </p>
@@ -1226,7 +1248,7 @@ export default function KycPage() {
                     ) : (
                       <div className="space-y-4">
                         {otpError && (
-                          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                          <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                             <IconAlertCircle className="h-3.5 w-3.5 shrink-0" />
                             {otpError}
                           </div>
@@ -1301,10 +1323,10 @@ export default function KycPage() {
                   </>
                 ) : (
                   <div className="text-center py-4">
-                    <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20 mb-3">
-                      <IconCheck className="h-8 w-8 text-emerald-500" />
+                    <div className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-success-soft ring-1 ring-success/25 mb-3">
+                      <IconCheck className="h-8 w-8 text-success" />
                     </div>
-                    <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    <p className="text-sm font-medium text-success">
                       Email Verified!
                     </p>
                   </div>
@@ -1369,7 +1391,7 @@ export default function KycPage() {
                     className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveFront
                         ? "border-brand bg-brand/5"
                         : documentFile
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/25 bg-success-soft"
                           : "border-border hover:border-brand/50 hover:bg-accent/50"
                       }`}
                   >
@@ -1439,7 +1461,7 @@ export default function KycPage() {
                     className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveBack
                         ? "border-brand bg-brand/5"
                         : documentFileBack
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/25 bg-success-soft"
                           : "border-border hover:border-brand/50 hover:bg-accent/50"
                       }`}
                   >
@@ -1557,7 +1579,7 @@ export default function KycPage() {
                     className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveAddrFront
                         ? "border-brand bg-brand/5"
                         : addressFile
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/25 bg-success-soft"
                           : "border-border hover:border-brand/50 hover:bg-accent/50"
                       }`}
                   >
@@ -1602,7 +1624,7 @@ export default function KycPage() {
                     className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all ${dragActiveAddrBack
                         ? "border-brand bg-brand/5"
                         : addressFileBack
-                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          ? "border-success/25 bg-success-soft"
                           : "border-border hover:border-brand/50 hover:bg-accent/50"
                       }`}
                   >

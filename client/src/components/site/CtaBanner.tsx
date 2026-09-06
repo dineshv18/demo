@@ -1,78 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
 import { Reveal, Section } from "./primitives";
+import { CTASection } from "@/components/marketing/CTASection";
 
+/**
+ * Shared closing banner for public pages. Now a thin wrapper over the
+ * marketing CTA so every page ends on the same navy/gold panel.
+ */
 export function CtaBanner() {
-    return (
-        <Section className="!py-16">
-            <Reveal>
-                <div className="relative overflow-hidden rounded-[20px] p-8 md:p-14 bg-[#10211D] text-white shadow-xl border border-[#10211D]">
-                    {/* Ambient Glows */}
-                    <div aria-hidden className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-                    <div aria-hidden className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#00B956]/20 blur-3xl pointer-events-none" />
-
-                    <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 z-10">
-                        <div className="space-y-4 max-w-xl text-left">
-                            {/* Badge */}
-                            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold border border-white/10 select-none">
-                                <Sparkles size={14} className="text-[#00B956] animate-pulse" />
-                                <span>Instant Setup</span>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="font-display text-3xl md:text-4xl font-medium tracking-tight leading-tight text-white">
-                                Ready to start investing?
-                            </h3>
-
-                            {/* Description */}
-                            <p className="text-sm text-white/70 leading-relaxed">
-                                Create an account in minutes. Fund your wallet when you&apos;re ready. Invest with discipline.
-                            </p>
-                        </div>
-
-                        {/* Action block */}
-                        <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-6 shrink-0">
-                            {/* Buttons */}
-                            <div className="flex flex-wrap gap-3">
-                                <Link
-                                    href="/login"
-                                    className="inline-flex items-center gap-2 rounded-xl bg-white text-[#10211D] hover:bg-white/90 px-6 py-3.5 text-sm font-semibold transition duration-200 shadow-lg shadow-black/10"
-                                >
-                                    Get Started <ArrowRight className="h-4 w-4" />
-                                </Link>
-                                <Link 
-                                    href="/contact" 
-                                    className="inline-flex items-center gap-2 rounded-lg border border-white/30 hover:border-white/60 hover:bg-white/5 px-6 py-3.5 text-sm font-semibold text-white transition duration-200"
-                                >
-                                    Talk to our team
-                                </Link>
-                            </div>
-
-                            {/* Overlapping Avatars */}
-                            <div className="flex items-center gap-3">
-                                <div className="flex -space-x-2 select-none">
-                                    {[
-                                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64&q=80",
-                                        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80",
-                                        "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=64&h=64&q=80",
-                                        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=64&h=64&q=80"
-                                    ].map((src, idx) => (
-                                        <img 
-                                            key={idx} 
-                                            src={src} 
-                                            alt="User avatar" 
-                                            className="h-7 w-7 rounded-full border border-[#10211D] object-cover"
-                                        />
-                                    ))}
-                                </div>
-                                <span className="text-xs text-white/80 font-medium">5/5 (220,000+ Active Clients)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Reveal>
-        </Section>
-    );
+  return (
+    <Section className="!py-16">
+      <Reveal>
+        <CTASection
+          eyebrow="Instant setup"
+          title="Ready to start investing?"
+          description="Create your ORVANTA account, complete verification, and choose the Index tier that fits your goals — with every term published upfront."
+          primary={{ href: "/register", label: "Get Started" }}
+          secondary={{ href: "/platform", label: "Explore Platform" }}
+        />
+      </Reveal>
+    </Section>
+  );
 }

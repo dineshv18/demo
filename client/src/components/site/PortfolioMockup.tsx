@@ -36,8 +36,8 @@ export function PortfolioMockup() {
                             <p className="text-[10px] text-muted-foreground mt-1">KYC-verified · Live</p>
                         </div>
                     </div>
-                    <div className="text-[10px] text-emerald-600 flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 font-medium">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Synced
+                    <div className="text-[10px] text-success flex items-center gap-1.5 bg-success-soft px-2.5 py-1 rounded-full border border-success/25 font-medium">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Synced
                     </div>
                 </div>
 
@@ -74,7 +74,7 @@ export function PortfolioMockup() {
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">Index Performance · 30D</p>
                             <div className="mt-1 flex items-baseline gap-2">
                                 <span className="text-xl font-bold tabular-nums text-foreground">$9,850.00</span>
-                                <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+                                <span className="text-[11px] text-success font-semibold flex items-center gap-0.5 bg-success-soft px-1.5 py-0.5 rounded-full">
                                     <ArrowUpRight className="h-3 w-3" /> +6.4%
                                 </span>
                             </div>
@@ -107,7 +107,7 @@ export function PortfolioMockup() {
                 {/* Referral strip */}
                 <div className="mt-4 flex items-center justify-between rounded-xl border border-border/50 bg-background/40 px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                        <div className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/10 text-amber-600">
+                        <div className="grid h-8 w-8 place-items-center rounded-lg bg-warning-soft text-warning">
                             <Gift className="h-4 w-4" />
                         </div>
                         <div>

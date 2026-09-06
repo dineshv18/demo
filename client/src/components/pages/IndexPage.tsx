@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  IconLoader2, IconAlertCircle, IconLock, IconShieldCheck,
+  IconLoader2, IconAlertCircle, IconShieldCheck,
   IconTrendingUp, IconTrendingDown, IconUser,
   IconRefresh, IconWallet, IconInfoCircle,
   IconClock, IconCircleCheck,
@@ -15,12 +15,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeading } from "@/components/dashboard/SectionCard";
+import { KycLockedState } from "@/components/dashboard/LockedState";
+import { DashboardSkeleton } from "@/components/dashboard/Skeletons";
 
 const TIER_COLORS = [
-  "from-teal-500 to-cyan-400",
-  "from-emerald-500 to-teal-400",
-  "from-amber-500 to-orange-400",
-  "from-green-600 to-emerald-400",
+  "from-navy-600 to-navy-400",
+  "from-navy-500 to-gold-700",
+  "from-gold-700 to-gold-500",
+  "from-gold-600 to-gold-400",
 ];
 
 function ChartTooltipContent({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -33,43 +36,22 @@ function ChartTooltipContent({ active, payload, label }: { active?: boolean; pay
   );
 }
 
-type Timeframe = "1W" | "1M" | "6M";
-const TIMEFRAMES: { key: Timeframe; label: string; days: number }[] = [
-  { key: "1W", label: "1W", days: 7 },
-  { key: "1M", label: "1M", days: 30 },
-  { key: "6M", label: "6M", days: 182 },
+/**
+ * Chart ranges.
+ *
+ * These only trim how many of the API's own `priceHistory` points are drawn —
+ * the series is never resampled, interpolated or projected forward. An earlier
+ * version of this page synthesised a growth curve from the tier's advertised
+ * return plus pseudo-random noise; that is gone, because a simulated line has
+ * no business being presented to an investor as the Index price.
+ */
+type Timeframe = "7D" | "1M" | "3M" | "ALL";
+const TIMEFRAMES: { key: Timeframe; label: string; points: number }[] = [
+  { key: "7D", label: "7D", points: 7 },
+  { key: "1M", label: "1M", points: 30 },
+  { key: "3M", label: "3M", points: 90 },
+  { key: "ALL", label: "ALL", points: Number.POSITIVE_INFINITY },
 ];
-
-// Deterministic pseudo-random so the wiggle stays stable across re-renders
-// (same seed -> same curve) instead of jumping around on every fetch.
-function seededRandom(seed: number) {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-}
-
-function projectGrowth(startPrice: number, returnPercent: number, days: number, startDate: Date, seed = 1) {
-  const dailyRate = Math.pow(1 + returnPercent / 100, 1 / days) - 1;
-  const points = [];
-  const step = days <= 30 ? 1 : Math.round(days / 30);
-  // Volatility band scales with the trend size — small moves for small returns,
-  // visible zigzag for bigger ones — capped so noise never dwarfs the trend.
-  const noiseAmplitude = Math.min(Math.abs(returnPercent) / 100, 0.05);
-
-  let prevPrice = startPrice;
-  for (let d = 0; d <= days; d += step) {
-    const trendPrice = startPrice * Math.pow(1 + dailyRate, d);
-    const wiggle = (seededRandom(seed + d) - 0.5) * 2 * noiseAmplitude;
-    const price = d === 0 ? startPrice : Math.max(trendPrice * (1 + wiggle), prevPrice * 0.97);
-    prevPrice = price;
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + d);
-    points.push({
-      price,
-      dateLabel: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    });
-  }
-  return points;
-}
 
 export default function IndexPage() {
   const [data, setData] = useState<IndexData | null>(null);
@@ -79,7 +61,7 @@ export default function IndexPage() {
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  const [timeframe, setTimeframe] = useState<Timeframe | null>(null);
+  const [timeframe, setTimeframe] = useState<Timeframe>("ALL");
 
   const [investAmount, setInvestAmount] = useState("");
   const [selectedTierId, setSelectedTierId] = useState("");
@@ -210,55 +192,36 @@ export default function IndexPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <IconLoader2 className="h-8 w-8 animate-spin text-brand" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!kycApproved) {
     return (
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
-        <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">ORVANTA Index</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Grow your money by investing in a plan — track it here.</p>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <div className="flex items-start sm:items-center gap-3 flex-1">
-            <IconAlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
-            <div>
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">One quick step first: verify your identity</p>
-              <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">This keeps your account and funds secure. It only takes a couple of minutes.</p>
-            </div>
-          </div>
-          <Button asChild size="sm" className="shrink-0 self-start sm:self-auto bg-amber-500 hover:bg-amber-600">
-            <Link href="/dashboard/kyc">{kyc?.status === "PENDING" ? "Check KYC Status" : "Complete KYC"}</Link>
-          </Button>
-        </div>
-        <Card className="px-6 py-16 text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
-            <IconLock className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h2 className="font-display text-xl font-semibold">Investing is Locked for Now</h2>
-          <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
-            {kyc?.status === "PENDING"
-              ? "We're reviewing your documents. This unlocks automatically once your KYC is approved."
-              : "Verify your identity (KYC) to unlock investing and start growing your money."}
-          </p>
-        </Card>
+      <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
+        <PageHeading
+          eyebrow="Investments"
+          title="ORVANTA Index"
+          description="Grow your money by investing in a plan — track it here."
+        />
+        <KycLockedState
+          status={kyc?.status ?? "NOT_STARTED"}
+          title="Investing is Locked for Now"
+          description="Verify your identity (KYC) to unlock investing and start growing your money."
+          pendingDescription="We're reviewing your documents. Investing unlocks automatically once your KYC is approved."
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
+      <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
+        <PageHeading eyebrow="Investments" title="ORVANTA Index" />
+        <div role="alert" className="flex items-center gap-3 rounded-xl border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
+          <IconAlertCircle className="size-4 shrink-0" /> {error}
         </div>
         <Button variant="outline" onClick={fetchData} className="gap-2">
-          <IconRefresh className="h-4 w-4" /> Retry
+          <IconRefresh className="size-4" /> Retry
         </Button>
       </div>
     );
@@ -274,50 +237,46 @@ export default function IndexPage() {
   );
   const selectedTier = activeTiers.find((t) => t.id === selectedTierId) || null;
 
-  // Chart projects off the most recently activated active investment, if any.
-  const latestActiveInvestment = activeInvestments.length > 0
-    ? [...activeInvestments].sort((a, b) => new Date(b.activatedAt).getTime() - new Date(a.activatedAt).getTime())[0]
-    : null;
-  const tierForProjection = latestActiveInvestment?.tier;
-  const timeframeReturn = (tf: Timeframe) => {
-    if (!tierForProjection) return 0;
-    if (tf === "1W") return parseFloat(tierForProjection.weeklyReturn);
-    if (tf === "1M") return parseFloat(tierForProjection.monthlyReturn);
-    return parseFloat(tierForProjection.halfYearlyReturn);
-  };
-  const activeFrame = TIMEFRAMES.find((t) => t.key === timeframe);
-  const projectionSeed = latestActiveInvestment
-    ? Array.from(latestActiveInvestment.id).reduce((sum: number, ch: string) => sum + ch.charCodeAt(0), 0)
-    : 1;
-  const projectionStartDate = latestActiveInvestment ? new Date(latestActiveInvestment.activatedAt) : new Date();
-  const chartData =
-    timeframe && activeFrame && tierForProjection
-      ? projectGrowth(currentPrice?.price || 0, timeframeReturn(timeframe), activeFrame.days, projectionStartDate, projectionSeed)
-      : priceHistory || [];
+  // The chart is the API's own price history, trimmed to the selected range.
+  const fullHistory = priceHistory || [];
+  const activeFrame = TIMEFRAMES.find((t) => t.key === timeframe) ?? TIMEFRAMES[3];
+  const chartData = Number.isFinite(activeFrame.points)
+    ? fullHistory.slice(-activeFrame.points)
+    : fullHistory;
+
+  // Change across the plotted window, computed from those same points.
+  const windowChange = (() => {
+    if (chartData.length < 2) return null;
+    const first = chartData[0].price;
+    const last = chartData[chartData.length - 1].price;
+    if (!first) return null;
+    return ((last - first) / first) * 100;
+  })();
 
   return (
     <>
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-8">
         {/* Header */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">ORVANTA Index</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              {hasAnyInvestment ? "Track your investments and grow your money further." : "Grow your money — pick a plan and invest in a few taps."}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 px-3 py-1.5 text-xs font-bold">
-              <IconShieldCheck className="h-3.5 w-3.5" /> KYC Verified
-            </Badge>
-            <Badge variant="outline" className="sm:hidden gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
-              <IconShieldCheck className="h-3 w-3" /> Verified
-            </Badge>
-            <Button variant="outline" size="icon" onClick={fetchData} className="size-9 shrink-0">
-              <IconRefresh className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <PageHeading
+          eyebrow="Investments"
+          title="ORVANTA Index"
+          description={
+            hasAnyInvestment
+              ? "Track your investments and grow your money further."
+              : "Grow your money — pick a plan and invest in a few taps."
+          }
+          actions={
+            <>
+              <Badge variant="outline" className="gap-1.5 border-success/25 bg-success-soft px-3 py-1.5 text-success">
+                <IconShieldCheck className="size-3.5" /> KYC Verified
+              </Badge>
+              <Button variant="outline" size="icon" onClick={fetchData} className="size-9 shrink-0" aria-label="Refresh">
+                <IconRefresh className="size-4" />
+              </Button>
+            </>
+          }
+        />
+
 
         {/* Simple 3-step guide — only shown to first-time / no-investment users */}
         {!hasAnyInvestment && (
@@ -330,7 +289,7 @@ export default function IndexPage() {
                 { n: "3", title: "Invest & track it here", desc: "Watch your investment grow until it matures, then withdraw." },
               ].map((s) => (
                 <div key={s.n} className="flex gap-3">
-                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-white text-xs font-bold">{s.n}</div>
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand text-white text-xs font-bold">{s.n}</div>
                   <div>
                     <p className="text-xs font-semibold text-foreground">{s.title}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
@@ -345,12 +304,12 @@ export default function IndexPage() {
         <Card className="p-4 sm:p-5 gap-0">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 shrink-0">
+              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-linear-to-br from-navy-600 to-navy-800 shrink-0">
                 <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
-                <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">
+                <p className="text-page-title text-foreground mt-0.5">
                   <span className="text-gradient">${balance.toFixed(2)}</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">This is the money available to invest</p>
@@ -373,12 +332,12 @@ export default function IndexPage() {
             <p className="text-xs text-muted-foreground mb-4">Each one grows independently and matures on its own date.</p>
 
             {withdrawSuccess && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
+              <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success mb-3">
                 <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {withdrawSuccess}
               </div>
             )}
             {topUpSuccess && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 mb-3">
+              <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success mb-3">
                 <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {topUpSuccess}
               </div>
             )}
@@ -392,11 +351,11 @@ export default function IndexPage() {
                 const isWithdrawTarget = withdrawTargetId === inv.id;
 
                 return (
-                  <div key={inv.id} className={`rounded-xl border p-4 ${isMature ? "border-brand/30 bg-brand/5" : "border-emerald-500/30 bg-emerald-500/5"}`}>
+                  <div key={inv.id} className={`rounded-xl border p-4 ${isMature ? "border-brand/30 bg-brand/5" : "border-success/25 bg-success-soft"}`}>
                     <div className="flex items-start justify-between flex-wrap gap-2">
                       <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{inv.tier.label}</p>
-                        <p className={`text-lg font-bold mt-0.5 ${isMature ? "text-brand" : "text-emerald-500"}`}>
+                        <p className={`text-lg font-bold mt-0.5 ${isMature ? "text-brand" : "text-success"}`}>
                           ${parseFloat(inv.netAmount || inv.amount).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -415,7 +374,7 @@ export default function IndexPage() {
                       </div>
                       <Badge
                         variant="outline"
-                        className={`gap-1 shrink-0 font-bold ${isMature ? "border-brand/30 bg-brand/10 text-brand" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"}`}
+                        className={`gap-1 shrink-0 font-bold ${isMature ? "border-brand/30 bg-brand/10 text-brand" : "border-success/25 bg-success-soft text-success"}`}
                       >
                         {isMature ? <IconCircleCheck className="h-3.5 w-3.5" /> : <IconClock className="h-3.5 w-3.5" />}
                         {isMature ? "MATURED — READY" : "GROWING"}
@@ -423,7 +382,7 @@ export default function IndexPage() {
                     </div>
 
                     {isWithdrawTarget && withdrawError && (
-                      <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive mt-3">
+                      <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive mt-3">
                         <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {withdrawError}
                       </div>
                     )}
@@ -454,7 +413,7 @@ export default function IndexPage() {
                     {isTopUpTarget && !isWithdrawTarget && (
                       <div className="mt-3 rounded-lg border border-border bg-background px-3 py-3 space-y-2">
                         {topUpError && (
-                          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                          <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                             <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {topUpError}
                           </div>
                         )}
@@ -484,15 +443,15 @@ export default function IndexPage() {
                     )}
 
                     {isWithdrawTarget && (
-                      <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-3">
+                      <div className="mt-3 rounded-lg border border-warning/25 bg-warning-soft px-3 py-3">
                         {!isMature ? (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
+                          <p className="text-xs text-warning">
                             This hasn&apos;t matured yet. Withdrawing early charges a{" "}
                             <strong>{exitPercent.toFixed(2)}% fee</strong>{" "}
                             (about ${estExitFee.toFixed(2)}). Waiting until the maturity date avoids most of this fee.
                           </p>
                         ) : (
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                          <p className="text-xs text-success">
                             This has matured — you can withdraw now. A small <strong>{exitPercent.toFixed(2)}% exit fee</strong> (about ${estExitFee.toFixed(2)}) applies, then the rest goes straight to your wallet.
                           </p>
                         )}
@@ -535,12 +494,12 @@ export default function IndexPage() {
 
           <div className="space-y-3">
             {investError && (
-              <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
                 <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {investError}
               </div>
             )}
             {investSuccess && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success">
                 <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {investSuccess}
               </div>
             )}
@@ -562,7 +521,7 @@ export default function IndexPage() {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
-                          <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
+                          <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-linear-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
                             {i + 1}
                           </div>
                           <div className="min-w-0">
@@ -625,7 +584,7 @@ export default function IndexPage() {
               />
             </div>
             {investAmountNum > 0 && matchingTiers.length === 0 && (
-              <p className="text-xs text-amber-600">No plan matches this amount — check the ranges above.</p>
+              <p className="text-xs text-warning">No plan matches this amount — check the ranges above.</p>
             )}
 
             <Button
@@ -647,8 +606,8 @@ export default function IndexPage() {
             </Button>
 
             {selectedTier && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
-                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              <div className="rounded-lg border border-warning/25 bg-warning-soft px-3 py-2">
+                <p className="text-xs text-warning font-medium">
                   A {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% one-time fee applies when you invest
                 </p>
                 {investAmountNum > 0 && (
@@ -678,42 +637,48 @@ export default function IndexPage() {
               </div>
               <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap">
                 <span className="font-display text-xl sm:text-2xl font-bold">${currentPrice?.price?.toFixed(2) || "0.00"}</span>
-                <Badge variant="outline" className={`gap-1 border-0 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
+                <Badge variant="outline" className={`gap-1 border-0 text-[10px] sm:text-xs font-bold ${priceUp ? "bg-success-soft text-success" : "bg-danger-soft text-danger"}`}>
                   {priceUp ? <IconTrendingUp className="h-3 w-3" /> : <IconTrendingDown className="h-3 w-3" />}
                   ${Math.abs(currentPrice?.changeAmount || 0).toFixed(2)} ({Math.abs(currentPrice?.changePercent || 0).toFixed(2)}%)
                 </Badge>
               </div>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {tierForProjection
-              ? "This chart shows how your active investment is projected to grow over time."
-              : "This chart tracks the Index price history. Invest in a plan to see your own growth projection here."}
+          <p className="mt-2 text-xs text-muted-foreground">
+            Actual published Index price history — not a projection.
+            {windowChange !== null && (
+              <>
+                {" "}
+                <span className={windowChange >= 0 ? "text-success" : "text-danger"}>
+                  {windowChange >= 0 ? "+" : ""}
+                  {windowChange.toFixed(2)}%
+                </span>{" "}
+                over the selected period.
+              </>
+            )}
           </p>
 
-          {/* Timeframe Selector */}
-          <div className="flex items-center gap-2 mt-4 flex-wrap">
-            <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/30">
+          {/* Range selector — trims the real series, nothing more */}
+          <div
+            role="group"
+            aria-label="Chart period"
+            className="no-x-overflow mt-4 flex max-w-full gap-0.5 overflow-x-auto rounded-lg border border-border bg-surface-2 p-0.5"
+          >
+            {TIMEFRAMES.map((tf) => (
               <button
-                onClick={() => setTimeframe(null)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${!timeframe ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}
+                key={tf.key}
+                type="button"
+                onClick={() => setTimeframe(tf.key)}
+                aria-pressed={activeFrame.key === tf.key}
+                className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                  activeFrame.key === tf.key
+                    ? "bg-card text-brand shadow-xs ring-1 ring-brand/20"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                History
+                {tf.label}
               </button>
-              {TIMEFRAMES.map((tf) => (
-                <button
-                  key={tf.key}
-                  onClick={() => setTimeframe(tf.key)}
-                  disabled={!tierForProjection}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${timeframe === tf.key ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}
-                >
-                  {tf.label}
-                </button>
-              ))}
-            </div>
-            {!tierForProjection && (
-              <span className="text-[11px] text-muted-foreground">Invest to unlock your own growth projection</span>
-            )}
+            ))}
           </div>
 
           <div className="h-[200px] sm:h-[280px] mt-4">
@@ -721,8 +686,8 @@ export default function IndexPage() {
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="idxGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00A94F" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#00A94F" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--brand)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" vertical={false} />
@@ -740,7 +705,7 @@ export default function IndexPage() {
                   width={64}
                 />
                 <Tooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="price" stroke="#00A94F" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "#00A94F", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "#00A94F", strokeWidth: 2, stroke: "var(--card)" }} />
+                <Area type="monotone" dataKey="price" stroke="var(--brand)" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "var(--brand)", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "var(--brand)", strokeWidth: 2, stroke: "var(--card)" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -751,7 +716,7 @@ export default function IndexPage() {
           <Card className="p-4 sm:p-6 gap-0">
             <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Index Manager</h2>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-2 shrink-0">
+              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-lg bg-linear-to-br from-brand to-brand-2 shrink-0">
                 <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
               <div className="min-w-0">

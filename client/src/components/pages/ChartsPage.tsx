@@ -1,157 +1,470 @@
 "use client";
 
-import { useState } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { IconTrendingUp, IconArrowUpRight } from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  IconChartLine,
+  IconCoins,
+  IconReceipt2,
+  IconTrendingUp,
+  IconWallet,
+} from "@tabler/icons-react";
 
-const portfolioData = [
-  { date: "Jan", value: 120000, profit: 8000 },
-  { date: "Feb", value: 135000, profit: 15000 },
-  { date: "Mar", value: 128000, profit: -7000 },
-  { date: "Apr", value: 145000, profit: 17000 },
-  { date: "May", value: 162000, profit: 17000 },
-  { date: "Jun", value: 155000, profit: -7000 },
-  { date: "Jul", value: 170000, profit: 15000 },
-  { date: "Aug", value: 185000, profit: 15000 },
-  { date: "Sep", value: 178000, profit: -7000 },
-  { date: "Oct", value: 195000, profit: 17000 },
-  { date: "Nov", value: 210000, profit: 15000 },
-  { date: "Dec", value: 225000, profit: 15000 },
-];
+import {
+  indexAPI,
+  referralAPI,
+  walletAPI,
+  type IndexData,
+  type IndexInvestment,
+  type ReferralEarningsBreakdown,
+  type TransactionData,
+} from "@/lib/api";
 
-const pairsPerformance = [
-  { pair: "EUR/USD", profit: 4520, trades: 24, winRate: 72 },
-  { pair: "GBP/USD", profit: 3210, trades: 18, winRate: 65 },
-  { pair: "BTC/USD", profit: 8900, trades: 12, winRate: 75 },
-  { pair: "ETH/USD", profit: 5600, trades: 15, winRate: 70 },
-  { pair: "USD/JPY", profit: -1200, trades: 20, winRate: 45 },
-  { pair: "XAU/USD", profit: 6700, trades: 10, winRate: 80 },
-];
+import { PageHeading, SectionCard, EmptyState } from "@/components/dashboard/SectionCard";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { DashboardSkeleton } from "@/components/dashboard/Skeletons";
+import { useChartTheme, tooltipStyles } from "@/components/dashboard/chart-theme";
+import {
+  formatMoney,
+  formatMoneyCompact,
+  formatDay,
+  parseAmount,
+} from "@/components/dashboard/format";
+import { Rise, Stagger } from "@/components/shared/motion";
+import { cn } from "@/lib/utils";
 
-const timeframes = ["1W", "1M", "3M", "6M", "1Y", "ALL"];
-
+/**
+ * Analytics.
+ *
+ * Every figure on this page is derived from the same endpoints the rest of the
+ * dashboard uses — the wallet transaction ledger, the user's Index investments,
+ * and the referral earnings breakdown. Nothing is simulated: when an account has
+ * no history, the page says so rather than drawing a plausible-looking curve.
+ */
 export default function ChartsPage() {
-  const [timeframe, setTimeframe] = useState("1Y");
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [investments, setInvestments] = useState<IndexInvestment[]>([]);
+  const [earnings, setEarnings] = useState<ReferralEarningsBreakdown | null>(null);
+  const [indexData, setIndexData] = useState<IndexData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const totalProfit = pairsPerformance.reduce((a, b) => a + b.profit, 0);
-  const totalTrades = pairsPerformance.reduce((a, b) => a + b.trades, 0);
-  const avgWinRate = Math.round(pairsPerformance.reduce((a, b) => a + b.winRate, 0) / pairsPerformance.length);
+  const { theme, mounted } = useChartTheme();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [txRes, invRes, earnRes, idxRes] = await Promise.allSettled([
+          walletAPI.getTransactions(),
+          indexAPI.getMyInvestments(),
+          referralAPI.getEarningsBreakdown(),
+          indexAPI.getData(),
+        ]);
+        if (txRes.status === "fulfilled") setTransactions(txRes.value.transactions);
+        if (invRes.status === "fulfilled") setInvestments(invRes.value.investments);
+        if (earnRes.status === "fulfilled") setEarnings(earnRes.value);
+        if (idxRes.status === "fulfilled") setIndexData(idxRes.value);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  /** Running wallet balance after each completed transaction. */
+  const balanceSeries = useMemo(() => {
+    const completed = transactions
+      .filter((t) => t.status === "COMPLETED")
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    const CREDIT = new Set(["DEPOSIT", "BONUS_CREDIT", "BONUS_TRANSFER", "INTERNAL_TRANSFER_IN"]);
+
+    let running = 0;
+    const byDay = new Map<string, number>();
+    for (const tx of completed) {
+      const amt = parseAmount(tx.amount);
+      running += CREDIT.has(tx.type) ? amt : -amt;
+      byDay.set(formatDay(tx.createdAt), running);
+    }
+    return Array.from(byDay, ([label, value]) => ({ label, value }));
+  }, [transactions]);
+
+  /** Deposits vs withdrawals, grouped by calendar month. */
+  const flowSeries = useMemo(() => {
+    const byMonth = new Map<string, { label: string; deposits: number; withdrawals: number }>();
+
+    for (const tx of transactions) {
+      if (tx.status !== "COMPLETED") continue;
+      const d = new Date(tx.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+      const row = byMonth.get(key) ?? { label, deposits: 0, withdrawals: 0 };
+      const amt = parseAmount(tx.amount);
+
+      if (tx.type === "DEPOSIT") row.deposits += amt;
+      else if (tx.type === "WITHDRAWAL" || tx.type === "BONUS_WITHDRAWAL") row.withdrawals += amt;
+
+      byMonth.set(key, row);
+    }
+
+    return Array.from(byMonth.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => v);
+  }, [transactions]);
+
+  /** Referral commission per level, straight from the API breakdown. */
+  const levelSeries = useMemo(() => {
+    const rates = indexData?.referralLevels ?? [];
+    const byLevel = earnings?.byLevel ?? [];
+    return rates.map((rate, i) => ({
+      label: `L${i + 1}`,
+      rate,
+      amount: byLevel[i] ?? 0,
+    }));
+  }, [indexData, earnings]);
+
+  const activeInvestments = useMemo(
+    () => investments.filter((i) => i.status === "ACTIVE"),
+    [investments]
+  );
+
+  const totals = useMemo(() => {
+    const deposits = transactions
+      .filter((t) => t.type === "DEPOSIT" && t.status === "COMPLETED")
+      .reduce((s, t) => s + parseAmount(t.amount), 0);
+    const withdrawals = transactions
+      .filter((t) => t.type === "WITHDRAWAL" && t.status === "COMPLETED")
+      .reduce((s, t) => s + parseAmount(t.amount), 0);
+    const indexValue = activeInvestments.reduce(
+      (s, i) => s + parseAmount(i.netAmount || i.amount),
+      0
+    );
+    const referral = earnings?.totalEarned ?? 0;
+    const completedCount = transactions.filter((t) => t.status === "COMPLETED").length;
+
+    return { deposits, withdrawals, indexValue, referral, completedCount };
+  }, [transactions, activeInvestments, earnings]);
+
+  if (loading) return <DashboardSkeleton />;
+
+  const hasHistory = transactions.length > 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track your trading performance</p>
+    <div className="space-y-5 sm:space-y-6">
+      <PageHeading
+        eyebrow="Insights"
+        title="Analytics"
+        description="Your deposits, Index position and referral commission — drawn from your account history."
+      />
+
+      {/* Headline figures */}
+      <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Rise>
+          <StatCard
+            label="Total Deposits"
+            value={totals.deposits}
+            icon={IconWallet}
+            accent="navy"
+            hint="Completed deposits"
+          />
+        </Rise>
+        <Rise>
+          <StatCard
+            label="Total Withdrawals"
+            value={totals.withdrawals}
+            icon={IconReceipt2}
+            accent="muted"
+            hint="Completed withdrawals"
+          />
+        </Rise>
+        <Rise>
+          <StatCard
+            label="Index Value"
+            value={totals.indexValue}
+            icon={IconChartLine}
+            accent="gold"
+            hint={
+              activeInvestments.length === 0
+                ? "No active investment"
+                : `${activeInvestments.length} active plan${activeInvestments.length > 1 ? "s" : ""}`
+            }
+          />
+        </Rise>
+        <Rise>
+          <StatCard
+            label="Referral Earnings"
+            value={totals.referral}
+            icon={IconCoins}
+            accent="success"
+            hint="Commission earned to date"
+          />
+        </Rise>
+      </Stagger>
+
+      {/* Balance history */}
+      <SectionCard
+        title="Wallet Balance History"
+        description="Running balance after each completed transaction"
+        icon={IconTrendingUp}
+        padded={false}
+      >
+        <div className="px-1 pb-4 pt-5 sm:px-3 sm:pb-6">
+          {!mounted ? null : balanceSeries.length === 0 ? (
+            <div className="px-3 sm:px-3">
+              <EmptyState
+                icon={IconTrendingUp}
+                title="No balance history yet"
+                description="Once you make your first deposit, your balance over time will be charted here."
+              />
+            </div>
+          ) : (
+            <div className="h-64 sm:h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={balanceSeries} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="analyticsBalance" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={theme.fillFrom} />
+                      <stop offset="100%" stopColor={theme.fillTo} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke={theme.grid} vertical={false} strokeDasharray="4 4" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: theme.axis }}
+                    axisLine={false}
+                    tickLine={false}
+                    minTickGap={24}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: theme.axis }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={56}
+                    tickFormatter={(v: number) => formatMoneyCompact(v)}
+                  />
+                  <Tooltip
+                    {...tooltipStyles(theme)}
+                    formatter={(value: unknown) =>
+                      [formatMoney(Number(value)), "Balance"] as [string, string]
+                    }
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke={theme.stroke}
+                    strokeWidth={2.25}
+                    fill="url(#analyticsBalance)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
+        {/* Deposits vs withdrawals */}
+        <SectionCard
+          title="Deposits vs Withdrawals"
+          description="Completed movements, grouped by month"
+          icon={IconWallet}
+          padded={false}
+        >
+          <div className="px-1 pb-4 pt-5 sm:px-3 sm:pb-6">
+            {!mounted ? null : flowSeries.length === 0 ? (
+              <div className="px-3">
+                <EmptyState
+                  icon={IconWallet}
+                  title="Nothing to compare yet"
+                  description="Deposits and withdrawals appear here once they complete."
+                />
+              </div>
+            ) : (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={flowSeries} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+                    <CartesianGrid stroke={theme.grid} vertical={false} strokeDasharray="4 4" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: theme.axis }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: theme.axis }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={56}
+                      tickFormatter={(v: number) => formatMoneyCompact(v)}
+                    />
+                    <Tooltip
+                      {...tooltipStyles(theme)}
+                      cursor={{ fill: theme.grid }}
+                      formatter={(value: unknown, name: unknown) =>
+                        [formatMoney(Number(value)), String(name)] as [string, string]
+                      }
+                    />
+                    <Bar dataKey="deposits" name="Deposits" fill={theme.positive} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="withdrawals" name="Withdrawals" fill={theme.stroke} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </SectionCard>
+
+        {/* Referral commission by level */}
+        <SectionCard
+          title="Commission by Level"
+          description="Referral earnings across your five levels"
+          icon={IconCoins}
+          padded={false}
+        >
+          <div className="px-1 pb-4 pt-5 sm:px-3 sm:pb-6">
+            {!mounted ? null : levelSeries.length === 0 ? (
+              <div className="px-3">
+                <EmptyState
+                  icon={IconCoins}
+                  title="No referral commission yet"
+                  description="Earnings appear here once your referrals start investing."
+                />
+              </div>
+            ) : (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={levelSeries} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+                    <CartesianGrid stroke={theme.grid} vertical={false} strokeDasharray="4 4" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: theme.axis }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: theme.axis }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={56}
+                      tickFormatter={(v: number) => formatMoneyCompact(v)}
+                    />
+                    <Tooltip
+                      {...tooltipStyles(theme)}
+                      cursor={{ fill: theme.grid }}
+                      formatter={(value: unknown) =>
+                        [formatMoney(Number(value)), "Earned"] as [string, string]
+                      }
+                    />
+                    <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
+                      {levelSeries.map((_, i) => (
+                        <Cell key={i} fill={theme.series[i % theme.series.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </SectionCard>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Total Profit</p>
-          <p className="text-2xl font-bold text-foreground">${totalProfit.toLocaleString()}</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-emerald-500">
-            <IconArrowUpRight className="h-3 w-3" />+18.2% this month
+      {/* Active investments breakdown */}
+      <SectionCard
+        title="Active Index Positions"
+        description="Your live allocations and their tiers"
+        icon={IconChartLine}
+        actionHref="/dashboard/index"
+        actionLabel="Manage"
+        padded={false}
+      >
+        {activeInvestments.length === 0 ? (
+          <div className="p-4 sm:p-6">
+            <EmptyState
+              icon={IconChartLine}
+              title="No active Index positions"
+              description="Allocate from your wallet into an Index tier to see it here."
+            />
           </div>
-        </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Total Trades</p>
-          <p className="text-2xl font-bold text-foreground">{totalTrades}</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-blue-500">
-            <IconTrendingUp className="h-3 w-3" />Active this month
-          </div>
-        </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Avg Win Rate</p>
-          <p className="text-2xl font-bold text-foreground">{avgWinRate}%</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-emerald-500">
-            <IconArrowUpRight className="h-3 w-3" />+2.4% vs last month
-          </div>
-        </div>
-      </div>
-
-      {/* Portfolio Chart */}
-      <div className="bg-card rounded-2xl border border-border p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Portfolio Growth</h2>
-            <p className="text-sm text-muted-foreground">Your equity curve over time</p>
-          </div>
-          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-            {timeframes.map((tf) => (
-              <button key={tf} onClick={() => setTimeframe(tf)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${timeframe === tf ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                {tf}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={portfolioData}>
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--brand))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--brand))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", color: "hsl(var(--foreground))" }} formatter={(value) => [`$${Number(value).toLocaleString()}`, "Portfolio"]} />
-              <Area type="monotone" dataKey="value" stroke="hsl(var(--brand))" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Pairs Performance */}
-      <div className="bg-card rounded-2xl border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Performance by Pair</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={pairsPerformance}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="pair" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", color: "hsl(var(--foreground))" }} formatter={(value) => [`$${Number(value).toLocaleString()}`, "Profit"]} />
-              <Bar dataKey="profit" fill="hsl(var(--brand))" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Pairs Table */}
-      <div className="bg-card rounded-2xl border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Detailed Breakdown</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-3 text-xs font-medium text-muted-foreground">Pair</th>
-                <th className="text-right py-3 text-xs font-medium text-muted-foreground">Profit/Loss</th>
-                <th className="text-right py-3 text-xs font-medium text-muted-foreground">Trades</th>
-                <th className="text-right py-3 text-xs font-medium text-muted-foreground">Win Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pairsPerformance.map((p) => (
-                <tr key={p.pair} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                  <td className="py-3 font-medium text-foreground">{p.pair}</td>
-                  <td className={`py-3 text-right font-semibold ${p.profit >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                    {p.profit >= 0 ? "+" : ""}${p.profit.toLocaleString()}
-                  </td>
-                  <td className="py-3 text-right text-muted-foreground">{p.trades}</td>
-                  <td className="py-3 text-right">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${p.winRate >= 60 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-600 dark:text-red-400"}`}>
-                      {p.winRate}%
-                    </span>
-                  </td>
+        ) : (
+          <>
+            {/* Desktop table */}
+            <table className="hidden w-full text-sm md:table">
+              <caption className="sr-only">Your active Index investments</caption>
+              <thead>
+                <tr className="border-y border-border bg-surface-2/60 text-left">
+                  <th scope="col" className="px-6 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tier</th>
+                  <th scope="col" className="px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Activated</th>
+                  <th scope="col" className="px-4 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Matures</th>
+                  <th scope="col" className="px-6 py-3 text-right text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Value</th>
                 </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {activeInvestments.map((inv) => (
+                  <tr key={inv.id} className="transition-colors hover:bg-surface-2/50">
+                    <td className="px-6 py-4 font-semibold text-foreground">{inv.tier.label}</td>
+                    <td className="whitespace-nowrap px-4 py-4 text-xs text-muted-foreground">
+                      {new Date(inv.activatedAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-xs text-muted-foreground">
+                      {inv.maturesAt
+                        ? new Date(inv.maturesAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })
+                        : "—"}
+                    </td>
+                    <td className="text-money px-6 py-4 text-right text-foreground">
+                      {formatMoney(parseAmount(inv.netAmount || inv.amount))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile cards */}
+            <ul className="divide-y divide-border md:hidden">
+              {activeInvestments.map((inv) => (
+                <li key={inv.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 truncate font-semibold text-foreground">{inv.tier.label}</p>
+                    <span className="text-money shrink-0 text-sm text-foreground">
+                      {formatMoney(parseAmount(inv.netAmount || inv.amount))}
+                    </span>
+                  </div>
+                  <dl className="mt-2.5 grid grid-cols-2 gap-2 text-[0.6875rem]">
+                    <div>
+                      <dt className="text-muted-foreground">Activated</dt>
+                      <dd className="mt-0.5 font-medium text-foreground">
+                        {new Date(inv.activatedAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Matures</dt>
+                      <dd className="mt-0.5 font-medium text-foreground">
+                        {inv.maturesAt
+                          ? new Date(inv.maturesAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })
+                          : "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </ul>
+          </>
+        )}
+      </SectionCard>
+
+      {!hasHistory && (
+        <p className={cn("text-center text-xs text-muted-foreground")}>
+          Analytics fill in as your account builds history — nothing here is simulated.
+        </p>
+      )}
     </div>
   );
 }

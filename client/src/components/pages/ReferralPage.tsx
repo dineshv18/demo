@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   IconCopy, IconUsers, IconCheck, IconWallet,
   IconShare, IconLink, IconUserPlus, IconTrophy, IconRefresh,
-  IconLoader2, IconAlertCircle, IconShield,
+  IconAlertCircle, IconShield,
   IconGift, IconCurrencyDollar, IconInfoCircle,
 } from "@tabler/icons-react";
 import {
@@ -20,19 +20,28 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeading } from "@/components/dashboard/SectionCard";
+import { DashboardSkeleton } from "@/components/dashboard/Skeletons";
 
 type Tab = "referrals" | "leadership" | "howItWorks";
 
-// Validated categorical palette (dataviz skill, default order, brand violet leading) —
-// passes CVD + normal-vision floors for a 6-slot legend at scripts/validate_palette.js.
-const LEVEL_COLORS = ["#00A94F", "#eb6834", "#1baf7a", "#eda100", "#00B956", "#0d9488"];
+// Level palette — navy/gold brand anchors plus the semantic tones, so the
+// referral charts read as part of the same product as the rest of the dashboard.
+const LEVEL_COLORS = [
+  "var(--brand)",
+  "var(--navy-500)",
+  "var(--color-success)",
+  "var(--brand-glow)",
+  "var(--color-info)",
+  "var(--navy-400)",
+];
 
 function statusBadge(status: string) {
   const cfg: Record<string, { label: string; color: string; bg: string }> = {
-    REGISTERED: { label: "Registered", color: "text-amber-600", bg: "bg-amber-100" },
-    KYC_DONE: { label: "KYC Done", color: "text-teal-600", bg: "bg-teal-100" },
-    DEPOSITED: { label: "Deposited", color: "text-emerald-600", bg: "bg-emerald-100" },
-    COMMISSION_PAID: { label: "Commission Paid", color: "text-emerald-600", bg: "bg-emerald-100" },
+    REGISTERED: { label: "Registered", color: "text-warning", bg: "bg-warning" },
+    KYC_DONE: { label: "KYC Done", color: "text-info", bg: "bg-info" },
+    DEPOSITED: { label: "Deposited", color: "text-success", bg: "bg-success" },
+    COMMISSION_PAID: { label: "Commission Paid", color: "text-success", bg: "bg-success" },
   };
   const s = cfg[status] || cfg.REGISTERED;
   return (
@@ -85,6 +94,8 @@ export default function ReferralPage() {
   const [hierarchy, setHierarchy] = useState<HierarchyItem[]>([]);
   const [earnings, setEarnings] = useState<ReferralEarningsBreakdown | null>(null);
   const [levelRates, setLevelRates] = useState<number[]>([]);
+  // Real platform minimum, taken from the lowest active Index tier.
+  const [minInvestment, setMinInvestment] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>("howItWorks");
   const [leadershipLevel, setLeadershipLevel] = useState(1);
   const [calcAmount, setCalcAmount] = useState("100");
@@ -92,9 +103,11 @@ export default function ReferralPage() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
-  const commissionRate = dashStats?.commissionRate || 2;
+  // Null until the API reports the real rate — never defaulted to a guess,
+  // since this figure drives the earnings calculator shown to the user.
+  const commissionRate = dashStats?.commissionRate ?? null;
   const calcAmountNum = parseFloat(calcAmount) || 0;
-  const calcEarning = (calcAmountNum * commissionRate) / 100;
+  const calcEarning = commissionRate === null ? 0 : (calcAmountNum * commissionRate) / 100;
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -119,7 +132,15 @@ export default function ReferralPage() {
       if (hierRes.status === "fulfilled") setHierarchy(hierRes.value.hierarchy);
       if (statsRes.status === "fulfilled") setDashStats(statsRes.value.stats);
       if (earnRes.status === "fulfilled") setEarnings(earnRes.value);
-      if (indexRes.status === "fulfilled") setLevelRates(indexRes.value.referralLevels || []);
+      if (indexRes.status === "fulfilled") {
+        setLevelRates(indexRes.value.referralLevels || []);
+        // The platform minimum is whatever the cheapest active tier accepts —
+        // never a number hardcoded into this page.
+        const active = (indexRes.value.tiers || []).filter((t) => t.isActive);
+        if (active.length > 0) {
+          setMinInvestment(Math.min(...active.map((t) => parseFloat(t.minAmount))));
+        }
+      }
 
       const allFailed = [codeRes, refsRes, hierRes, statsRes].every((r) => r.status === "rejected");
       if (allFailed) {
@@ -155,9 +176,7 @@ export default function ReferralPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <IconLoader2 className="h-8 w-8 animate-spin text-brand" />
-      </div>
+      <DashboardSkeleton />
     );
   }
 
@@ -176,30 +195,38 @@ export default function ReferralPage() {
   const monthlyTotals = earnings?.monthlyTotals || [];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">Referral Overview</h1>
-          <p className="text-muted-foreground text-sm mt-1">Invite your friends, grow your network and earn exciting rewards.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-            <span className="text-xs text-muted-foreground hidden sm:inline">Share your referral link</span>
-            <code className="text-xs font-medium text-foreground truncate max-w-[160px] sm:max-w-[220px]">{link}</code>
-            <button onClick={copyLink} className="text-brand hover:text-brand-2 transition-colors shrink-0">
-              <IconCopy className="h-4 w-4" />
-            </button>
-          </div>
-          <Button variant="outline" size="icon" onClick={fetchData} className="shrink-0">
-            <IconRefresh className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+      <PageHeading
+        eyebrow="Invite & earn"
+        title="Referral Overview"
+        description="Invite your friends, grow your network and earn commission across five levels."
+        actions={
+          <>
+            <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <span className="hidden shrink-0 text-xs text-muted-foreground lg:inline">
+                Referral link
+              </span>
+              <code className="max-w-38 truncate text-xs font-medium text-foreground sm:max-w-55">
+                {link}
+              </code>
+              <button
+                onClick={copyLink}
+                aria-label="Copy referral link"
+                className="shrink-0 text-brand transition-colors hover:text-brand-2"
+              >
+                <IconCopy className="size-4" />
+              </button>
+            </div>
+            <Button variant="outline" size="icon" onClick={fetchData} className="shrink-0" aria-label="Refresh">
+              <IconRefresh className="size-4" />
+            </Button>
+          </>
+        }
+      />
 
       {error && (
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <IconAlertCircle className="h-4 w-4 shrink-0" /> {error}
+        <div role="alert" className="flex items-center gap-3 rounded-xl border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger">
+          <IconAlertCircle className="size-4 shrink-0" /> {error}
         </div>
       )}
 
@@ -207,45 +234,45 @@ export default function ReferralPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-brand/10 shrink-0">
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-brand/10 shrink-0">
               <IconUsers className="h-5 w-5 text-brand" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Total Referrals</p>
-              <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
+              <p className="text-money text-xl text-foreground sm:text-2xl">{stats.total}</p>
             </div>
           </div>
         </Card>
         <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-500/10 shrink-0">
-              <IconCurrencyDollar className="h-5 w-5 text-emerald-500" />
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-success-soft shrink-0">
+              <IconCurrencyDollar className="h-5 w-5 text-success" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Total Referral Earnings</p>
-              <p className="text-xl sm:text-2xl font-bold text-foreground">${totalEarned.toFixed(2)}</p>
+              <p className="text-money text-xl text-foreground sm:text-2xl">${totalEarned.toFixed(2)}</p>
             </div>
           </div>
         </Card>
         <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-teal-500/10 shrink-0">
-              <IconShield className="h-5 w-5 text-teal-500" />
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-info-soft shrink-0">
+              <IconShield className="h-5 w-5 text-info" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">KYC Done</p>
-              <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.kycDone}</p>
+              <p className="text-money text-xl text-foreground sm:text-2xl">{stats.kycDone}</p>
             </div>
           </div>
         </Card>
         <Card className="p-5 gap-0">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-full bg-amber-500/10 shrink-0">
-              <IconWallet className="h-5 w-5 text-amber-500" />
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-warning-soft shrink-0">
+              <IconWallet className="h-5 w-5 text-warning" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Deposited</p>
-              <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.deposited}</p>
+              <p className="text-money text-xl text-foreground sm:text-2xl">{stats.deposited}</p>
             </div>
           </div>
         </Card>
@@ -281,7 +308,7 @@ export default function ReferralPage() {
             <span className="text-xs text-muted-foreground">Last 6 Months</span>
           </div>
           {monthlyTotals.some((m) => m.amount > 0) ? (
-            <div className="h-[240px]">
+            <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyTotals} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -300,7 +327,7 @@ export default function ReferralPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-[240px] flex flex-col items-center justify-center text-center">
+            <div className="h-60 flex flex-col items-center justify-center text-center">
               <IconTrophy className="h-8 w-8 text-muted-foreground/40 mb-2" />
               <p className="text-sm text-muted-foreground">No earnings yet — invite friends to start earning</p>
             </div>
@@ -314,7 +341,7 @@ export default function ReferralPage() {
             <IconInfoCircle className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
           {hasEarnings ? (
-            <div className="h-[220px] relative">
+            <div className="h-55 relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -340,7 +367,7 @@ export default function ReferralPage() {
               </div>
             </div>
           ) : (
-            <div className="h-[220px] flex flex-col items-center justify-center text-center">
+            <div className="h-55 flex flex-col items-center justify-center text-center">
               <IconTrophy className="h-8 w-8 text-muted-foreground/40 mb-2" />
               <p className="text-sm text-muted-foreground">No level earnings yet</p>
             </div>
@@ -365,7 +392,8 @@ export default function ReferralPage() {
       {levelRates.length > 0 && (
         <Card className="p-5 gap-0 overflow-hidden">
           <h3 className="text-base font-bold text-foreground mb-4">Referral Level Commission</h3>
-          <div className="overflow-x-auto">
+          {/* Table on tablet and up; stacked rows on phones so nothing scrolls sideways */}
+          <div className="hidden sm:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -393,6 +421,28 @@ export default function ReferralPage() {
               </TableBody>
             </Table>
           </div>
+
+          <ul className="divide-y divide-border sm:hidden">
+            {levelRates.map((rate, i) => (
+              <li key={i} className="flex items-center gap-3 py-3">
+                <span
+                  className="grid size-9 shrink-0 place-items-center rounded-lg text-xs font-bold"
+                  style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
+                >
+                  L{i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">Level {i + 1}</p>
+                  <p className="text-[0.6875rem] text-muted-foreground">
+                    {rate.toFixed(2)}% commission
+                  </p>
+                </div>
+                <span className="text-money shrink-0 text-sm text-foreground">
+                  ${(byLevel[i] || 0).toFixed(2)}
+                </span>
+              </li>
+            ))}
+          </ul>
           <p className="text-[11px] text-muted-foreground mt-3">
             Applies to the maintenance fee taken when a referral invests in the Index. Levels 2–5 pay the ancestor referrers in your chain.
           </p>
@@ -400,14 +450,14 @@ export default function ReferralPage() {
       )}
 
       {/* Tabs */}
-      <div className="inline-flex rounded-xl border border-border p-1 bg-card">
-        <button onClick={() => setTab("howItWorks")} className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${tab === "howItWorks" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
+      <div role="tablist" aria-label="Referral sections" className="no-x-overflow flex max-w-full gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1">
+        <button onClick={() => setTab("howItWorks")} className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm ${tab === "howItWorks" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
           <IconGift className="h-4 w-4 inline mr-1" />How It Works
         </button>
-        <button onClick={() => setTab("referrals")} className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${tab === "referrals" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
+        <button onClick={() => setTab("referrals")} className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm ${tab === "referrals" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
           <IconUsers className="h-4 w-4 inline mr-1" />Recent Referrals ({stats.total})
         </button>
-        <button onClick={() => setTab("leadership")} className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${tab === "leadership" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
+        <button onClick={() => setTab("leadership")} className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm ${tab === "leadership" ? "bg-brand/10 text-brand" : "text-muted-foreground hover:bg-accent"}`}>
           <IconTrophy className="h-4 w-4 inline mr-1" />Leadership
         </button>
       </div>
@@ -420,7 +470,7 @@ export default function ReferralPage() {
             <div className="space-y-6">
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-brand/10 text-brand font-bold text-sm shrink-0">1</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-brand/10 text-brand font-bold text-sm shrink-0">1</div>
                   <div className="w-px flex-1 bg-border mt-2" />
                 </div>
                 <div className="pb-6">
@@ -435,7 +485,7 @@ export default function ReferralPage() {
 
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-500/10 text-teal-500 font-bold text-sm shrink-0">2</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-info-soft text-info font-bold text-sm shrink-0">2</div>
                   <div className="w-px flex-1 bg-border mt-2" />
                 </div>
                 <div className="pb-6">
@@ -446,7 +496,7 @@ export default function ReferralPage() {
 
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-emerald-500/10 text-emerald-500 font-bold text-sm shrink-0">3</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-success-soft text-success font-bold text-sm shrink-0">3</div>
                   <div className="w-px flex-1 bg-border mt-2" />
                 </div>
                 <div className="pb-6">
@@ -457,7 +507,7 @@ export default function ReferralPage() {
 
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-500/10 text-amber-500 font-bold text-sm shrink-0">4</div>
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-warning-soft text-warning font-bold text-sm shrink-0">4</div>
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Get Paid Instantly!</p>
@@ -470,7 +520,11 @@ export default function ReferralPage() {
           <Card className="p-6 gap-0">
             <h3 className="text-lg font-bold text-foreground mb-4">Earnings Calculator</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Enter an investment amount to see your Level 1 commission at {commissionRate}%. Minimum investment is $100.
+              Enter an investment amount to see your Level 1 commission
+              {commissionRate !== null && <> at {commissionRate}%</>}.
+              {minInvestment !== null && (
+                <> Minimum investment is ${minInvestment.toFixed(2)}.</>
+              )}
             </p>
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1">
@@ -479,7 +533,7 @@ export default function ReferralPage() {
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">$</span>
                   <input
                     type="number"
-                    min={100}
+                    min={minInvestment ?? 0}
                     step={1}
                     value={calcAmount}
                     onChange={(e) => setCalcAmount(e.target.value)}
@@ -488,18 +542,20 @@ export default function ReferralPage() {
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 px-5 py-3.5 sm:min-w-[200px]">
-                <IconCurrencyDollar className="h-5 w-5 text-emerald-500 shrink-0" />
+              <div className="flex items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 px-5 py-3.5 sm:min-w-50">
+                <IconCurrencyDollar className="h-5 w-5 text-success shrink-0" />
                 <div>
                   <p className="text-[11px] text-muted-foreground">You earn</p>
-                  <p className="text-lg font-bold text-emerald-500">
+                  <p className="text-lg font-bold text-success">
                     ${calcEarning.toFixed(2)}
                   </p>
                 </div>
               </div>
             </div>
-            {calcAmountNum > 0 && calcAmountNum < 100 && (
-              <p className="mt-3 text-xs text-amber-600">Minimum investment is $100 — this amount is below the platform minimum.</p>
+            {minInvestment !== null && calcAmountNum > 0 && calcAmountNum < minInvestment && (
+              <p className="mt-3 text-xs text-warning">
+                Minimum investment is ${minInvestment.toFixed(2)} — this amount is below the platform minimum.
+              </p>
             )}
           </Card>
 
@@ -527,7 +583,7 @@ export default function ReferralPage() {
         <Card className="p-0 gap-0 overflow-hidden">
           {referrals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
+              <div className="grid h-16 w-16 place-items-center rounded-lg bg-muted mb-4">
                 <IconUserPlus className="h-8 w-8 text-muted-foreground/40" />
               </div>
               <p className="text-sm font-medium text-foreground">No referrals yet</p>
@@ -619,7 +675,7 @@ export default function ReferralPage() {
             <Card className="p-0 gap-0 overflow-hidden">
               {levelItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="grid h-16 w-16 place-items-center rounded-full bg-muted mb-4">
+                  <div className="grid h-16 w-16 place-items-center rounded-lg bg-muted mb-4">
                     <IconTrophy className="h-8 w-8 text-muted-foreground/40" />
                   </div>
                   <p className="text-sm font-medium text-foreground">No referrals at Level {leadershipLevel} yet</p>

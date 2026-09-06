@@ -8,13 +8,16 @@ import {
   IconMail, IconPhone, IconShieldCheck, IconShield,
   IconWallet, IconClock, IconLoader2, IconCheck, IconX,
   IconLock, IconAlertTriangle, IconTrash, IconArrowLeft,
-  IconEye, IconEyeOff,
+  IconEye, IconEyeOff, IconPalette,
 } from "@tabler/icons-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeading } from "@/components/dashboard/SectionCard";
+import { PanelSkeleton } from "@/components/dashboard/Skeletons";
+import { ThemeSegmented } from "@/components/theme/ThemeToggle";
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -95,9 +98,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <IconLoader2 className="h-8 w-8 animate-spin text-brand" />
-      </div>
+      <div className="mx-auto max-w-2xl space-y-5"><PanelSkeleton lines={3} /><PanelSkeleton lines={4} /><PanelSkeleton lines={3} /></div>
     );
   }
 
@@ -108,10 +109,10 @@ export default function ProfilePage() {
     : "—";
 
   const kycConfig: Record<string, { label: string; color: string; bg: string; icon: typeof IconCheck }> = {
-    APPROVED: { label: "Verified", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: IconCheck },
-    PENDING: { label: "Under Review", color: "text-amber-500", bg: "bg-amber-500/10", icon: IconClock },
-    REJECTED: { label: "Rejected", color: "text-red-500", bg: "bg-red-500/10", icon: IconX },
-    NOT_STARTED: { label: "Not Started", color: "text-gray-500", bg: "bg-gray-500/10", icon: IconShield },
+    APPROVED: { label: "Verified", color: "text-success", bg: "bg-success-soft", icon: IconCheck },
+    PENDING: { label: "Under Review", color: "text-warning", bg: "bg-warning-soft", icon: IconClock },
+    REJECTED: { label: "Rejected", color: "text-danger", bg: "bg-danger-soft", icon: IconX },
+    NOT_STARTED: { label: "Not Started", color: "text-muted-foreground", bg: "bg-muted", icon: IconShield },
   };
   const kycCfg = kycConfig[kycStatus] || kycConfig.NOT_STARTED;
   const KycIcon = kycCfg.icon;
@@ -123,17 +124,33 @@ export default function ProfilePage() {
         <IconArrowLeft className="h-3.5 w-3.5" /> Back to Dashboard
       </Link>
 
-      {/* Page Header */}
-      <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">My Profile</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage your account settings</p>
-      </div>
+      <PageHeading
+        eyebrow="Settings"
+        title="My Profile"
+        description="Manage your account details, security and appearance."
+      />
+
+      {/* Appearance */}
+      <Card className="gap-4 p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <IconPalette className="h-5 w-5 shrink-0 text-muted-foreground" />
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">Appearance</h3>
+              <p className="text-xs text-muted-foreground">
+                Choose how ORVANTA looks on this device. Your choice is remembered.
+              </p>
+            </div>
+          </div>
+          <ThemeSegmented />
+        </div>
+      </Card>
 
       {/* Profile Card */}
       <Card className="p-4 sm:p-6 gap-5">
         {/* Avatar + Name */}
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-white text-lg sm:text-xl font-bold shrink-0 shadow-sm ring-1 ring-black/5">
+          <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-navy-800 ring-1 ring-brand/30 flex items-center justify-center text-lg font-bold text-brand shrink-0 shadow-sm sm:text-xl">
             {user?.name?.charAt(0)?.toUpperCase() || "?"}
           </div>
           <div className="min-w-0">
@@ -145,8 +162,8 @@ export default function ProfilePage() {
         {/* Info Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-            <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
-              <IconMail className="h-4 w-4 text-teal-500" />
+            <div className="h-9 w-9 rounded-lg bg-info-soft flex items-center justify-center shrink-0">
+              <IconMail className="h-4 w-4 text-info" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Email</p>
@@ -155,8 +172,8 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-            <div className="h-9 w-9 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-              <IconPhone className="h-4 w-4 text-green-500" />
+            <div className="h-9 w-9 rounded-lg bg-success-soft flex items-center justify-center shrink-0">
+              <IconPhone className="h-4 w-4 text-success" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Phone</p>
@@ -177,8 +194,8 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-            <div className="h-9 w-9 rounded-lg bg-gray-500/10 flex items-center justify-center shrink-0">
-              <IconClock className="h-4 w-4 text-gray-500" />
+            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <IconClock className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Joined</p>
@@ -226,7 +243,7 @@ export default function ProfilePage() {
         {showChangePassword && (
           <div className="space-y-3 pt-2 border-t border-border">
             {passwordMsg && (
-              <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs ${passwordMsg.type === "success" ? "bg-emerald-500/10 text-emerald-500" : "bg-destructive/10 text-destructive"}`}>
+              <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs ${passwordMsg.type === "success" ? "bg-success-soft text-success" : "bg-danger-soft text-danger"}`}>
                 {passwordMsg.type === "success" ? <IconCheck className="h-3.5 w-3.5 shrink-0" /> : <IconAlertTriangle className="h-3.5 w-3.5 shrink-0" />}
                 {passwordMsg.text}
               </div>
@@ -294,12 +311,12 @@ export default function ProfilePage() {
       </Card>
 
       {/* Deactivate Account */}
-      <Card className="border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/5 p-4 sm:p-6 gap-4">
+      <Card className="gap-4 border-danger/25 bg-danger-soft/40 p-4 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <IconTrash className="h-5 w-5 text-red-500 shrink-0" />
+            <IconTrash className="h-5 w-5 text-danger shrink-0" />
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">Delete My Account</h3>
+              <h3 className="text-sm font-semibold text-danger">Delete My Account</h3>
               <p className="text-xs text-muted-foreground">Deactivate your account</p>
             </div>
           </div>
@@ -307,17 +324,17 @@ export default function ProfilePage() {
             variant="outline"
             size="sm"
             onClick={() => setShowDeactivate(true)}
-            className="border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 shrink-0"
+            className="shrink-0 border-danger/30 text-danger hover:bg-danger-soft"
           >
             Deactivate
           </Button>
         </div>
 
         {showDeactivate && (
-          <div className="space-y-3 pt-3 border-t border-red-200 dark:border-red-900/50">
-            <div className="flex items-start gap-2 rounded-lg bg-red-500/10 px-3 py-2.5">
-              <IconAlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-red-600 dark:text-red-400 leading-relaxed">
+          <div className="space-y-3 border-t border-danger/20 pt-3">
+            <div className="flex items-start gap-2 rounded-lg bg-danger-soft px-3 py-2.5">
+              <IconAlertTriangle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
+              <p className="text-xs text-danger leading-relaxed">
                 This will deactivate your account. You will be logged out and won&apos;t be able to access your account until it&apos;s reactivated by support.
               </p>
             </div>
@@ -325,7 +342,7 @@ export default function ProfilePage() {
               <Button
                 onClick={handleDeactivate}
                 disabled={deactivateLoading}
-                className="flex-1 gap-2 bg-red-600 hover:bg-red-700 text-white"
+                className="flex-1 gap-2 bg-destructive text-white hover:brightness-110"
               >
                 {deactivateLoading ? (
                   <>

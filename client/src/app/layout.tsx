@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Manrope, Sora } from "next/font/google";
 import { RoleThemeProvider } from "@/components/site/ThemeProvider";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
@@ -7,14 +7,26 @@ import "./globals.css";
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
+  display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const sora = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "ORVANTA Financial — Institutional-Grade Index Investing",
+  title: "ORVANTA Financial — Growing Wealth. Building Futures.",
   description:
     "Institutional-grade Index investing. Transparent tiers, KYC-verified security, and real-time performance tracking.",
 };
+
+// Applies the persisted theme class before first paint so the navy/gold
+// palette never flashes the wrong way round on load.
+const themeBootstrap = `(function(){try{var s=localStorage.getItem("theme");var d=s==="dark"||(s==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark";}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -24,14 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;r.style.setProperty("--brand","#00A94F");r.style.setProperty("--brand-2","#00B956");r.style.setProperty("--brand-glow","#00B956");r.style.setProperty("--ring","#00A94F")}catch(e){}})();`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body
-        className={`${manrope.variable} font-sans antialiased`}
+        className={`${manrope.variable} ${sora.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <AuthProvider>
