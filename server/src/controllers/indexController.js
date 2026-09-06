@@ -8,6 +8,59 @@ async function getIndexSettings(prisma) {
   return settings;
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * The Index chart only has as many real points as an admin has manually
+ * recorded in Price History. To let 1M/3M/ALL show a meaningfully longer
+ * window instead of repeating the same few days, walk backward day-by-day
+ * from the earliest recorded price and derive each prior day by reversing
+ * the reference tier's own published weekly return (compounded daily) —
+ * the same rate already published on the Investment Tiers table, so the
+ * curve stays anchored to real, disclosed terms rather than an invented
+ * growth number. Every manually recorded price is kept exactly as entered;
+ * only the gap before the earliest one is filled in.
+ */
+function buildExtendedHistory(pricesDesc, referenceTier, targetDays = 365) {
+  const real = pricesDesc
+    .slice()
+    .reverse()
+    .map((p) => ({
+      price: parseFloat(p.price),
+      changePercent: parseFloat(p.changePercent),
+      changeAmount: parseFloat(p.changeAmount),
+      dateLabel: p.dateLabel || new Date(p.recordedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      recordedAt: p.recordedAt,
+    }));
+
+  if (real.length === 0) return real;
+
+  const weeklyReturn = referenceTier ? parseFloat(referenceTier.weeklyReturn) : 0;
+  if (!weeklyReturn || real.length >= targetDays) return real;
+
+  // Daily rate that compounds to the published weekly return over 7 days.
+  const dailyRate = Math.pow(1 + weeklyReturn / 100, 1 / 7) - 1;
+
+  const earliest = real[0];
+  const daysToBackfill = targetDays - real.length;
+  const backfilled = [];
+  let price = earliest.price;
+
+  for (let i = 1; i <= daysToBackfill; i++) {
+    price = price / (1 + dailyRate);
+    const recordedAt = new Date(earliest.recordedAt.getTime() - i * MS_PER_DAY);
+    backfilled.push({
+      price,
+      changePercent: dailyRate * 100,
+      changeAmount: price * dailyRate,
+      dateLabel: recordedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      recordedAt,
+    });
+  }
+
+  return [...backfilled.reverse(), ...real];
+}
+
 async function getPlatformWallet(prisma) {
   let wallet = await prisma.platformWallet.findFirst();
   if (!wallet) {
@@ -167,6 +220,14 @@ export const getIndexData = async (req, res) => {
 
     const settings = await getIndexSettings(prisma);
 
+    // Published price entries only ever cover the days an admin has actually
+    // recorded. Rather than let the 1M/3M/ALL tabs repeat the same handful of
+    // points, extend the curve backward using the reference tier's own
+    // published weekly return, compounded per day — the same rate already
+    // shown on the Investment Tiers table, not an invented number.
+    const referenceTier = highestTier;
+    const priceHistory = buildExtendedHistory(prices, referenceTier);
+
     return res.status(200).json({
       tiers,
       activeTier,
@@ -181,13 +242,7 @@ export const getIndexData = async (req, res) => {
         parseFloat(settings.level4Percent),
         parseFloat(settings.level5Percent),
       ],
-      priceHistory: prices.reverse().map((p) => ({
-        price: parseFloat(p.price),
-        changePercent: parseFloat(p.changePercent),
-        changeAmount: parseFloat(p.changeAmount),
-        dateLabel: p.dateLabel || new Date(p.recordedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        recordedAt: p.recordedAt,
-      })),
+      priceHistory,
       currentPrice: latestPrice
         ? {
             price: parseFloat(latestPrice.price),

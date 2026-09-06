@@ -645,7 +645,7 @@ export default function IndexPage() {
             </div>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Actual published Index price history — not a projection.
+            Published Index price history, extended using the published tier return where daily prices aren&apos;t yet recorded.
             {windowChange !== null && (
               <>
                 {" "}
