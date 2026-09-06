@@ -8,6 +8,7 @@ import {
   IconArrowRight,
   IconChartLine,
   IconFileText,
+  IconLayoutDashboard,
   IconMenu2,
   IconShieldCheck,
   IconX,
@@ -18,6 +19,7 @@ import { BrandMark } from "@/components/shared/BrandMark";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { EASE_OUT } from "@/components/shared/motion";
 import { SheenButton } from "@/components/marketing/SheenButton";
+import { useAuth } from "@/lib/AuthContext";
 
 /** Public routes — unchanged. Plain links, no dropdowns. */
 const links = [
@@ -39,6 +41,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const reduce = useReducedMotion();
+  const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -157,16 +160,25 @@ export function Navbar() {
           <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
             <ThemeToggle className="size-10" />
 
-            <Link
-              href="/login"
-              className="hidden h-10 items-center rounded-xl border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:border-brand/45 hover:bg-accent sm:inline-flex"
-            >
-              Login
-            </Link>
-            <SheenButton href="/register" size="sm" className="hidden sm:inline-flex">
-              Get Started
-              <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </SheenButton>
+            {user ? (
+              <SheenButton href="/dashboard" size="sm" className="hidden sm:inline-flex">
+                <IconLayoutDashboard className="size-4" stroke={1.75} />
+                Dashboard
+              </SheenButton>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden h-10 items-center rounded-xl border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:border-brand/45 hover:bg-accent sm:inline-flex"
+                >
+                  Login
+                </Link>
+                <SheenButton href="/register" size="sm" className="hidden sm:inline-flex">
+                  Get Started
+                  <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </SheenButton>
+              </>
+            )}
 
             <button
               type="button"
@@ -233,16 +245,25 @@ export function Navbar() {
                 })}
               </ul>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
-                <Link
-                  href="/login"
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-border text-sm font-semibold text-foreground"
-                >
-                  Login
-                </Link>
-                <SheenButton href="/register" size="md" className="w-full">
-                  Get Started
-                </SheenButton>
+              <div className="mt-3 border-t border-border pt-3">
+                {user ? (
+                  <SheenButton href="/dashboard" size="md" className="w-full">
+                    <IconLayoutDashboard className="size-4" stroke={1.75} />
+                    Dashboard
+                  </SheenButton>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/login"
+                      className="inline-flex h-12 items-center justify-center rounded-xl border border-border text-sm font-semibold text-foreground"
+                    >
+                      Login
+                    </Link>
+                    <SheenButton href="/register" size="md" className="w-full">
+                      Get Started
+                    </SheenButton>
+                  </div>
+                )}
               </div>
 
               <ul className="mt-3 flex flex-col gap-2 border-t border-border pt-3">

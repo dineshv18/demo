@@ -6,6 +6,7 @@ import { IconArrowRight, IconCheck, IconShieldCheck, IconX } from "@tabler/icons
 import { Reveal, Section } from "@/components/site/primitives";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
 
 /* ------------------------------------------------------------------ *
  * "What You Get" — a side-by-side stance rather than a feature matrix.
@@ -35,6 +36,7 @@ const frictions = [
 ];
 
 export function WhatYouGet({ id }: { id?: string }) {
+  const { user } = useAuth();
   return (
     <Section id={id}>
       {/* Heading */}
@@ -104,8 +106,8 @@ export function WhatYouGet({ id }: { id?: string }) {
             </ul>
 
             <footer className="relative p-4 pt-0 sm:p-5 sm:pt-0">
-              <SheenButton href="/register" size="md" className="w-full">
-                Open an account
+              <SheenButton href={user ? "/dashboard" : "/register"} size="md" className="w-full">
+                {user ? "Go to dashboard" : "Open an account"}
                 <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </SheenButton>
             </footer>

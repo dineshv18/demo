@@ -17,6 +17,7 @@ import { Reveal, Section } from "../site/primitives";
 import { FeatureGrid, StatementSection } from "@/components/marketing/sections";
 import { CTASection } from "@/components/marketing/CTASection";
 import { SheenButton } from "@/components/marketing/SheenButton";
+import { useAuth } from "@/lib/AuthContext";
 
 type TablerIcon = React.ComponentType<IconProps>;
 
@@ -69,6 +70,7 @@ const facts: { value: string; label: string }[] = [
 ];
 
 export default function AboutPage() {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen">
       {/* HERO — asymmetric split, organic-cut visual on the right */}
@@ -98,8 +100,8 @@ export default function AboutPage() {
             </Reveal>
             <Reveal delay={0.15}>
               <div className="mt-8 flex flex-wrap items-center gap-4">
-                <SheenButton href="/register" size="md">
-                  Open an account
+                <SheenButton href={user ? "/dashboard" : "/register"} size="md">
+                  {user ? "Go to dashboard" : "Open an account"}
                   <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                 </SheenButton>
                 <Link

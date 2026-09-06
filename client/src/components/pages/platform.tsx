@@ -26,6 +26,7 @@ import { CTASection } from "@/components/marketing/CTASection";
 import { FeatureGrid as SharedFeatureGrid, StatementSection } from "@/components/marketing/sections";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
 
 type TablerIcon = React.ComponentType<IconProps>;
 
@@ -137,6 +138,7 @@ function FeatureCard({
 }
 
 export default function PlatformPage() {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen">
       {/* ─── HERO ─── */}
@@ -167,8 +169,8 @@ export default function PlatformPage() {
 
           <Reveal delay={0.15}>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <SheenButton href="/register" size="md">
-                Get Started <IconArrowRight className="size-4" />
+              <SheenButton href={user ? "/dashboard" : "/register"} size="md">
+                {user ? "Go to Dashboard" : "Get Started"} <IconArrowRight className="size-4" />
               </SheenButton>
               <a
                 href="#access"
@@ -308,10 +310,10 @@ export default function PlatformPage() {
                 deep. Every payout is tracked and visible in your referral history.
               </p>
               <Link
-                href="/register"
+                href={user ? "/dashboard/referral" : "/register"}
                 className="group inline-flex items-center gap-2 text-sm font-semibold text-brand"
               >
-                Start referring
+                {user ? "View your referral link" : "Start referring"}
                 <IconArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -385,10 +387,10 @@ export default function PlatformPage() {
                   <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{d.sub}</p>
                 </div>
                 <Link
-                  href="/login"
+                  href={user ? "/dashboard" : "/login"}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-semibold text-foreground transition-colors hover:border-brand/45 hover:bg-accent hover:text-brand"
                 >
-                  {d.cta} <IconArrowRight className="size-3.5" />
+                  {user ? "Open Dashboard" : d.cta} <IconArrowRight className="size-3.5" />
                 </Link>
               </div>
             </Reveal>
@@ -402,7 +404,6 @@ export default function PlatformPage() {
           <CTASection
             title="Ready to start investing?"
             description="Create an account in minutes. Fund your wallet when you're ready. Invest with discipline."
-            primary={{ href: "/register", label: "Get Started" }}
             secondary={{ href: "/contact", label: "Talk to our team" }}
           />
         </Reveal>

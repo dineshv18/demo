@@ -21,6 +21,7 @@ import { Reveal, Section } from "../site/primitives";
 import { CtaBanner } from "../site/CtaBanner";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
 
 type TablerIcon = React.ComponentType<IconProps>;
 
@@ -127,6 +128,8 @@ function ChannelCard({ channel }: { channel: (typeof channels)[number] }) {
 }
 
 export default function ContactPage() {
+  const { user } = useAuth();
+  const supportHref = user ? "/dashboard/support" : "/login";
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -190,7 +193,7 @@ export default function ContactPage() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <SheenButton href="/login" size="md">
+              <SheenButton href={supportHref} size="md">
                 Open a support ticket <IconArrowRight className="size-4" />
               </SheenButton>
               <button
@@ -380,7 +383,7 @@ export default function ContactPage() {
                     Support tickets raised from your dashboard are tracked, attach
                     screenshots, and reach the team that can actually see your account.
                   </p>
-                  <SheenButton href="/login" size="sm" className="mt-6">
+                  <SheenButton href={supportHref} size="sm" className="mt-6">
                     Go to Support <IconArrowRight className="size-4" />
                   </SheenButton>
                 </div>

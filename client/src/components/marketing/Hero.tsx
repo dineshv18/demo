@@ -19,6 +19,7 @@ import {
 import { EASE_OUT } from "@/components/shared/motion";
 import { HeroPreview } from "@/components/marketing/HeroPreview";
 import { SheenButton } from "@/components/marketing/SheenButton";
+import { useAuth } from "@/lib/AuthContext";
 
 const proofPoints = [
   { icon: IconShieldCheck, label: "100% KYC-verified" },
@@ -37,6 +38,7 @@ const proofPoints = [
 export function Hero() {
   const reduce = useReducedMotion();
   const frameRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const { scrollYProgress } = useScroll({
     target: frameRef,
@@ -97,16 +99,25 @@ export function Hero() {
           {...rise(0.21)}
           className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"
         >
-          <SheenButton href="/register" size="lg">
-            Get Started
-            <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </SheenButton>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-8 py-4 text-[0.9375rem] font-semibold text-foreground shadow-card transition-colors hover:border-brand/45 hover:bg-accent"
-          >
-            Login
-          </Link>
+          {user ? (
+            <SheenButton href="/dashboard" size="lg">
+              Go to Dashboard
+              <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </SheenButton>
+          ) : (
+            <>
+              <SheenButton href="/register" size="lg">
+                Get Started
+                <IconArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </SheenButton>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-8 py-4 text-[0.9375rem] font-semibold text-foreground shadow-card transition-colors hover:border-brand/45 hover:bg-accent"
+              >
+                Login
+              </Link>
+            </>
+          )}
         </motion.div>
 
         {/* Proof points */}

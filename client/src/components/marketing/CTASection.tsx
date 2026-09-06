@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconArrowRight, IconSparkles } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
 
 /**
  * Closing call to action. Navy ground, gold accent, abstract tick pattern —
@@ -12,7 +13,7 @@ export function CTASection({
   eyebrow = "Verification takes minutes",
   title,
   description,
-  primary = { href: "/register", label: "Get Started" },
+  primary,
   secondary = { href: "/platform", label: "Learn More" },
   className,
 }: {
@@ -23,6 +24,13 @@ export function CTASection({
   secondary?: { href: string; label: string } | null;
   className?: string;
 }) {
+  const { user } = useAuth();
+  const resolvedPrimary =
+    primary ??
+    (user
+      ? { href: "/dashboard", label: "Go to Dashboard" }
+      : { href: "/register", label: "Get Started" });
+
   return (
     <div
       className={cn(
@@ -56,10 +64,10 @@ export function CTASection({
 
         <div className="flex shrink-0 flex-wrap gap-3">
           <Link
-            href={primary.href}
+            href={resolvedPrimary.href}
             className="btn-glow btn-glow-hover inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold"
           >
-            {primary.label} <IconArrowRight className="size-4" />
+            {resolvedPrimary.label} <IconArrowRight className="size-4" />
           </Link>
           {secondary && (
             <Link
