@@ -3,7 +3,10 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { IconLayoutSidebarLeftCollapse } from "@tabler/icons-react"
+import {
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftExpand,
+} from "@tabler/icons-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -273,7 +276,13 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, isMobile, state, openMobile } = useSidebar()
+  // On desktop the icon should reflect what the click will do next: an
+  // already-collapsed rail shows an "expand" glyph, an expanded one shows
+  // "collapse". The mobile drawer only has one direction (open), so it
+  // always shows the same affordance there.
+  const isCollapsed = isMobile ? !openMobile : state === "collapsed"
+  const Icon = isCollapsed ? IconLayoutSidebarLeftExpand : IconLayoutSidebarLeftCollapse
 
   return (
     <Button
@@ -288,7 +297,7 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <IconLayoutSidebarLeftCollapse className="h-5 w-5" />
+      <Icon className="h-5 w-5" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
