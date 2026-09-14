@@ -77,85 +77,110 @@ function LineTooltip({ active, payload, label }: { active?: boolean; payload?: A
 /**
  * The 5-level referral structure only pays out as many levels as a user has
  * personally unlocked through their own Index investment (real, admin-set
- * thresholds — never hardcoded here). This renders that ladder: which levels
- * are already earning, which are still locked, and what it takes to open
- * the next one.
+ * thresholds — never hardcoded here). This is built to be readable at a
+ * glance: one big "where you stand" banner, then all 5 levels laid out as a
+ * simple checklist so it's obvious which ones already pay and which don't
+ * yet, and exactly what closes that gap.
  */
 function LevelUnlockCard({ unlock }: { unlock: ReferralLevelUnlock }) {
   const { totalInvested, unlockedLevel, nextTierMinInvestment, tiers } = unlock;
-  const rungs: { levels: string; min: number; unlockedAt: number }[] = [
-    { levels: "Level 1", min: tiers.level1MinInvestment, unlockedAt: 1 },
-    { levels: "Levels 1–3", min: tiers.level123MinInvestment, unlockedAt: 3 },
-    { levels: "Levels 1–5", min: tiers.level12345MinInvestment, unlockedAt: 5 },
+
+  // Every individual level, with the minimum investment that opens it.
+  const perLevelMin = [
+    tiers.level1MinInvestment,
+    tiers.level123MinInvestment,
+    tiers.level123MinInvestment,
+    tiers.level12345MinInvestment,
+    tiers.level12345MinInvestment,
   ];
+
   const progressPercent =
     nextTierMinInvestment && nextTierMinInvestment > 0
       ? Math.min(100, (totalInvested / nextTierMinInvestment) * 100)
       : 100;
 
+  const remaining = nextTierMinInvestment !== null ? Math.max(0, nextTierMinInvestment - totalInvested) : 0;
+
   return (
-    <Card className="p-5 gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="text-base font-bold text-foreground">Your Referral Level Access</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            How many levels you earn from depends on your own total Index investment —
-            currently <span className="font-semibold text-foreground">${totalInvested.toFixed(2)}</span>.
-          </p>
-        </div>
-        <Badge variant="outline" className="gap-1.5 border-brand/25 bg-brand/10 text-brand font-semibold shrink-0">
-          {unlockedLevel > 0 ? <IconLockOpen size={12} /> : <IconLock size={12} />}
-          {unlockedLevel > 0 ? `${unlockedLevel} of 5 levels unlocked` : "No levels unlocked yet"}
-        </Badge>
+    <Card className="p-5 gap-5">
+      <div>
+        <h3 className="text-base font-bold text-foreground">Which Referral Levels You Can Earn From</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          The more you personally invest in the Index, the more of the 5 referral levels pay you commission.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {rungs.map((rung) => {
-          const isUnlocked = unlockedLevel >= rung.unlockedAt;
+      {/* Big "where you stand today" banner */}
+      <div className="rounded-2xl border border-brand/25 bg-brand/6 p-4 sm:p-5 flex flex-wrap items-center gap-4 justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand text-brand-foreground">
+            {unlockedLevel > 0 ? <IconLockOpen className="size-6" stroke={1.75} /> : <IconLock className="size-6" stroke={1.75} />}
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Your Index investment so far</p>
+            <p className="text-money text-xl sm:text-2xl text-foreground truncate">${totalInvested.toFixed(2)}</p>
+          </div>
+        </div>
+        <div className="text-left sm:text-right">
+          <p className="text-xs text-muted-foreground">You currently earn from</p>
+          <p className="text-lg sm:text-xl font-bold text-brand">
+            {unlockedLevel > 0 ? `Level${unlockedLevel > 1 ? "s" : ""} 1${unlockedLevel > 1 ? `–${unlockedLevel}` : ""}` : "No levels yet"}
+          </p>
+        </div>
+      </div>
+
+      {/* Every level, one row each — unmissable check or lock */}
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+        {perLevelMin.map((min, i) => {
+          const levelNum = i + 1;
+          const isUnlocked = unlockedLevel >= levelNum;
           return (
             <div
-              key={rung.levels}
-              className={`rounded-xl border p-4 ${
-                isUnlocked ? "border-success/25 bg-success-soft" : "border-border bg-muted/30"
+              key={levelNum}
+              className={`rounded-xl border p-3 flex sm:flex-col items-center sm:items-center gap-2 sm:gap-1.5 sm:text-center ${
+                isUnlocked ? "border-success/30 bg-success-soft" : "border-border bg-muted/30"
               }`}
             >
-              <div className="flex items-center gap-2">
-                {isUnlocked ? (
-                  <IconLockOpen className="size-4 text-success shrink-0" />
-                ) : (
-                  <IconLock className="size-4 text-muted-foreground shrink-0" />
-                )}
+              <span
+                className={`grid size-9 sm:size-10 shrink-0 place-items-center rounded-full font-bold text-sm ${
+                  isUnlocked ? "bg-success text-white" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {isUnlocked ? <IconCheck className="size-5" /> : levelNum}
+              </span>
+              <div className="min-w-0">
                 <p className={`text-sm font-semibold ${isUnlocked ? "text-success" : "text-foreground"}`}>
-                  {rung.levels}
+                  Level {levelNum}
+                </p>
+                <p className="text-[0.6875rem] text-muted-foreground leading-tight">
+                  {isUnlocked ? "Unlocked" : `Needs $${min.toFixed(0)}`}
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1.5">
-                {isUnlocked
-                  ? "Unlocked — you earn commission at these levels."
-                  : `Unlocks at $${rung.min.toFixed(2)} invested`}
-              </p>
             </div>
           );
         })}
       </div>
 
-      {nextTierMinInvestment !== null && (
+      {/* How to unlock the next one */}
+      {nextTierMinInvestment !== null ? (
         <div>
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-            <span>Progress to next level tier</span>
+            <span>Invest ${remaining.toFixed(2)} more to unlock the next level{unlockedLevel === 1 || unlockedLevel === 0 ? "s" : ""}</span>
             <span className="font-medium text-foreground">
               ${totalInvested.toFixed(2)} / ${nextTierMinInvestment.toFixed(2)}
             </span>
           </div>
-          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+          <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
             <div
               className="h-full rounded-full bg-brand transition-all"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">
-            Invest ${Math.max(0, nextTierMinInvestment - totalInvested).toFixed(2)} more in the Index to unlock the next tier of levels.
-          </p>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 rounded-xl border border-success/25 bg-success-soft px-4 py-3 text-sm font-medium text-success">
+          <IconCheck className="size-4 shrink-0" />
+          You&apos;ve unlocked all 5 referral levels — the maximum.
         </div>
       )}
     </Card>
@@ -622,10 +647,33 @@ export default function ReferralPage() {
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div className="grid h-10 w-10 place-items-center rounded-lg bg-warning-soft text-warning font-bold text-sm shrink-0">4</div>
+                  <div className="w-px flex-1 bg-border mt-2" />
                 </div>
-                <div>
+                <div className="pb-6">
                   <p className="font-semibold text-foreground">Get Paid Instantly!</p>
                   <p className="text-sm text-muted-foreground mt-1">Your share is automatically credited to your wallet — no waiting, no manual claims.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-brand/10 text-brand font-bold text-sm shrink-0">5</div>
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Invest More, Unlock More Levels</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Levels 2–5 only pay out once <span className="font-medium text-foreground">you</span> have invested enough
+                    in the Index yourself
+                    {dashStats?.levelUnlock && (
+                      <>
+                        {" "}— $
+                        {dashStats.levelUnlock.tiers.level1MinInvestment.toFixed(0)} unlocks Level 1, $
+                        {dashStats.levelUnlock.tiers.level123MinInvestment.toFixed(0)} unlocks Levels 1–3, and $
+                        {dashStats.levelUnlock.tiers.level12345MinInvestment.toFixed(0)} unlocks all 5
+                      </>
+                    )}
+                    . See exactly where you stand in the card above.
+                  </p>
                 </div>
               </div>
             </div>
