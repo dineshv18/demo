@@ -142,7 +142,7 @@ export default function PlatformPage() {
   return (
     <div className="min-h-screen">
       {/* ─── HERO ─── */}
-      <Section className="!pb-0 !pt-6 lg:!pt-10">
+      <Section className="pb-0! pt-6! lg:pt-10!">
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
@@ -399,7 +399,7 @@ export default function PlatformPage() {
       </Section>
 
       {/* ─── CTA ─── */}
-      <Section className="!pt-6">
+      <Section className="pt-6!">
         <Reveal>
           <CTASection
             title="Ready to start investing?"

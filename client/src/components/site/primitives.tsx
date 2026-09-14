@@ -24,7 +24,7 @@ export function Section({
   return (
     <section
       id={id}
-      className={cn("relative mx-auto max-w-7xl px-5 py-14 lg:px-8 lg:py-20", className)}
+      className={cn("relative mx-auto max-w-7xl px-5 py-10 sm:py-12 lg:px-8 lg:py-16", className)}
     >
       {children}
     </section>
@@ -55,15 +55,19 @@ export function SectionTitle({
   return (
     <div className={cn("max-w-3xl", align === "center" && "mx-auto text-center")}>
       {eyebrow && (
-        <div className="mb-5">
+        <div className="mb-4">
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       )}
       <h2 className="font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
         {title}
       </h2>
+      <span
+        aria-hidden
+        className={cn("gold-rule mt-4 block w-16", align === "center" && "mx-auto")}
+      />
       {description && (
-        <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
           {description}
         </p>
       )}

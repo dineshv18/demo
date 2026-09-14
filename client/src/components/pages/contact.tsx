@@ -170,7 +170,7 @@ export default function ContactPage() {
   // ─── SENT ───
   if (sent) {
     return (
-      <Section className="!py-20">
+      <Section className="py-14!">
         <Reveal>
           <div className="relative mx-auto max-w-lg overflow-hidden rounded-xl border border-border bg-card p-8 text-center shadow-card sm:p-12">
             <span
@@ -212,7 +212,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen">
       {/* ── HERO ── */}
-      <Section className="!pb-8 !pt-6 lg:!pt-10">
+      <Section className="pb-8! pt-6! lg:pt-10!">
         <Reveal>
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -249,7 +249,7 @@ export default function ContactPage() {
       </Section>
 
       {/* ── CONTACT CHANNELS — seamless table, like a spec sheet ── */}
-      <Section className="!pt-0">
+      <Section className="pt-0!">
         <Reveal>
           <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border shadow-card sm:grid-cols-3">
             {channels.map((c) => (

@@ -74,7 +74,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* HERO — asymmetric split, organic-cut visual on the right */}
-      <Section className="!pb-0 !pt-6 lg:!pt-10">
+      <Section className="pb-0! pt-6! lg:pt-10!">
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-7">
             <Reveal>
@@ -322,7 +322,7 @@ export default function AboutPage() {
       </Section>
 
       {/* CTA */}
-      <Section className="!pt-6">
+      <Section className="pt-6!">
         <Reveal>
           <CTASection
             eyebrow="Open an account"
