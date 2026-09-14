@@ -87,7 +87,7 @@ export default function ClientLogin() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <Card className="gap-0 rounded-xl p-7 shadow-lifted sm:p-8">
+        <Card className="auth-card gap-0 p-7 sm:p-9">
           <div className="mb-7 flex flex-col items-center gap-2 text-center">
             <span className="grid size-11 place-items-center rounded-xl bg-accent text-brand ring-1 ring-brand/15">
               <IconShieldCheck className="size-5" stroke={1.75} />

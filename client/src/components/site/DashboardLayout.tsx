@@ -45,8 +45,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <DashboardSidebar />
         <SidebarInset className="min-w-0">
           <DashboardHeader onStartTour={triggerDashboardTour} />
-          <div className="no-x-overflow flex-1 overflow-y-auto bg-background">
-            <PageTransition className="mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">
+          <div className="no-x-overflow relative flex-1 overflow-y-auto bg-background">
+            <span aria-hidden className="bg-grid pointer-events-none fixed inset-0 left-(--sidebar-width) opacity-25 dark:opacity-15" />
+            <span aria-hidden className="pointer-events-none fixed -right-48 top-20 size-[34rem] rounded-full bg-brand/6 blur-3xl" />
+            <PageTransition className="relative mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">
               {children}
             </PageTransition>
           </div>

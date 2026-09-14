@@ -109,7 +109,7 @@ export default function Home() {
             title={
               <>
                 Your ORVANTA account is{" "}
-                <span className="text-gold-400">one step away</span>.
+                <span className="text-purple-400">one step away</span>.
               </>
             }
             description="Complete verification, fund your wallet, and start investing with full visibility into every tier, balance, and transaction."

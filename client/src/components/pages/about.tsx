@@ -141,7 +141,7 @@ export default function AboutPage() {
                   <div>
                     <p className="font-display text-2xl font-semibold leading-snug text-white">
                       Verification first.
-                      <span className="block text-gold-400">Always.</span>
+                      <span className="block text-purple-400">Always.</span>
                     </p>
                     <p className="mt-4 text-sm leading-relaxed text-white/60">
                       No account moves funds until identity checks clear — the
@@ -156,7 +156,7 @@ export default function AboutPage() {
 
         {/* Fact strip — sits directly under the hero, seamless like Home's */}
         <Reveal delay={0.25}>
-          <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-md border-2 border-brand/25 bg-brand/15 sm:grid-cols-4">
+          <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-brand/20 bg-brand/15 shadow-card sm:grid-cols-4">
             {facts.map((f) => (
               <div key={f.label} className="bg-card p-5 text-center sm:p-6">
                 <dt className="sr-only">{f.label}</dt>
@@ -175,7 +175,7 @@ export default function AboutPage() {
       {/* WHAT WE'RE BUILDING */}
       <Section>
         <Reveal>
-          <div className="grid gap-10 rounded-xl border border-border bg-card p-8 shadow-card lg:grid-cols-12 lg:p-12">
+          <div className="grid gap-10 rounded-2xl border border-brand/10 bg-card/95 p-8 shadow-lifted backdrop-blur-sm lg:grid-cols-12 lg:p-12">
             <div className="lg:col-span-5">
               <span aria-hidden className="gold-rule block w-14" />
               <h2 className="mt-5 font-classic text-3xl font-bold leading-snug tracking-[-0.01em] text-foreground md:text-4xl">
@@ -326,7 +326,7 @@ export default function AboutPage() {
             title={
               <>
                 Ready to invest with{" "}
-                <span className="text-gold-400">full visibility</span>?
+                <span className="text-purple-400">full visibility</span>?
               </>
             }
             description="Complete verification, fund your wallet, and track every tier, balance and transaction from one dashboard."

@@ -32,7 +32,7 @@ export function BrandMark({
         width={size}
         height={size}
         priority={priority}
-        className={cn("h-10 w-auto", className)}
+        className={cn("brand-logo--dark h-10 w-auto", className)}
       />
     );
   }
@@ -45,7 +45,7 @@ export function BrandMark({
         width={size}
         height={size}
         priority={priority}
-        className={cn("h-10 w-auto", className)}
+        className={cn("brand-logo--light h-10 w-auto", className)}
       />
     );
   }
@@ -59,7 +59,7 @@ export function BrandMark({
         width={size}
         height={size}
         priority={priority}
-        className={cn("h-10 w-auto dark:hidden", className)}
+        className={cn("brand-logo--light h-10 w-auto dark:hidden", className)}
       />
       <Image
         src="/dark-Photoroom.png"
@@ -68,7 +68,7 @@ export function BrandMark({
         width={size}
         height={size}
         priority={priority}
-        className={cn("hidden h-10 w-auto dark:block", className)}
+        className={cn("brand-logo--dark hidden h-10 w-auto dark:block", className)}
       />
     </>
   );

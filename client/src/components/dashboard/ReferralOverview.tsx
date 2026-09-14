@@ -54,7 +54,7 @@ export function ReferralOverview({
   const toneClass = {
     gold: "bg-accent text-brand ring-brand/15",
     success: "bg-success-soft text-success ring-success/15",
-    navy: "bg-navy-800 text-gold-400 ring-navy-800/15 dark:bg-white/8 dark:ring-white/10",
+    navy: "bg-secondary text-brand ring-brand/15",
   };
 
   return (
@@ -158,7 +158,7 @@ export function ReferralOverview({
 
 /**
  * Full-width invite banner shown at the foot of the dashboard.
- * Navy ground, gold accent, abstract tick pattern — no gradient wash.
+ * Black ground, purple accent, abstract tick pattern.
  */
 export function ReferralCta({ className }: { className?: string }) {
   return (
@@ -176,7 +176,7 @@ export function ReferralCta({ className }: { className?: string }) {
 
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-gold-400">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-purple-300">
             <IconGift className="size-3.5" stroke={2} />
             Invite &amp; Earn
           </span>
@@ -198,7 +198,7 @@ export function ReferralCta({ className }: { className?: string }) {
           </Link>
           <Link
             href="/dashboard/referral"
-            className="inline-flex h-12 items-center justify-center rounded-xl border border-white/15 px-7 text-sm font-semibold text-white transition-colors hover:border-brand/50 hover:text-gold-400"
+            className="inline-flex h-12 items-center justify-center rounded-xl border border-white/15 px-7 text-sm font-semibold text-white transition-colors hover:border-brand/50 hover:text-purple-300"
           >
             View earnings
           </Link>

@@ -6,7 +6,7 @@
 
 /* ============================================================
    ORVANTA FINANCIAL — DESIGN SYSTEM
-   Deep navy + gold. One product, two themes.
+   Crisp white + purple in light mode, true black + violet in dark mode.
    ============================================================ */
 
 @theme inline {
@@ -48,26 +48,34 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Brand — gold accent */
+  /* Brand — purple accent */
   --color-brand: var(--brand);
   --color-brand-2: var(--brand-2);
   --color-brand-glow: var(--brand-glow);
   --color-brand-foreground: var(--brand-foreground);
 
-  /* Navy scale — fixed, theme-independent brand anchors */
-  --color-navy-900: #050F1C;
-  --color-navy-800: #071426;
-  --color-navy-700: #0B1B32;
-  --color-navy-600: #0D213B;
-  --color-navy-500: #142E4E;
-  --color-navy-400: #1D3E66;
+  /* Deep ink scale — fixed, theme-independent anchors */
+  --color-navy-900: #07050A;
+  --color-navy-800: #0D0912;
+  --color-navy-700: #15101C;
+  --color-navy-600: #201628;
+  --color-navy-500: #31203F;
+  --color-navy-400: #4A2C61;
 
-  /* Gold scale */
-  --color-gold-700: #A8861B;
-  --color-gold-600: #C9A227;
-  --color-gold-500: #D8B44A;
-  --color-gold-400: #E5C766;
-  --color-gold-300: #F0DDA0;
+  /* Purple scale */
+  --color-purple-700: #5B21B6;
+  --color-purple-600: #6D28D9;
+  --color-purple-500: #7C3AED;
+  --color-purple-400: #A78BFA;
+  --color-purple-300: #C4B5FD;
+
+  /* Compatibility aliases for existing component variant names. Every value
+     now resolves to purple; no gold pigment remains in the UI. */
+  --color-gold-700: #4C1D95;
+  --color-gold-600: #6D28D9;
+  --color-gold-500: #7C3AED;
+  --color-gold-400: #A78BFA;
+  --color-gold-300: #C4B5FD;
 
   /* Financial semantics */
   --color-success: var(--success);
@@ -89,7 +97,7 @@
   /* Classic serif, reserved for public marketing headings (Home/About/Platform/Contact). */
   --font-classic: var(--font-baskerville), Georgia, "Times New Roman", serif;
 
-  /* Elevation — restrained, navy-tinted */
+  /* Elevation — restrained, purple-ink tinted */
   --shadow-xs: 0 1px 2px var(--shadow-tint-1);
   --shadow-sm: 0 1px 2px var(--shadow-tint-1), 0 2px 6px -2px var(--shadow-tint-1);
   --shadow-card: 0 1px 2px var(--shadow-tint-1), 0 8px 24px -12px var(--shadow-tint-2);
@@ -97,51 +105,46 @@
   --shadow-overlay: 0 24px 64px -24px var(--shadow-tint-3);
 }
 
-/* ---------------- LIGHT: warm ivory, white cards, navy ink ---------------- */
+/* ---------------- LIGHT: white canvas, quiet lavender surfaces ---------------- */
 :root {
   /* Tight radii read as institutional; soft ones read as consumer-app. */
   --radius: 0.5rem;
 
-  /* Near-neutral paper. Gold is an accent, never the ground — a cream page
-     plus gold washes made the whole site read yellow in light mode. */
-  --background: #FAFAF9;
-  --foreground: #071426;
+  --background: #FFFFFF;
+  --foreground: #17121F;
 
   --surface: #FFFFFF;
-  --surface-2: #F4F4F2;
-  --hairline: #E6E5E2;
+  --surface-2: #F7F4FB;
+  --hairline: #E9E2F0;
 
   --card: #FFFFFF;
-  --card-foreground: #071426;
+  --card-foreground: #17121F;
   --popover: #FFFFFF;
-  --popover-foreground: #071426;
+  --popover-foreground: #17121F;
 
-  /* Gold is the action colour, navy is the ink */
-  --primary: #C9A227;
-  --primary-foreground: #071426;
+  --primary: #6D28D9;
+  --primary-foreground: #FFFFFF;
 
-  --secondary: #F4F4F2;
-  --secondary-foreground: #0B1B32;
+  --secondary: #F3EEFA;
+  --secondary-foreground: #2D1740;
 
-  --muted: #F4F4F2;
-  --muted-foreground: #5E6B7D;
+  --muted: #F7F4FB;
+  --muted-foreground: #6D6475;
 
-  /* Gold-tinted chip fill — kept light enough to sit on white without
-     tinting whole sections. */
-  --accent: #F9F4E6;
-  --accent-foreground: #6B540E;
+  --accent: #F1EAFE;
+  --accent-foreground: #5420A7;
 
   --destructive: #C4453C;
   --destructive-foreground: #FFFFFF;
 
-  --border: #E6E5E2;
-  --input: #D9D8D3;
-  --ring: #C9A227;
+  --border: #E7E0ED;
+  --input: #D7CDDF;
+  --ring: #7C3AED;
 
-  --brand: #C9A227;
-  --brand-2: #A8861B;
-  --brand-glow: #D8B44A;
-  --brand-foreground: #071426;
+  --brand: #6D28D9;
+  --brand-2: #4C1D95;
+  --brand-glow: #8B5CF6;
+  --brand-foreground: #FFFFFF;
 
   --success: #1E8C60;
   --success-soft: #E6F4EE;
@@ -152,58 +155,57 @@
   --info: #2B5C93;
   --info-soft: #EAF1F9;
 
-  /* Sidebar stays deep navy in light mode — the brand anchor */
-  --sidebar: #071426;
-  --sidebar-foreground: #A9B7C9;
-  --sidebar-primary: #D8B44A;
-  --sidebar-primary-foreground: #071426;
-  --sidebar-accent: #10233D;
+  --sidebar: #0D0912;
+  --sidebar-foreground: #BEB4C9;
+  --sidebar-primary: #8B5CF6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #21152B;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgba(255, 255, 255, 0.07);
-  --sidebar-ring: #C9A227;
+  --sidebar-ring: #8B5CF6;
 
-  --shadow-tint-1: rgba(7, 20, 38, 0.06);
-  --shadow-tint-2: rgba(7, 20, 38, 0.14);
-  --shadow-tint-3: rgba(7, 20, 38, 0.24);
+  --shadow-tint-1: rgba(44, 24, 58, 0.06);
+  --shadow-tint-2: rgba(44, 24, 58, 0.13);
+  --shadow-tint-3: rgba(32, 15, 45, 0.23);
 }
 
-/* ---------------- DARK: deep navy ground, lifted navy cards ---------------- */
+/* ---------------- DARK: true black ground, lifted violet-black cards ---------------- */
 .dark {
-  --background: #071426;
-  --foreground: #ECF1F7;
+  --background: #08070A;
+  --foreground: #F7F4FA;
 
-  --surface: #0D213B;
-  --surface-2: #142E4E;
-  --hairline: rgba(255, 255, 255, 0.08);
+  --surface: #100E13;
+  --surface-2: #19151E;
+  --hairline: rgba(196, 181, 253, 0.12);
 
-  --card: #0D213B;
-  --card-foreground: #ECF1F7;
-  --popover: #0D213B;
-  --popover-foreground: #ECF1F7;
+  --card: #121015;
+  --card-foreground: #F7F4FA;
+  --popover: #121015;
+  --popover-foreground: #F7F4FA;
 
-  --primary: #D8B44A;
-  --primary-foreground: #071426;
+  --primary: #8B5CF6;
+  --primary-foreground: #FFFFFF;
 
-  --secondary: #142E4E;
-  --secondary-foreground: #ECF1F7;
+  --secondary: #201A27;
+  --secondary-foreground: #F7F4FA;
 
-  --muted: #122744;
-  --muted-foreground: #93A5BC;
+  --muted: #19151E;
+  --muted-foreground: #AAA1B3;
 
-  --accent: #1B2F4C;
-  --accent-foreground: #E5C766;
+  --accent: #251A31;
+  --accent-foreground: #C4B5FD;
 
   --destructive: #E06A60;
   --destructive-foreground: #180605;
 
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #D8B44A;
+  --border: rgba(196, 181, 253, 0.13);
+  --input: rgba(196, 181, 253, 0.19);
+  --ring: #A78BFA;
 
-  --brand: #D8B44A;
-  --brand-2: #C9A227;
-  --brand-glow: #E5C766;
-  --brand-foreground: #071426;
+  --brand: #A78BFA;
+  --brand-2: #7C3AED;
+  --brand-glow: #C4B5FD;
+  --brand-foreground: #120B1B;
 
   --success: #3FC08B;
   --success-soft: rgba(63, 192, 139, 0.12);
@@ -214,42 +216,35 @@
   --info: #6BA3E0;
   --info-soft: rgba(107, 163, 224, 0.12);
 
-  --sidebar: #050F1C;
-  --sidebar-foreground: #A9B7C9;
-  --sidebar-primary: #D8B44A;
-  --sidebar-primary-foreground: #071426;
-  --sidebar-accent: #12294A;
+  --sidebar: #070509;
+  --sidebar-foreground: #BEB4C9;
+  --sidebar-primary: #A78BFA;
+  --sidebar-primary-foreground: #120B1B;
+  --sidebar-accent: #21152B;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgba(255, 255, 255, 0.07);
-  --sidebar-ring: #D8B44A;
+  --sidebar-ring: #A78BFA;
 
   --shadow-tint-1: rgba(0, 0, 0, 0.32);
   --shadow-tint-2: rgba(0, 0, 0, 0.5);
   --shadow-tint-3: rgba(0, 0, 0, 0.66);
 }
 
-/* ---------------- CLASSIC: public marketing pages only ----------------
-   Home / About / Platform / Contact render inside a `.site-classic`
-   wrapper (see SiteShell). In light mode this swaps the plain white/off-
-   white ground for a warm ivory "paper" and richer gold-lined borders —
-   the rest of the app (dashboard, auth) is outside this scope and keeps
-   the standard navy/gold tokens untouched. Dark mode stays the same deep
-   navy as everywhere else, so only the light-mode block below overrides
-   anything. */
+/* Public marketing pages keep the classic typography on a clean white canvas. */
 html:not(.dark) .site-classic {
-  --background: #FBF6E9;
-  --surface: #FFFDF6;
-  --surface-2: #F5EDD8;
-  --card: #FFFDF6;
-  --card-foreground: #071426;
-  --accent: #F6ECCE;
-  --accent-foreground: #6B540E;
-  --border: #E3D6AD;
-  --hairline: #E3D6AD;
-  --muted: #F2E9D3;
-  --shadow-tint-1: rgba(90, 68, 8, 0.08);
-  --shadow-tint-2: rgba(90, 68, 8, 0.16);
-  --shadow-tint-3: rgba(90, 68, 8, 0.26);
+  --background: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F8F5FC;
+  --card: #FFFFFF;
+  --card-foreground: #17121F;
+  --accent: #F1EAFE;
+  --accent-foreground: #5420A7;
+  --border: #E7E0ED;
+  --hairline: #E7E0ED;
+  --muted: #F7F4FB;
+  --shadow-tint-1: rgba(64, 35, 83, 0.06);
+  --shadow-tint-2: rgba(64, 35, 83, 0.13);
+  --shadow-tint-3: rgba(43, 20, 59, 0.22);
 }
 
 @layer base {
@@ -291,6 +286,36 @@ html:not(.dark) .site-classic {
 
   /* Financial figures read as data, not prose */
   .tnum, table td, table th { font-variant-numeric: tabular-nums; }
+}
+
+/* The supplied artwork contains legacy navy/gold pixels. These filters keep
+   the original transparent artwork while presenting a single-colour purple
+   mark in both themes. */
+.brand-logo--light {
+  filter: brightness(0) saturate(100%) invert(22%) sepia(91%) saturate(4264%) hue-rotate(257deg) brightness(82%) contrast(98%);
+}
+.brand-logo--dark {
+  filter: brightness(0) saturate(100%) invert(69%) sepia(32%) saturate(3058%) hue-rotate(213deg) brightness(102%) contrast(96%);
+}
+
+/* Shared authentication surface: a quiet glass panel with a single purple
+   edge keeps login, registration, OTP and password recovery visually aligned. */
+.auth-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border-color: color-mix(in oklab, var(--brand) 18%, var(--border));
+  background: color-mix(in oklab, var(--card) 94%, transparent);
+  box-shadow: var(--shadow-overlay);
+  backdrop-filter: blur(18px) saturate(130%);
+}
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 2rem auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brand), transparent);
+  opacity: 0.75;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -348,14 +373,14 @@ html:not(.dark) .site-classic {
   border-radius: var(--radius-xl);
 }
 @utility surface-navy {
-  background: linear-gradient(160deg, #0B1B32 0%, #071426 100%);
-  color: #ECF1F7;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, #17101F 0%, #08070A 72%);
+  color: #F7F4FA;
+  border: 1px solid rgba(167, 139, 250, 0.18);
 }
 @utility hairline-t { border-top: 1px solid var(--border); }
 @utility hairline-b { border-bottom: 1px solid var(--border); }
 
-/* ---------------- Gold accents (used sparingly) ---------------- */
+/* ---------------- Classic purple accents ---------------- */
 @utility gold-rule {
   background: linear-gradient(90deg, transparent, var(--brand), transparent);
   height: 1px;
@@ -440,7 +465,7 @@ html:not(.dark) .site-classic {
 @utility bg-noise {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
-/* Abstract financial ticks — for navy CTA panels */
+/* Abstract financial ticks — for dark CTA panels */
 @utility bg-ticker {
   background-image: repeating-linear-gradient(
     115deg,
@@ -595,11 +620,9 @@ html:not(.dark) .site-classic {
 }
 
 /* ============================================================
-   Gold sheen button
-   Rotating gradient layers under a gold face, blended so light
-   sweeps across it. Layers are gold-only (never a difference blend
-   between hues) so the effect stays on-brand instead of going
-   rainbow. Radius follows the tight house scale, not a pill.
+   Purple sheen button
+   Rotating highlight layers under a violet face. Radius follows the
+   tight house scale, not a pill.
    ============================================================ */
 .orv-sheen {
   --orv-sheen-rad: var(--radius-lg);

@@ -282,7 +282,7 @@ export function BentoFeatures({ id }: { id?: string }) {
           >
             <article
               className={cn(
-                "group flex h-full overflow-hidden rounded-md border border-brand/20 bg-card p-5 shadow-card",
+                "group flex h-full overflow-hidden rounded-2xl border border-brand/15 bg-card/95 p-5 shadow-card backdrop-blur-sm",
                 "transition-[transform,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)]",
                 "hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lifted",
                 // A full-width tile reads better side-by-side than stacked.

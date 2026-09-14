@@ -256,7 +256,7 @@ export default function ClientDashboard() {
           {/* Account summary */}
           <SectionCard title="Account" icon={IconUser} actionHref="/dashboard/profile" actionLabel="Profile">
             <div className="flex items-center gap-3.5">
-              <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-navy-800 text-base font-bold text-brand ring-1 ring-brand/25 dark:bg-white/10">
+              <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand text-base font-bold text-brand-foreground shadow-sm ring-1 ring-brand/35">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
               <span className="min-w-0">

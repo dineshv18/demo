@@ -158,7 +158,7 @@ export default function ClientRegister() {
       >
         <div className="space-y-6">
           <AuthLogo />
-          <Card className="gap-6 rounded-xl p-8 text-center shadow-lifted">
+          <Card className="auth-card gap-6 p-8 text-center">
             <div className="mx-auto grid size-16 place-items-center rounded-xl bg-success-soft ring-1 ring-success/25">
               <IconCircleCheck className="size-8 text-success" stroke={1.75} />
             </div>
@@ -193,7 +193,7 @@ export default function ClientRegister() {
         <div className="space-y-6">
           <AuthLogo />
 
-          <Card className="gap-5 rounded-xl p-7 shadow-lifted sm:p-8">
+          <Card className="auth-card gap-5 p-7 sm:p-9">
             <button onClick={() => setView("register")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <IconArrowLeft className="h-4 w-4" /> Back to registration
             </button>
@@ -249,7 +249,7 @@ export default function ClientRegister() {
                   onPaste={handleOTPPaste}
                   onFocus={(e) => e.currentTarget.select()}
                   className={cn(
-                    "h-14 w-11 rounded-lg border-2 bg-surface-2 text-center font-display text-2xl font-semibold tabular-nums text-foreground transition-all sm:h-16 sm:w-13",
+                    "h-14 w-11 rounded-xl border bg-surface-2 text-center font-display text-2xl font-semibold tabular-nums text-foreground shadow-xs transition-all sm:h-16 sm:w-13",
                     "focus:outline-none focus:ring-2",
                     errors.otp
                       ? "border-destructive focus:border-destructive focus:ring-destructive/25"
@@ -309,7 +309,7 @@ export default function ClientRegister() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <Card className="gap-0 rounded-xl p-7 shadow-lifted sm:p-8">
+        <Card className="auth-card gap-0 p-7 sm:p-9">
           <div className="text-center space-y-1.5 mb-6">
             <h2 className="font-display text-2xl font-semibold tracking-tight">Create Account</h2>
             <p className="text-muted-foreground text-sm">Fill in the details to get started</p>

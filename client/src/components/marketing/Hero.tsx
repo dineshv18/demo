@@ -30,7 +30,7 @@ const proofPoints = [
 /**
  * Landing hero.
  *
- * Centred lockup over a quiet navy/gold ground, with the dashboard preview
+ * Centred lockup over a quiet black/purple ground, with the dashboard preview
  * sitting below in a glass frame that lifts and un-tilts as it scrolls into
  * view. The perspective tilt is decorative only — it degrades to a flat, static
  * frame under `prefers-reduced-motion`.
@@ -146,7 +146,7 @@ export function Hero() {
           style={reduce ? undefined : { rotateX, scale, opacity }}
           className="origin-top rounded-2xl border border-border bg-card/60 p-2 shadow-lifted backdrop-blur-xl sm:p-3"
         >
-          {/* Gold hairline along the top edge of the frame */}
+          {/* Purple hairline along the top edge of the frame */}
           <span
             aria-hidden
             className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-brand/60 to-transparent"
@@ -165,7 +165,7 @@ export function Hero() {
 }
 
 /**
- * Abstract investment-growth motif: a rising gold curve with column ticks,
+ * Abstract investment-growth motif: a rising purple curve with column ticks,
  * echoing the bar-and-swoosh inside the ORVANTA mark. Purely decorative.
  */
 function GrowthGeometry() {
@@ -173,7 +173,7 @@ function GrowthGeometry() {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Soft gold bloom behind the headline */}
+      {/* Soft purple bloom behind the headline */}
       <div
         className="absolute left-1/2 top-0 size-[42rem] -translate-x-1/2 -translate-y-1/3 rounded-full blur-3xl"
         style={{

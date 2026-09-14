@@ -5,7 +5,7 @@ import { CTASection } from "@/components/marketing/CTASection";
 
 /**
  * Shared closing banner for public pages. Now a thin wrapper over the
- * marketing CTA so every page ends on the same navy/gold panel.
+ * marketing CTA so every page ends on the same black/purple panel.
  */
 export function CtaBanner() {
   return (

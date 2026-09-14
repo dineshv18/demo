@@ -103,7 +103,7 @@ export function DashboardSidebar() {
           )}
         >
           <Link href={item.to} onClick={() => setOpenMobile(false)} data-tour={`nav-${item.slug}`}>
-            {/* Active treatment: a gold-tinted navy surface with a gold rail */}
+            {/* Active treatment: purple wash with a high-contrast rail. */}
             {active &&
               (reduce ? (
                 <span
@@ -158,7 +158,7 @@ export function DashboardSidebar() {
             </span>
           </span>
         </Link>
-        {/* Hairline of gold under the mark — the one flourish up here */}
+        {/* Quiet purple hairline under the mark. */}
         <span aria-hidden className="mt-3 block h-px bg-linear-to-r from-brand/40 via-brand/10 to-transparent group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
 
@@ -236,7 +236,7 @@ export function DashboardSidebar() {
                   size="lg"
                   className="rounded-lg text-sidebar-foreground/80 hover:bg-white/[0.05] hover:text-white data-[state=open]:bg-white/[0.06] data-[state=open]:text-white"
                 >
-                  <span className="grid aspect-square size-8 shrink-0 place-items-center rounded-lg bg-brand/15 text-xs font-bold text-brand ring-1 ring-brand/25">
+                  <span className="grid aspect-square size-8 shrink-0 place-items-center rounded-lg bg-brand text-xs font-bold text-brand-foreground shadow-sm ring-1 ring-brand/35">
                     {user?.name?.charAt(0)?.toUpperCase() || "U"}
                   </span>
                   <span className="grid flex-1 text-left leading-tight">

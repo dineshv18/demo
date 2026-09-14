@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 /**
  * The primary "Get Started" call to action.
  *
- * A gold face with several rotating light sweeps blended over it, plus a slow
+ * A purple face with several rotating light sweeps blended over it, plus a slow
  * breathing highlight — the same layered idea as the reference button, but
  * rebuilt on the project's own CSS (there is no styled-components here) and
- * restricted to the gold palette so blending never drifts off-brand. Radius
+ * restricted to the purple palette so blending never drifts off-brand. Radius
  * follows the house scale rather than a pill.
  *
  * Renders an anchor when given `href`, otherwise a real `<button>`.

@@ -95,7 +95,7 @@ export function DashboardHeader({ onStartTour }: { onStartTour?: () => void }) {
   const initial = user?.name?.charAt(0)?.toUpperCase() || "U";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-card/85 px-3 backdrop-blur-xl sm:px-5">
+    <header className="sticky top-0 z-30 flex h-17 shrink-0 items-center gap-2 border-b border-brand/10 bg-card/88 px-3 shadow-xs backdrop-blur-xl sm:px-5">
       <SidebarTrigger className="-ml-1 size-9 rounded-lg text-muted-foreground hover:bg-accent hover:text-brand" />
 
       <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
@@ -189,7 +189,7 @@ export function DashboardHeader({ onStartTour }: { onStartTour?: () => void }) {
             className="ml-0.5 flex items-center gap-2 rounded-lg p-0.5 pr-1 transition-colors hover:bg-accent"
             aria-label="Account menu"
           >
-            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-navy-800 text-xs font-bold text-brand ring-1 ring-brand/25 dark:bg-white/10">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand text-xs font-bold text-brand-foreground shadow-sm ring-1 ring-brand/35">
               {initial}
             </span>
             <span className="hidden max-w-28 truncate text-sm font-semibold text-foreground lg:inline">

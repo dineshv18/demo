@@ -414,7 +414,7 @@ export default function WalletPage() {
                 <Button onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
                   size="lg"
                   title={balance <= 0 ? "No balance" : hasPending ? "You have a pending request" : undefined}
-                  className="gap-2 border border-white/20 bg-transparent text-white hover:border-brand/50 hover:bg-white/5 hover:text-gold-400">
+                  className="gap-2 border border-white/20 bg-transparent text-white hover:border-brand/50 hover:bg-white/5 hover:text-purple-300">
                   <IconMinus className="h-4 w-4" /> Withdraw
                 </Button>
               </div>
@@ -604,7 +604,6 @@ export default function WalletPage() {
 
                 <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-4">
                   <div id="deposit-qr-image" className="mx-auto grid size-48 place-items-center overflow-hidden rounded-lg bg-white p-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={depositQrSrc}
                       alt={`USDT ${depositNetwork} deposit QR code`}

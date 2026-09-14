@@ -28,31 +28,31 @@ export type ChartTheme = {
 const LIGHT: ChartTheme = {
   grid: "rgba(7, 20, 38, 0.07)",
   axis: "rgba(94, 107, 125, 0.9)",
-  stroke: "#C9A227",
-  fillFrom: "rgba(201, 162, 39, 0.28)",
-  fillTo: "rgba(201, 162, 39, 0)",
+  stroke: "#6D28D9",
+  fillFrom: "rgba(109, 40, 217, 0.28)",
+  fillTo: "rgba(109, 40, 217, 0)",
   tooltipBg: "#FFFFFF",
   tooltipBorder: "#E7E4DB",
   tooltipText: "#071426",
   positive: "#1E8C60",
   negative: "#C4453C",
   emptyRing: "#E1DDD2",
-  series: ["#C9A227", "#0B1B32", "#1D3E66", "#A8861B", "#5E6B7D"],
+  series: ["#6D28D9", "#17121F", "#4A2C61", "#4C1D95", "#6D6475"],
 };
 
 const DARK: ChartTheme = {
   grid: "rgba(255, 255, 255, 0.07)",
   axis: "rgba(147, 165, 188, 0.9)",
-  stroke: "#D8B44A",
-  fillFrom: "rgba(216, 180, 74, 0.30)",
-  fillTo: "rgba(216, 180, 74, 0)",
+  stroke: "#A78BFA",
+  fillFrom: "rgba(167, 139, 250, 0.30)",
+  fillTo: "rgba(167, 139, 250, 0)",
   tooltipBg: "#0D213B",
   tooltipBorder: "rgba(255, 255, 255, 0.12)",
   tooltipText: "#ECF1F7",
   positive: "#3FC08B",
   negative: "#E06A60",
   emptyRing: "rgba(255, 255, 255, 0.13)",
-  series: ["#D8B44A", "#6BA3E0", "#3FC08B", "#E5C766", "#93A5BC"],
+  series: ["#A78BFA", "#7C3AED", "#3FC08B", "#C4B5FD", "#AAA1B3"],
 };
 
 /**

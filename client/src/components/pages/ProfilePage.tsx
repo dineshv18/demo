@@ -150,7 +150,7 @@ export default function ProfilePage() {
       <Card className="p-4 sm:p-6 gap-5">
         {/* Avatar + Name */}
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-navy-800 ring-1 ring-brand/30 flex items-center justify-center text-lg font-bold text-brand shrink-0 shadow-sm sm:text-xl">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand text-lg font-bold text-brand-foreground shadow-sm ring-1 ring-brand/35 sm:h-16 sm:w-16 sm:text-xl">
             {user?.name?.charAt(0)?.toUpperCase() || "?"}
           </div>
           <div className="min-w-0">

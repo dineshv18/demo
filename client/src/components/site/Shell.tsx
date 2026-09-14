@@ -6,11 +6,9 @@ import { Footer } from "@/components/marketing/Footer";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
-    // `site-classic` scopes the warm-ivory, ornate-border treatment to the
-    // public marketing pages only (Home/About/Platform/Contact) — dashboard
-    // and auth screens are outside this route group and keep the plain
-    // navy/gold tokens untouched.
-    <div className="site-classic">
+    // `site-classic` scopes the classic white/purple treatment to the four
+    // public marketing pages while preserving their shared structure.
+    <div className="site-classic min-h-screen bg-background text-foreground">
       <SiteBackground />
       <Navbar />
       {/* Offsets the fixed header: main bar (h-24) plus the lg-only utility strip */}

@@ -18,9 +18,9 @@ const ACCENT: Record<StatAccent, { chip: string; ring: string; wash: string }> =
     wash: "from-brand/10",
   },
   navy: {
-    chip: "bg-navy-800 text-gold-400 dark:bg-white/8 dark:text-gold-400",
-    ring: "ring-navy-800/15 dark:ring-white/10",
-    wash: "from-navy-800/8 dark:from-white/5",
+    chip: "bg-secondary text-brand",
+    ring: "ring-brand/15",
+    wash: "from-brand/8",
   },
   success: {
     chip: "bg-success-soft text-success",
@@ -78,7 +78,7 @@ export function StatCard({
   const body = (
     <article
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand/10 bg-card/95 p-4 shadow-card backdrop-blur-sm sm:p-5",
         "transition-[transform,box-shadow,border-color] duration-300 ease-[cubic-bezier(.16,1,.3,1)]",
         href && "hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lifted",
         className

@@ -62,7 +62,7 @@ function ResetPasswordForm() {
   // ─── INVALID TOKEN ───
   if (!token) {
     return (
-      <Card className="gap-5 rounded-2xl p-8 text-center shadow-lifted">
+      <Card className="auth-card gap-5 p-8 text-center">
         <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-danger-soft ring-1 ring-danger/25">
           <IconAlertCircle className="size-8 text-danger" stroke={1.75} />
         </div>
@@ -91,7 +91,7 @@ function ResetPasswordForm() {
   // ─── SUCCESS ───
   if (success) {
     return (
-      <Card className="gap-6 rounded-2xl p-8 text-center shadow-lifted">
+      <Card className="auth-card gap-6 p-8 text-center">
         <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-success-soft ring-1 ring-success/25">
           <IconCircleCheck className="size-8 text-success" stroke={1.75} />
         </div>
@@ -124,7 +124,7 @@ function ResetPasswordForm() {
         : "mismatch";
 
   return (
-    <Card className="gap-0 rounded-2xl p-7 shadow-lifted sm:p-8">
+    <Card className="auth-card gap-0 p-7 sm:p-9">
       <div className="mb-7 space-y-2 text-center">
         <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-accent text-brand ring-1 ring-brand/20">
           <IconShieldLock className="size-6" stroke={1.75} />

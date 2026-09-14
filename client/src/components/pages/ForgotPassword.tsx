@@ -58,7 +58,7 @@ export default function ForgotPassword() {
         <div className="space-y-6">
           <AuthLogo />
 
-          <Card className="gap-6 rounded-xl p-7 text-center shadow-lifted sm:p-8">
+          <Card className="auth-card gap-6 p-7 text-center sm:p-9">
             <div className="mx-auto grid size-16 place-items-center rounded-xl bg-success-soft ring-1 ring-success/25">
               <IconMailCheck className="size-8 text-success" stroke={1.75} />
             </div>
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
       <div className="space-y-6">
         <AuthLogo />
 
-        <Card className="gap-0 rounded-xl p-7 shadow-lifted sm:p-8">
+        <Card className="auth-card gap-0 p-7 sm:p-9">
           <div className="mb-7 space-y-2 text-center">
             <div className="mx-auto mb-4 grid size-12 place-items-center rounded-xl bg-accent text-brand ring-1 ring-brand/20">
               <IconMail className="size-6" stroke={1.75} />

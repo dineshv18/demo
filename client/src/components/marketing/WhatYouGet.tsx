@@ -62,7 +62,7 @@ export function WhatYouGet({ id }: { id?: string }) {
       <div className="mt-14 grid gap-5 lg:grid-cols-2 lg:gap-6">
         {/* ORVANTA */}
         <Reveal>
-          <article className="relative flex h-full flex-col overflow-hidden rounded-md border-2 border-brand/35 bg-card shadow-lifted">
+          <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand/25 bg-card/95 shadow-lifted backdrop-blur-sm">
             {/* Gold hairline marks this as the recommended side */}
             <span
               aria-hidden
@@ -115,7 +115,7 @@ export function WhatYouGet({ id }: { id?: string }) {
         <Reveal delay={0.08}>
           <article
             className={cn(
-              "flex h-full flex-col overflow-hidden rounded-md border border-brand/15 bg-surface-2/50 shadow-card"
+              "flex h-full flex-col overflow-hidden rounded-2xl border border-brand/15 bg-surface-2/50 shadow-card"
             )}
           >
             <header className="border-b border-border p-6 sm:p-7">

@@ -102,7 +102,7 @@ export function FeatureCard({
   );
 
   const shell = cn(
-    "group relative flex h-full flex-col overflow-hidden rounded-md border border-brand/20 bg-card p-6 shadow-card",
+    "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand/15 bg-card/95 p-6 shadow-card backdrop-blur-sm",
     "transition-[transform,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)]",
     "hover:-translate-y-0.5 hover:border-brand/45 hover:shadow-lifted",
     className
@@ -314,7 +314,7 @@ export function StatementSection({
           <div className="relative mx-auto max-w-3xl">
             <Icon className="mx-auto mb-6 size-9 text-brand" stroke={1.5} />
             <p className="font-classic text-2xl italic font-bold leading-snug tracking-[-0.01em] text-white md:text-[2.5rem] md:leading-[1.2]">
-              {lead} <span className="text-gold-400">{accent}</span>
+              {lead} <span className="text-purple-400">{accent}</span>
             </p>
             {body && (
               <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-white/60">

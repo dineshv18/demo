@@ -44,7 +44,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card",
+        "flex flex-col overflow-hidden rounded-2xl border border-brand/10 bg-card/95 shadow-card backdrop-blur-sm",
         className
       )}
     >

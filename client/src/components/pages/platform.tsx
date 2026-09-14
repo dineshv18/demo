@@ -110,7 +110,7 @@ function FeatureCard({
   return (
     <div
       className={cn(
-        "card-tilt group relative flex h-full flex-col overflow-hidden rounded-md border border-brand/20 bg-card p-6 shadow-card",
+        "card-tilt group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand/15 bg-card/95 p-6 shadow-card backdrop-blur-sm",
         className
       )}
     >
@@ -186,7 +186,7 @@ export default function PlatformPage() {
               aria-hidden
               className="pointer-events-none absolute -inset-x-10 -top-16 h-56 rounded-full bg-brand/6 blur-3xl"
             />
-            <div className="relative rounded-xl border border-border bg-card/60 p-2 shadow-lifted backdrop-blur-xl sm:p-3">
+            <div className="relative rounded-2xl border border-brand/15 bg-card/70 p-2 shadow-lifted backdrop-blur-xl sm:p-3">
               <span
                 aria-hidden
                 className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-brand/60 to-transparent"
@@ -198,7 +198,7 @@ export default function PlatformPage() {
 
         {/* Quick capability strip — seamless, under the preview */}
         <Reveal delay={0.28}>
-          <dl className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-md border-2 border-brand/25 bg-brand/15">
+          <dl className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-2xl border border-brand/20 bg-brand/15 shadow-card">
             {[
               { label: "KYC", sub: "Gated access" },
               { label: "5-Level", sub: "Referrals" },

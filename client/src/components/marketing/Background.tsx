@@ -4,7 +4,7 @@
  * Ambient page background for the public site.
  *
  * Deliberately quiet: a faint grid that fades out toward the middle of the
- * viewport, and two low-opacity gold washes in the corners. The previous
+ * viewport, and two low-opacity purple washes in the corners. The previous
  * mouse-tracking glow and floating particles read as crypto-landing-page, so
  * they are gone — the ground should sit behind the content, not compete.
  */

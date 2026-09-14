@@ -19,8 +19,8 @@ const HIGHLIGHTS = [
 ];
 
 /**
- * The branded half of the split-screen auth layout. Deep navy ground, a drawn
- * gold growth curve, and the ORVANTA tagline — desktop only; mobile gets the
+ * The branded half of the split-screen auth layout. Black ground, a drawn
+ * purple growth curve, and the ORVANTA tagline — desktop only; mobile gets the
  * single-column card instead.
  */
 export function AuthBrandPanel({
@@ -35,7 +35,7 @@ export function AuthBrandPanel({
   const reduce = useReducedMotion();
 
   return (
-    <div className="surface-navy relative hidden overflow-hidden lg:flex lg:w-[52%]">
+    <div className="surface-navy relative hidden overflow-hidden border-r border-brand/15 lg:flex lg:w-[48%] xl:w-[50%]">
       <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
 
       {/* Concentric rings + rising curve */}
@@ -46,21 +46,21 @@ export function AuthBrandPanel({
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          <radialGradient id="authGoldGlow" cx="72%" cy="18%" r="60%">
-            <stop offset="0%" stopColor="#D8B44A" stopOpacity="0.20" />
-            <stop offset="100%" stopColor="#D8B44A" stopOpacity="0" />
+          <radialGradient id="authPurpleGlow" cx="72%" cy="18%" r="60%">
+            <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.20" />
+            <stop offset="100%" stopColor="#A78BFA" stopOpacity="0" />
           </radialGradient>
           <linearGradient id="authCurve" x1="0" y1="700" x2="800" y2="0">
-            <stop offset="0%" stopColor="#C9A227" stopOpacity="0" />
-            <stop offset="50%" stopColor="#D8B44A" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#E5C766" stopOpacity="0.25" />
+            <stop offset="0%" stopColor="#6D28D9" stopOpacity="0" />
+            <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.25" />
           </linearGradient>
         </defs>
 
-        <rect width="800" height="700" fill="url(#authGoldGlow)" />
-        <circle cx="620" cy="170" r="180" fill="none" stroke="rgba(216,180,74,0.12)" strokeWidth="1" />
-        <circle cx="620" cy="170" r="270" fill="none" stroke="rgba(216,180,74,0.07)" strokeWidth="1" />
-        <circle cx="140" cy="580" r="150" fill="none" stroke="rgba(216,180,74,0.09)" strokeWidth="1" />
+        <rect width="800" height="700" fill="url(#authPurpleGlow)" />
+        <circle cx="620" cy="170" r="180" fill="none" stroke="rgba(167,139,250,0.12)" strokeWidth="1" />
+        <circle cx="620" cy="170" r="270" fill="none" stroke="rgba(167,139,250,0.07)" strokeWidth="1" />
+        <circle cx="140" cy="580" r="150" fill="none" stroke="rgba(167,139,250,0.09)" strokeWidth="1" />
 
         <motion.path
           d="M40 610 C 200 580, 320 520, 430 400 S 660 190, 790 110"
@@ -79,14 +79,14 @@ export function AuthBrandPanel({
           <Link href="/" aria-label="ORVANTA Financial — home">
             <BrandMark on="dark" className="h-12 w-auto" />
           </Link>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-gold-400">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-purple-300">
             <span aria-hidden className="size-1.5 rounded-full bg-brand" />
             {eyebrow}
           </span>
         </div>
 
         <div>
-          <h1 className="mb-5 font-display text-4xl font-semibold leading-[1.08] tracking-[-0.03em] xl:text-5xl">
+          <h1 className="mb-5 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.02em] xl:text-6xl">
             {title}
           </h1>
           <p className="max-w-sm text-base leading-relaxed text-white/60">{description}</p>
@@ -148,9 +148,10 @@ export default function AuthShell({
         description={brandDescription}
       />
 
-      <div className="relative flex flex-1 items-center justify-center px-5 py-12 sm:px-6 lg:px-14 xl:px-20">
-        {/* Quiet ground behind the form on mobile, where the navy panel is hidden */}
-        <span aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-40 lg:hidden" />
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden px-5 py-20 sm:px-8 lg:px-12 xl:px-20">
+        <span aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-35 dark:opacity-20" />
+        <span aria-hidden className="pointer-events-none absolute -right-40 top-1/4 size-[32rem] rounded-full bg-brand/8 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-48 -left-24 size-96 rounded-full bg-brand/6 blur-3xl" />
 
         <div className="absolute right-4 top-4 flex items-center gap-2 sm:right-6 sm:top-6">
           <Link

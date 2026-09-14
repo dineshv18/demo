@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
 
 /**
- * Closing call to action. Navy ground, gold accent, abstract tick pattern —
- * deliberately no multi-hue gradient.
+ * Closing call to action. Black ground, purple accent, abstract tick pattern.
  */
 export function CTASection({
   eyebrow = "Verification takes minutes",
@@ -50,7 +49,7 @@ export function CTASection({
 
       <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-xl space-y-4">
-          <span className="inline-flex select-none items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-gold-400">
+          <span className="inline-flex select-none items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-purple-400">
             <IconSparkles size={14} stroke={2} />
             {eyebrow}
           </span>
@@ -72,7 +71,7 @@ export function CTASection({
           {secondary && (
             <Link
               href={secondary.href}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-brand/50 hover:text-gold-400"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-brand/50 hover:text-purple-400"
             >
               {secondary.label}
             </Link>
