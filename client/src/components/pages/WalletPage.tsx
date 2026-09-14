@@ -6,7 +6,7 @@ import {
   IconPlus, IconMinus, IconLoader2, IconAlertCircle,
   IconCheck, IconArrowUpRight, IconArrowDownLeft, IconClock,
   IconRefresh, IconLock, IconShieldCheck, IconUpload, IconCreditCard,
-  IconCopy, IconGift, IconArrowRight,
+  IconCopy, IconGift, IconArrowRight, IconDownload, IconShare3,
 } from "@tabler/icons-react";
 import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type CryptoDepositInfo } from "@/lib/api";
 import { Card } from "@/components/ui/card";
@@ -55,6 +55,7 @@ export default function WalletPage() {
   const [depositSuccess, setDepositSuccess] = useState(false);
 
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawNetwork, setWithdrawNetwork] = useState<"TRC20" | "BEP20">("TRC20");
   const [withdrawUpiId, setWithdrawUpiId] = useState("");
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [withdrawError, setWithdrawError] = useState("");
@@ -105,6 +106,31 @@ export default function WalletPage() {
   const hasPending = !!pendingRequest;
   const cryptoAddress =
     (depositNetwork === "TRC20" ? cryptoDeposit?.trc20Address : cryptoDeposit?.bep20Address) || "—";
+  const depositQrSrc = depositNetwork === "TRC20" ? "/crypto/tron-qr.jpg" : "/crypto/bnb-qr.jpg";
+
+  const handleDownloadQr = () => {
+    const a = document.createElement("a");
+    a.href = depositQrSrc;
+    a.download = `orvanta-usdt-${depositNetwork.toLowerCase()}-deposit-qr.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const handleShareQr = async () => {
+    const shareText = `My ORVANTA USDT (${depositNetwork}) deposit address: ${cryptoAddress}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "ORVANTA USDT Deposit Address", text: shareText });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      // User cancelled the share sheet — nothing to do.
+    }
+  };
 
   const handleScreenshot = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -161,11 +187,15 @@ export default function WalletPage() {
     if (!withdrawUpiId.trim()) { setWithdrawError("USDT wallet address is required"); return; }
     setWithdrawLoading(true);
     setWithdrawError("");
+    // The network isn't a separate field on the backend yet, so it's prefixed
+    // onto the address itself — admin sees exactly which chain to pay out on
+    // without needing a schema change.
+    const payoutAddress = `[${withdrawNetwork}] ${withdrawUpiId.trim()}`;
     try {
       if (withdrawSource === "bonus") {
-        await walletAPI.requestBonusWithdrawal(amt, withdrawUpiId.trim());
+        await walletAPI.requestBonusWithdrawal(amt, payoutAddress);
       } else {
-        await walletAPI.withdraw(amt, withdrawUpiId.trim());
+        await walletAPI.withdraw(amt, payoutAddress);
       }
       setWithdrawSuccess(true);
       setWithdrawAmount("");
@@ -560,30 +590,43 @@ export default function WalletPage() {
                 <p className="text-sm text-muted-foreground text-center">Send USDT to the address below</p>
 
                 {/* Network selector */}
-                <div className="flex rounded-lg border border-border bg-accent/40 p-1">
-                  {(["TRC20", "BEP20"] as const).map((net) => (
-                    <button
-                      key={net}
-                      type="button"
-                      onClick={() => setDepositNetwork(net)}
-                      className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
-                        depositNetwork === net ? "bg-card text-brand shadow-xs" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      USDT ({net})
-                    </button>
-                  ))}
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground mb-1">Network</Label>
+                  <select
+                    value={depositNetwork}
+                    onChange={(e) => setDepositNetwork(e.target.value as "TRC20" | "BEP20")}
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30"
+                  >
+                    <option value="TRC20">USDT — Tron (TRC20)</option>
+                    <option value="BEP20">USDT — BNB Smart Chain (BEP20)</option>
+                  </select>
                 </div>
 
                 <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-4">
-                  <div className="mx-auto grid size-48 place-items-center overflow-hidden rounded-lg bg-white p-2">
+                  <div id="deposit-qr-image" className="mx-auto grid size-48 place-items-center overflow-hidden rounded-lg bg-white p-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={depositNetwork === "TRC20" ? "/crypto/tron-qr.jpg" : "/crypto/bnb-qr.jpg"}
+                      src={depositQrSrc}
                       alt={`USDT ${depositNetwork} deposit QR code`}
                       className="size-full object-contain"
                     />
                   </div>
+
+                  <div className="flex justify-center gap-4">
+                    <button
+                      onClick={handleDownloadQr}
+                      className="flex items-center gap-1.5 text-xs font-medium text-brand hover:underline"
+                    >
+                      <IconDownload className="h-3.5 w-3.5" /> Download QR
+                    </button>
+                    <button
+                      onClick={handleShareQr}
+                      className="flex items-center gap-1.5 text-xs font-medium text-brand hover:underline"
+                    >
+                      <IconShare3 className="h-3.5 w-3.5" /> Share
+                    </button>
+                  </div>
+
                   <div>
                     <span className="text-xs text-muted-foreground">
                       {depositNetwork === "TRC20" ? "Tron (TRC20) address" : "BNB Smart Chain (BEP20) address"}
@@ -774,7 +817,20 @@ export default function WalletPage() {
                     })()}
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Your USDT wallet address (TRC20 or BEP20) *</Label>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Withdraw via *</Label>
+                    <select
+                      value={withdrawNetwork}
+                      onChange={(e) => setWithdrawNetwork(e.target.value as "TRC20" | "BEP20")}
+                      className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30"
+                    >
+                      <option value="TRC20">USDT — Tron (TRC20)</option>
+                      <option value="BEP20">USDT — BNB Smart Chain (BEP20)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">
+                      Your {withdrawNetwork === "TRC20" ? "Tron (TRC20)" : "BNB Smart Chain (BEP20)"} wallet address *
+                    </Label>
                     <Input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="Enter your USDT wallet address" />
                   </div>
                 </div>
