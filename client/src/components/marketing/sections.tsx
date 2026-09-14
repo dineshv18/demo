@@ -313,7 +313,7 @@ export function StatementSection({
           />
           <div className="relative mx-auto max-w-3xl">
             <Icon className="mx-auto mb-6 size-9 text-brand" stroke={1.5} />
-            <p className="font-display text-2xl font-semibold leading-snug tracking-[-0.025em] text-white md:text-[2.5rem] md:leading-[1.15]">
+            <p className="font-classic text-2xl italic font-bold leading-snug tracking-[-0.01em] text-white md:text-[2.5rem] md:leading-[1.2]">
               {lead} <span className="text-gold-400">{accent}</span>
             </p>
             {body && (

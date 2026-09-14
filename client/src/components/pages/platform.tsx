@@ -20,7 +20,7 @@ import {
   type IconProps,
 } from "@tabler/icons-react";
 
-import { Reveal, Section, SectionTitle } from "../site/primitives";
+import { Eyebrow, Reveal, Section, SectionTitle } from "../site/primitives";
 import { HeroPreview } from "@/components/marketing/HeroPreview";
 import { CTASection } from "@/components/marketing/CTASection";
 import { FeatureGrid as SharedFeatureGrid, StatementSection } from "@/components/marketing/sections";
@@ -145,16 +145,13 @@ export default function PlatformPage() {
       <Section className="pb-0! pt-6! lg:pt-10!">
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-              The ORVANTA Platform
-            </span>
+            <Eyebrow>The ORVANTA Platform</Eyebrow>
           </Reveal>
 
           <Reveal delay={0.05}>
-            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.04] tracking-[-0.035em] text-foreground md:text-5xl lg:text-6xl">
+            <h1 className="mt-6 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl lg:text-6xl">
               The platform
-              <span className="block text-gradient">investors trust.</span>
+              <span className="block text-gradient italic">investors trust.</span>
             </h1>
           </Reveal>
 
@@ -301,7 +298,7 @@ export default function PlatformPage() {
               <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
                 <IconUsers className="size-3.5" stroke={2} /> Referral Program
               </span>
-              <h2 className="font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-4xl">
+              <h2 className="font-classic text-3xl font-bold tracking-[-0.01em] text-foreground md:text-4xl">
                 Earn across five levels.
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground md:text-base">

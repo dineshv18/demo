@@ -86,6 +86,8 @@
 
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sora), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* Classic serif, reserved for public marketing headings (Home/About/Platform/Contact). */
+  --font-classic: var(--font-baskerville), Georgia, "Times New Roman", serif;
 
   /* Elevation — restrained, navy-tinted */
   --shadow-xs: 0 1px 2px var(--shadow-tint-1);
@@ -336,6 +338,27 @@
 }
 @utility gold-hairline {
   border: 1px solid color-mix(in oklab, var(--brand) 34%, transparent);
+}
+/* A slim double rule — a classic, engraved-invitation style divider. */
+@utility gold-rule-double {
+  height: 5px;
+  background-image:
+    linear-gradient(90deg, transparent, var(--brand), transparent),
+    linear-gradient(90deg, transparent, var(--brand), transparent);
+  background-size: 100% 1px, 40% 1px;
+  background-position: top center, bottom center;
+  background-repeat: no-repeat;
+}
+/* Fine gold corner brackets — an ornamental frame for a panel or card. */
+@utility corner-frame {
+  position: relative;
+}
+@utility corner-frame-marks {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-color: var(--brand);
+  opacity: 0.65;
 }
 @utility text-gold {
   color: var(--brand);

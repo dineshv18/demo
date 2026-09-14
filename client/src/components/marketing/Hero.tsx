@@ -78,10 +78,10 @@ export function Hero() {
         {/* Headline */}
         <motion.h1
           {...rise(0.07)}
-          className="mt-8 font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-7xl"
+          className="mt-8 font-classic text-[2.75rem] font-bold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-6xl lg:text-7xl"
         >
           Growing wealth.
-          <span className="mt-1 block text-gradient">Building futures.</span>
+          <span className="mt-1 block text-gradient italic">Building futures.</span>
         </motion.h1>
 
         {/* Subtext */}

@@ -31,12 +31,17 @@ export function Section({
   );
 }
 
-/** Small gold-accented label that sits above a heading. */
+/**
+ * A small-caps label flanked by short gold rules — a letterpress-style
+ * kicker rather than a pill badge, in keeping with the classic treatment
+ * of the public marketing pages.
+ */
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-      <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+    <span className="inline-flex items-center gap-3 text-[0.6875rem] font-semibold uppercase tracking-[0.28em] text-brand">
+      <span aria-hidden className="h-px w-6 bg-brand/50" />
       {children}
+      <span aria-hidden className="h-px w-6 bg-brand/50" />
     </span>
   );
 }
@@ -55,19 +60,18 @@ export function SectionTitle({
   return (
     <div className={cn("max-w-3xl", align === "center" && "mx-auto text-center")}>
       {eyebrow && (
-        <div className="mb-4">
+        <div className={cn("mb-5 flex", align === "center" ? "justify-center" : "justify-start")}>
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       )}
-      <h2 className="font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
+      <h2 className="font-classic text-4xl font-bold tracking-[-0.01em] text-foreground md:text-5xl md:leading-[1.1]">
         {title}
       </h2>
-      <span
-        aria-hidden
-        className={cn("gold-rule mt-4 block w-16", align === "center" && "mx-auto")}
-      />
+      <div className={cn("mt-5 w-20", align === "center" && "mx-auto")}>
+        <span aria-hidden className="gold-rule-double block w-full" />
+      </div>
       {description && (
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+        <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">
           {description}
         </p>
       )}

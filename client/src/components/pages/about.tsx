@@ -13,7 +13,7 @@ import {
   type IconProps,
 } from "@tabler/icons-react";
 
-import { Reveal, Section } from "../site/primitives";
+import { Eyebrow, Reveal, Section } from "../site/primitives";
 import { FeatureGrid, StatementSection } from "@/components/marketing/sections";
 import { CTASection } from "@/components/marketing/CTASection";
 import { SheenButton } from "@/components/marketing/SheenButton";
@@ -78,15 +78,12 @@ export default function AboutPage() {
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-7">
             <Reveal>
-              <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-                <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-                Our Story
-              </span>
+              <Eyebrow>Our Story</Eyebrow>
             </Reveal>
             <Reveal delay={0.05}>
-              <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.04] tracking-[-0.035em] text-foreground md:text-5xl lg:text-6xl">
+              <h1 className="mt-6 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl lg:text-6xl">
                 Built for investors
-                <span className="block text-gradient">who read the fine print.</span>
+                <span className="block text-gradient italic">who read the fine print.</span>
               </h1>
             </Reveal>
             <Reveal delay={0.1}>
@@ -181,7 +178,7 @@ export default function AboutPage() {
           <div className="grid gap-10 rounded-xl border border-border bg-card p-8 shadow-card lg:grid-cols-12 lg:p-12">
             <div className="lg:col-span-5">
               <span aria-hidden className="gold-rule block w-14" />
-              <h2 className="mt-5 font-display text-3xl font-semibold leading-snug tracking-[-0.03em] text-foreground md:text-4xl">
+              <h2 className="mt-5 font-classic text-3xl font-bold leading-snug tracking-[-0.01em] text-foreground md:text-4xl">
                 What we&apos;re building
               </h2>
             </div>
@@ -225,7 +222,7 @@ export default function AboutPage() {
             <IconClock className="size-3.5 text-brand" stroke={2} />
             How Accounts Are Built
           </span>
-          <h2 className="mt-5 font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
+          <h2 className="mt-5 font-classic text-3xl font-bold tracking-[-0.01em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
             The same process,{" "}
             <span className="text-gradient">every single time.</span>
           </h2>
@@ -282,7 +279,7 @@ export default function AboutPage() {
               <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
                 Why Choose ORVANTA
               </span>
-              <h2 className="font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-4xl">
+              <h2 className="font-classic text-3xl font-bold tracking-[-0.01em] text-foreground md:text-4xl">
                 Built for investors who read the fine print.
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground md:text-base">

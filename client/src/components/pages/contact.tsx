@@ -17,7 +17,7 @@ import {
   type IconProps,
 } from "@tabler/icons-react";
 
-import { Reveal, Section } from "../site/primitives";
+import { Eyebrow, Reveal, Section } from "../site/primitives";
 import { CtaBanner } from "../site/CtaBanner";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
@@ -227,15 +227,12 @@ export default function ContactPage() {
 
         <div className="max-w-3xl">
           <Reveal delay={0.05}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-accent px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-              <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-              We&apos;re here to help
-            </span>
+            <Eyebrow>We&apos;re here to help</Eyebrow>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.04] tracking-[-0.035em] text-foreground md:text-5xl lg:text-6xl">
+            <h1 className="mt-6 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl lg:text-6xl">
               Get in touch with{" "}
-              <span className="text-gradient">ORVANTA</span>
+              <span className="text-gradient italic">ORVANTA</span>
             </h1>
           </Reveal>
           <Reveal delay={0.15}>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Sora } from "next/font/google";
+import { Manrope, Sora, Libre_Baskerville } from "next/font/google";
 import { RoleThemeProvider } from "@/components/site/ThemeProvider";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
@@ -16,6 +16,17 @@ const sora = Sora({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
+});
+
+// Reserved for the public marketing pages (Home / About / Platform / Contact)
+// only — dashboard and auth screens keep the Sora display face untouched.
+// A formal book-style serif for a classic, institutional headline feel.
+const baskerville = Libre_Baskerville({
+  variable: "--font-baskerville",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -39,7 +50,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body
-        className={`${manrope.variable} ${sora.variable} font-sans antialiased`}
+        className={`${manrope.variable} ${sora.variable} ${baskerville.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <AuthProvider>
