@@ -35,7 +35,7 @@ export function AuthBrandPanel({
   const reduce = useReducedMotion();
 
   return (
-    <div className="surface-navy relative hidden overflow-hidden border-r border-brand/15 lg:flex lg:w-[48%] xl:w-[50%]">
+    <div className="surface-navy relative hidden overflow-hidden rounded-[2rem] border border-brand/15 lg:m-4 lg:mr-0 lg:flex lg:min-h-[calc(100svh-2rem)] lg:w-[44%] xl:w-[47%]">
       <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
 
       {/* Concentric rings + rising curve */}
@@ -74,7 +74,7 @@ export function AuthBrandPanel({
         />
       </svg>
 
-      <div className="relative z-10 flex w-full flex-col justify-between p-12 text-white xl:p-14">
+      <div className="relative z-10 flex w-full flex-col justify-between p-10 text-white xl:p-14">
         <div className="flex items-start justify-between gap-4">
           <Link href="/" aria-label="ORVANTA Financial — home">
             <BrandMark on="dark" className="h-12 w-auto" />
@@ -86,7 +86,7 @@ export function AuthBrandPanel({
         </div>
 
         <div>
-          <h1 className="mb-5 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.02em] xl:text-6xl">
+          <h1 className="mb-5 max-w-xl font-classic text-4xl font-bold leading-[1.02] tracking-[-0.03em] xl:text-[3.6rem]">
             {title}
           </h1>
           <p className="max-w-sm text-base leading-relaxed text-white/60">{description}</p>
@@ -141,7 +141,7 @@ export default function AuthShell({
   const reduce = useReducedMotion();
 
   return (
-    <div className="relative flex min-h-svh w-full bg-background">
+    <div className="relative flex min-h-svh w-full bg-surface-2">
       <AuthBrandPanel
         eyebrow={brandEyebrow}
         title={brandTitle}
@@ -167,7 +167,7 @@ export default function AuthShell({
           initial={reduce ? undefined : { opacity: 0, y: 16 }}
           animate={reduce ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE_OUT }}
-          className="relative w-full max-w-md"
+          className="relative w-full max-w-[29rem]"
         >
           {children}
         </motion.div>

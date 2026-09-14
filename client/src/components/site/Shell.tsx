@@ -11,8 +11,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="site-classic min-h-screen bg-background text-foreground">
       <SiteBackground />
       <Navbar />
-      {/* Offsets the fixed header: main bar (h-24) plus the lg-only utility strip */}
-      <main className="min-h-screen pt-24 lg:pt-34">{children}</main>
+      <main className="min-h-screen pt-24">{children}</main>
       <Footer />
     </div>
   );

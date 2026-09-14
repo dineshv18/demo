@@ -213,35 +213,39 @@ export default function ContactPage() {
     <div className="min-h-screen">
       {/* ── HERO ── */}
       <Section className="pb-8! pt-6! lg:pt-10!">
-        <Reveal>
-          <nav aria-label="Breadcrumb" className="mb-6">
-            <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <li>
-                <Link href="/" className="transition-colors hover:text-brand">Home</Link>
-              </li>
-              <li aria-hidden><IconChevronRight className="size-3.5 opacity-50" /></li>
-              <li className="font-medium text-foreground" aria-current="page">Contact</li>
-            </ol>
-          </nav>
-        </Reveal>
-
-        <div className="max-w-3xl">
-          <Reveal delay={0.05}>
-            <Eyebrow>We&apos;re here to help</Eyebrow>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <h1 className="mt-6 font-classic text-4xl font-bold leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl lg:text-6xl">
-              Get in touch with{" "}
-              <span className="text-gradient italic">ORVANTA</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              Whether you&apos;re evaluating the platform or already investing, our team is
-              here. For account-specific issues, opening a support ticket from your
-              dashboard gets you the fastest response.
-            </p>
-          </Reveal>
+        <div className="grid overflow-hidden rounded-[2rem] border border-brand/15 bg-card shadow-overlay lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="px-7 py-12 sm:px-10 lg:px-14 lg:py-16">
+            <Reveal>
+              <nav aria-label="Breadcrumb" className="mb-8">
+                <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <li><Link href="/" className="transition-colors hover:text-brand">Home</Link></li>
+                  <li aria-hidden><IconChevronRight className="size-3.5 opacity-50" /></li>
+                  <li className="font-medium text-foreground" aria-current="page">Contact</li>
+                </ol>
+              </nav>
+            </Reveal>
+            <Reveal delay={0.05}><Eyebrow>We&apos;re here to help</Eyebrow></Reveal>
+            <Reveal delay={0.1}>
+              <h1 className="mt-6 font-classic text-4xl font-bold leading-[1.02] tracking-[-0.03em] text-foreground md:text-5xl lg:text-6xl">
+                Let&apos;s start a<br /><span className="text-gradient italic">conversation.</span>
+              </h1>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+                Exploring ORVANTA or need help with an existing account? Tell us what you need and we&apos;ll connect you with the right team.
+              </p>
+            </Reveal>
+          </div>
+          <div className="relative flex min-h-[320px] flex-col justify-end overflow-hidden bg-[#09070c] p-8 text-white lg:p-10">
+            <span aria-hidden className="bg-ticker absolute inset-0 opacity-30" />
+            <span aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-brand/30 blur-3xl" />
+            <div className="relative">
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-purple-300">Expected response</p>
+              <p className="mt-3 font-classic text-4xl font-bold">2–3 hours</p>
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">Account holders can also raise a tracked support ticket directly from the dashboard.</p>
+              <Link href={supportHref} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-300">Open support <IconArrowRight className="size-4" /></Link>
+            </div>
+          </div>
         </div>
       </Section>
 

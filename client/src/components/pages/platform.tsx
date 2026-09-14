@@ -143,7 +143,8 @@ export default function PlatformPage() {
     <div className="min-h-screen">
       {/* ─── HERO ─── */}
       <Section className="pb-0! pt-6! lg:pt-10!">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="grid items-center gap-10 overflow-hidden rounded-[2rem] border border-brand/15 bg-card p-7 shadow-overlay sm:p-10 lg:grid-cols-12 lg:p-12">
+          <div className="lg:col-span-5">
           <Reveal>
             <Eyebrow>The ORVANTA Platform</Eyebrow>
           </Reveal>
@@ -156,7 +157,7 @@ export default function PlatformPage() {
           </Reveal>
 
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
               The ORVANTA Index platform powers every account with real-time
               performance tracking, transparent tiered investment plans, a
               wallet built for crypto and bank deposits, and KYC-verified
@@ -165,7 +166,7 @@ export default function PlatformPage() {
           </Reveal>
 
           <Reveal delay={0.15}>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <SheenButton href={user ? "/dashboard" : "/register"} size="md">
                 {user ? "Go to Dashboard" : "Get Started"} <IconArrowRight className="size-4" />
               </SheenButton>
@@ -177,11 +178,10 @@ export default function PlatformPage() {
               </a>
             </div>
           </Reveal>
-        </div>
+          </div>
 
-        {/* Live product preview — full-width, matches the real dashboard shape */}
-        <Reveal delay={0.2} y={30}>
-          <div className="relative mx-auto mt-14 max-w-6xl">
+        <Reveal delay={0.2} y={30} className="lg:col-span-7">
+          <div className="relative">
             <span
               aria-hidden
               className="pointer-events-none absolute -inset-x-10 -top-16 h-56 rounded-full bg-brand/6 blur-3xl"
@@ -195,6 +195,7 @@ export default function PlatformPage() {
             </div>
           </div>
         </Reveal>
+        </div>
 
         {/* Quick capability strip — seamless, under the preview */}
         <Reveal delay={0.28}>

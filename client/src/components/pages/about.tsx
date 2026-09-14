@@ -75,8 +75,8 @@ export default function AboutPage() {
     <div className="min-h-screen">
       {/* HERO — asymmetric split, organic-cut visual on the right */}
       <Section className="pb-0! pt-6! lg:pt-10!">
-        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-7">
+        <div className="grid items-stretch overflow-hidden rounded-[2rem] border border-brand/15 bg-card shadow-overlay lg:grid-cols-12">
+          <div className="flex flex-col justify-center px-7 py-12 sm:px-10 lg:col-span-7 lg:px-14 lg:py-16">
             <Reveal>
               <Eyebrow>Our Story</Eyebrow>
             </Reveal>
@@ -116,16 +116,10 @@ export default function AboutPage() {
             </Reveal>
           </div>
 
-          {/* Organic-shaped visual — a navy panel with a bitten corner, echoing
-              the reference layout without borrowing anyone's stock imagery. */}
-          <div className="lg:col-span-5">
+          <div className="bg-[#09070c] p-5 sm:p-8 lg:col-span-5">
             <Reveal delay={0.12} y={30}>
               <div
-                className="surface-navy relative aspect-4/5 overflow-hidden p-8 sm:p-10"
-                style={{
-                  clipPath:
-                    "polygon(0% 0%, 78% 0%, 78% 18%, 100% 18%, 100% 100%, 0% 100%)",
-                }}
+                className="surface-navy relative min-h-[420px] overflow-hidden rounded-2xl p-8 sm:p-10 lg:min-h-[560px]"
               >
                 <span
                   aria-hidden
