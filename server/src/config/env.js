@@ -19,18 +19,11 @@ function getEnv() {
     R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || "",
     R2_PUBLIC_URL: process.env.R2_PUBLIC_URL || "",
 
-    // Receiving UPI for QR-based deposits (INR)
-    ORVANTA_UPI_ID: process.env.ORVANTA_UPI_ID || "rforritesh@pingpay",
-
     CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
 
-    // USD Payment Details (placeholder — update when ready)
-    ORVANTA_USD_PAYMENT_METHOD: process.env.ORVANTA_USD_PAYMENT_METHOD || "Bank Transfer",
-    ORVANTA_USD_ACCOUNT_NAME: process.env.ORVANTA_USD_ACCOUNT_NAME || "ORVANTA Financial",
-    ORVANTA_USD_ACCOUNT_NUMBER: process.env.ORVANTA_USD_ACCOUNT_NUMBER || "XXXXXXXXXXXX",
-    ORVANTA_USD_ROUTING_NUMBER: process.env.ORVANTA_USD_ROUTING_NUMBER || "XXXXXXXXX",
-    ORVANTA_USD_SWIFT_CODE: process.env.ORVANTA_USD_SWIFT_CODE || "XXXXXXXX",
-    ORVANTA_USD_BANK_NAME: process.env.ORVANTA_USD_BANK_NAME || "Your Bank Name",
+    // Receiving crypto addresses for USDT deposits.
+    ORVANTA_USDT_TRC20_ADDRESS: process.env.ORVANTA_USDT_TRC20_ADDRESS || "TXdsbHJQhyzinGzsEVZ7a8a4uzXtKoACwd",
+    ORVANTA_USDT_BEP20_ADDRESS: process.env.ORVANTA_USDT_BEP20_ADDRESS || "0xeA029DF5F5cA71C7922fFC5a3cc464e3b272F1C0",
 
     CORS_ORIGINS: [
       process.env.ADMIN_URL || "http://localhost:5173",

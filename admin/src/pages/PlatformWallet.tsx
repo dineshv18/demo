@@ -170,9 +170,9 @@ export default function PlatformWallet() {
                 className="mt-1 rounded-xl border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus-visible:ring-[#00A94F]/50" />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#68736E]">Destination (bank / UPI details) *</label>
+              <label className="text-xs font-medium text-[#68736E]">Destination (wallet address) *</label>
               <Input type="text" value={destination} onChange={(e) => setDestination(e.target.value)}
-                placeholder="e.g. bank account or UPI ID"
+                placeholder="e.g. USDT wallet address"
                 className="mt-1 rounded-xl border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus-visible:ring-[#00A94F]/50" />
             </div>
             <div>

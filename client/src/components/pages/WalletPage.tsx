@@ -8,7 +8,7 @@ import {
   IconRefresh, IconLock, IconShieldCheck, IconUpload, IconCreditCard,
   IconCopy, IconGift, IconArrowRight,
 } from "@tabler/icons-react";
-import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type UsdPaymentInfo } from "@/lib/api";
+import { walletAPI, kycAPI, type WalletData, type TransactionData, type KycData, type CryptoDepositInfo } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,8 @@ export default function WalletPage() {
   const router = useRouter();
   const pathname = usePathname();
   const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [usdPayment, setUsdPayment] = useState<UsdPaymentInfo | null>(null);
+  const [cryptoDeposit, setCryptoDeposit] = useState<CryptoDepositInfo | null>(null);
+  const [depositNetwork, setDepositNetwork] = useState<"TRC20" | "BEP20">("TRC20");
   const [currencyLocked, setCurrencyLocked] = useState(false);
   // Null until the wallet API reports the real limits. These figures are quoted
   // to the user as the fee they'll actually be charged, so they must never fall
@@ -81,7 +82,7 @@ export default function WalletPage() {
       ]);
       if (walletRes.status === "fulfilled") {
         setWallet(walletRes.value.wallet);
-        setUsdPayment(walletRes.value.usdPayment || null);
+        setCryptoDeposit(walletRes.value.cryptoDeposit || null);
         setPendingRequest(walletRes.value.pendingRequest);
         setPendingBonusRequest(walletRes.value.pendingBonusRequest);
         setCurrencyLocked(walletRes.value.currencyLocked);
@@ -102,6 +103,8 @@ export default function WalletPage() {
   const frozen = wallet ? parseFloat(wallet.frozen) : 0;
   const sym = currencySymbol();
   const hasPending = !!pendingRequest;
+  const cryptoAddress =
+    (depositNetwork === "TRC20" ? cryptoDeposit?.trc20Address : cryptoDeposit?.bep20Address) || "—";
 
   const handleScreenshot = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -122,7 +125,7 @@ export default function WalletPage() {
       return;
     }
     if (!transactionId.trim()) {
-      setDepositError("Transaction ID / UTR is required");
+      setDepositError("Transaction hash / ID is required");
       return;
     }
     if (!screenshot) {
@@ -155,7 +158,7 @@ export default function WalletPage() {
       setWithdrawError(`Insufficient ${withdrawSource === "bonus" ? "bonus " : ""}balance — this withdrawal rounds up to $${roundedAmt.toFixed(2)}`);
       return;
     }
-    if (!withdrawUpiId.trim()) { setWithdrawError("UPI ID is required"); return; }
+    if (!withdrawUpiId.trim()) { setWithdrawError("USDT wallet address is required"); return; }
     setWithdrawLoading(true);
     setWithdrawError("");
     try {
@@ -554,39 +557,53 @@ export default function WalletPage() {
               </div>
             ) : depositStep === "qr" ? (
               <>
-                <p className="text-sm text-muted-foreground text-center">Make a bank transfer to the details below</p>
+                <p className="text-sm text-muted-foreground text-center">Send USDT to the address below</p>
 
-                {/* USD Bank Details */}
-                <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Bank Name</span>
-                    <span className="text-sm font-semibold text-foreground">{usdPayment?.bankName || "—"}</span>
+                {/* Network selector */}
+                <div className="flex rounded-lg border border-border bg-accent/40 p-1">
+                  {(["TRC20", "BEP20"] as const).map((net) => (
+                    <button
+                      key={net}
+                      type="button"
+                      onClick={() => setDepositNetwork(net)}
+                      className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
+                        depositNetwork === net ? "bg-card text-brand shadow-xs" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      USDT ({net})
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-4">
+                  <div className="mx-auto grid size-48 place-items-center overflow-hidden rounded-lg bg-white p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={depositNetwork === "TRC20" ? "/crypto/tron-qr.jpg" : "/crypto/bnb-qr.jpg"}
+                      alt={`USDT ${depositNetwork} deposit QR code`}
+                      className="size-full object-contain"
+                    />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Account Name</span>
-                    <span className="text-sm font-semibold text-foreground">{usdPayment?.accountName || "—"}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Account Number</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.accountNumber || "—"}</span>
-                      <button onClick={() => { navigator.clipboard.writeText(usdPayment?.accountNumber || ""); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-1 text-xs text-brand hover:underline">
+                  <div>
+                    <span className="text-xs text-muted-foreground">
+                      {depositNetwork === "TRC20" ? "Tron (TRC20) address" : "BNB Smart Chain (BEP20) address"}
+                    </span>
+                    <div className="mt-1 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
+                      <span className="flex-1 truncate font-mono text-xs font-semibold text-foreground">
+                        {cryptoAddress}
+                      </span>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(cryptoAddress); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                        className="flex shrink-0 items-center gap-1 text-xs text-brand hover:underline"
+                      >
                         <IconCopy className="h-3.5 w-3.5" /> {copied ? "Copied!" : "Copy"}
                       </button>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Routing Number</span>
-                    <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.routingNumber || "—"}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">SWIFT Code</span>
-                    <span className="text-sm font-mono font-semibold text-foreground">{usdPayment?.swiftCode || "—"}</span>
-                  </div>
                 </div>
 
                 <p className="text-xs text-warning text-center">
-                  After payment, click &quot;I&apos;ve Paid&quot; to submit your transaction details
+                  Only send USDT on the {depositNetwork === "TRC20" ? "Tron (TRC20)" : "BNB Smart Chain (BEP20)"} network to this address. Sending any other asset or using the wrong network will result in permanent loss of funds.
                 </p>
 
                 <div className="flex gap-3">
@@ -623,12 +640,12 @@ export default function WalletPage() {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Transaction ID / UTR *</Label>
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Transaction Hash / ID *</Label>
                     <Input
                       type="text"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
-                      placeholder="Enter 12-digit UTR / Transaction ID"
+                      placeholder="Enter the on-chain transaction hash"
                     />
                   </div>
 
@@ -703,7 +720,7 @@ export default function WalletPage() {
                   <IconCheck className="h-8 w-8 text-success" />
                 </div>
                 <p className="text-sm font-semibold text-success">Withdrawal Request Submitted!</p>
-                <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your bank account within 12-24 working hours.</p>
+                <p className="text-xs text-muted-foreground">Your withdrawal is being processed. Funds will be sent to your USDT wallet address within 12-24 working hours.</p>
                 <Button onClick={closeWithdraw} className="w-full">Done</Button>
               </div>
             ) : (
@@ -750,15 +767,15 @@ export default function WalletPage() {
                             − {sym}{withdrawalSettings.feeAmount.toFixed(2)} processing fee
                           </p>
                           <p className="text-xs font-semibold text-foreground pt-1 border-t border-brand/10">
-                            = {sym}{payout.toFixed(2)} you&apos;ll receive on UPI
+                            = {sym}{payout.toFixed(2)} in USDT you&apos;ll receive
                           </p>
                         </div>
                       );
                     })()}
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-muted-foreground mb-1">Your UPI ID (where you&apos;ll receive funds) *</Label>
-                    <Input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="yourname@upi" />
+                    <Label className="text-xs font-medium text-muted-foreground mb-1">Your USDT wallet address (TRC20 or BEP20) *</Label>
+                    <Input type="text" value={withdrawUpiId} onChange={(e) => setWithdrawUpiId(e.target.value)} placeholder="Enter your USDT wallet address" />
                   </div>
                 </div>
                 <div className="flex gap-3">

@@ -44,14 +44,9 @@ export const getWallet = async (req, res) => {
     const walletSettings = await getWalletSettings(getPrisma());
     return res.status(200).json({
       wallet,
-      upiId: env.ORVANTA_UPI_ID,
-      usdPayment: {
-        method: env.ORVANTA_USD_PAYMENT_METHOD,
-        accountName: env.ORVANTA_USD_ACCOUNT_NAME,
-        accountNumber: env.ORVANTA_USD_ACCOUNT_NUMBER,
-        routingNumber: env.ORVANTA_USD_ROUTING_NUMBER,
-        swiftCode: env.ORVANTA_USD_SWIFT_CODE,
-        bankName: env.ORVANTA_USD_BANK_NAME,
+      cryptoDeposit: {
+        trc20Address: env.ORVANTA_USDT_TRC20_ADDRESS,
+        bep20Address: env.ORVANTA_USDT_BEP20_ADDRESS,
       },
       pendingRequest: await getPendingRequest(req.user.id, ["DEPOSIT", "WITHDRAWAL"]),
       pendingBonusRequest: await getPendingRequest(req.user.id, ["BONUS_WITHDRAWAL"]),
@@ -319,14 +314,18 @@ export const requestDeposit = async (req, res) => {
 
 export const requestWithdrawal = async (req, res) => {
   try {
-    const { amount: rawAmount, upiId } = req.body;
+    // `upiId` is a legacy field name on the Transaction model — it now holds
+    // the user's crypto payout address (USDT, TRC20 or BEP20), not a UPI ID.
+    // Kept as-is to avoid a schema migration; only the label and validation
+    // message changed.
+    const { amount: rawAmount, upiId: payoutAddress } = req.body;
     const settings = await getWalletSettings(getPrisma());
     const minWithdrawal = parseFloat(settings.minWithdrawal);
     const feeAmount = parseFloat(settings.withdrawalFeeAmount);
 
     if (!rawAmount || rawAmount <= 0) return res.status(400).json({ message: "Invalid amount" });
     if (rawAmount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
-    if (!upiId || !upiId.trim()) return res.status(400).json({ message: "Your UPI ID is required to receive the withdrawal" });
+    if (!payoutAddress || !payoutAddress.trim()) return res.status(400).json({ message: "Your USDT wallet address is required to receive the withdrawal" });
 
     // The amount actually deducted from the wallet is rounded up to the next
     // $10 so the flat fee comes out of the rounding headroom rather than
@@ -364,13 +363,13 @@ export const requestWithdrawal = async (req, res) => {
         payoutAmount,
         status: "PENDING",
         description: `Withdrawal request of ${wallet.currency} ${amount.toFixed(2)} (a $${feeAmount.toFixed(2)} processing fee applies)`,
-        upiId: upiId.trim(),
+        upiId: payoutAddress.trim(),
         currency: wallet.currency,
       },
     });
 
     return res.status(201).json({
-      message: `Withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
+      message: `Withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} in USDT within 12-24 working hours.`,
       transaction,
     });
   } catch (error) {
@@ -426,14 +425,15 @@ export const transferBonusToWallet = async (req, res) => {
 // bonusBalance instead of balance. Balance is deducted at approval time.
 export const requestBonusWithdrawal = async (req, res) => {
   try {
-    const { amount: rawAmount, upiId } = req.body;
+    // See requestWithdrawal above — `upiId` now holds a USDT payout address.
+    const { amount: rawAmount, upiId: payoutAddress } = req.body;
     const settings = await getWalletSettings(getPrisma());
     const minWithdrawal = parseFloat(settings.minWithdrawal);
     const feeAmount = parseFloat(settings.withdrawalFeeAmount);
 
     if (!rawAmount || rawAmount <= 0) return res.status(400).json({ message: "Invalid amount" });
     if (rawAmount < minWithdrawal) return res.status(400).json({ message: `Minimum withdrawal is $${minWithdrawal.toFixed(2)}` });
-    if (!upiId || !upiId.trim()) return res.status(400).json({ message: "Your UPI ID is required to receive the withdrawal" });
+    if (!payoutAddress || !payoutAddress.trim()) return res.status(400).json({ message: "Your USDT wallet address is required to receive the withdrawal" });
 
     const amount = roundUpToTen(parseFloat(rawAmount));
 
@@ -465,13 +465,13 @@ export const requestBonusWithdrawal = async (req, res) => {
         payoutAmount,
         status: "PENDING",
         description: `Bonus withdrawal request of ${wallet.currency} ${amount.toFixed(2)} (a $${feeAmount.toFixed(2)} processing fee applies)`,
-        upiId: upiId.trim(),
+        upiId: payoutAddress.trim(),
         currency: wallet.currency,
       },
     });
 
     return res.status(201).json({
-      message: `Bonus withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} on your UPI within 12-24 working hours.`,
+      message: `Bonus withdrawal request submitted for $${amount.toFixed(2)}. A $${feeAmount.toFixed(2)} processing fee applies — you'll receive $${payoutAmount.toFixed(2)} in USDT within 12-24 working hours.`,
       transaction,
     });
   } catch (error) {

@@ -232,7 +232,7 @@ export default function Payments() {
       {/* Search */}
       <div className="relative">
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#89938E]" />
-        <Input type="text" placeholder="Search by name, email, transaction ID, UPI..." value={search}
+        <Input type="text" placeholder="Search by name, email, transaction ID, wallet address..." value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10 rounded-xl border-[#DDE4DE]" />
       </div>
@@ -332,7 +332,7 @@ export default function Payments() {
                       {selected.type === "DEPOSIT" ? (
                         <div className="flex justify-between"><span className="text-gray-500">Transaction ID / UTR</span><span className="font-mono text-xs text-gray-900 dark:text-white text-right">{selected.transactionId || "-"}</span></div>
                       ) : (
-                        <div className="flex justify-between"><span className="text-gray-500">User UPI ID</span><span className="font-mono text-xs text-gray-900 dark:text-white text-right">{selected.upiId || "-"}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">USDT Payout Address</span><span className="font-mono text-xs text-gray-900 dark:text-white text-right">{selected.upiId || "-"}</span></div>
                       )}
                       <div className="flex justify-between"><span className="text-gray-500">Submitted</span><span className="text-gray-900 dark:text-white text-right">{fmtDate(selected.createdAt)}</span></div>
                       {selected.processedAt && <div className="flex justify-between"><span className="text-gray-500">Processed</span><span className="text-gray-900 dark:text-white text-right">{fmtDate(selected.processedAt)}</span></div>}
@@ -355,7 +355,7 @@ export default function Payments() {
                   {/* withdrawal note */}
                   {(selected.type === "WITHDRAWAL" || selected.type === "BONUS_WITHDRAWAL") && (
                     <div className="rounded-xl border border-[#00A94F]/30 bg-[#EAF7E8] p-4 text-sm text-[#10211D]">
-                      Send <strong>{fmtAmt(selected)}</strong> to the user&apos;s UPI: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their {selected.type === "BONUS_WITHDRAWAL" ? "bonus" : "wallet"} balance.
+                      Send <strong>{fmtAmt(selected)}</strong> in USDT to the user&apos;s address: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their {selected.type === "BONUS_WITHDRAWAL" ? "bonus" : "wallet"} balance.
                     </div>
                   )}
 

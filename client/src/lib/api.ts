@@ -222,20 +222,16 @@ export const authAPI = {
     request<ApiResponse>("/auth/deactivate-account", { method: "POST" }),
 };
 
-export interface UsdPaymentInfo {
-  method: string;
-  accountName: string;
-  accountNumber: string;
-  routingNumber: string;
-  swiftCode: string;
-  bankName: string;
+export interface CryptoDepositInfo {
+  trc20Address: string;
+  bep20Address: string;
 }
 
 // ─── Wallet API ───
 export const walletAPI = {
   getWallet: () =>
     request<{
-      wallet: WalletData; upiId: string; usdPayment: UsdPaymentInfo;
+      wallet: WalletData; cryptoDeposit: CryptoDepositInfo;
       pendingRequest: TransactionData | null; pendingBonusRequest: TransactionData | null;
       currencyLocked: boolean;
       withdrawalSettings: { minWithdrawal: number; feeAmount: number };

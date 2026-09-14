@@ -216,7 +216,7 @@ export default function Support() {
                     </span>
                   </div>
                   <p className="text-xs text-[#68736E] truncate">
-                    {p.type === "DEPOSIT" ? `UTR: ${p.transactionId || "—"}` : `UPI: ${p.upiId || "—"}`}
+                    {p.type === "DEPOSIT" ? `TXN: ${p.transactionId || "—"}` : `USDT: ${p.upiId || "—"}`}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -271,9 +271,9 @@ export default function Support() {
                       <div className="flex justify-between"><span className="text-[#68736E]">Amount</span><span className="font-bold text-[#10211D] text-lg">{fmtAmt(selected)}</span></div>
                       <div className="flex justify-between"><span className="text-[#68736E]">Type</span><span className="font-medium text-[#10211D]">{selected.type === "DEPOSIT" ? "Deposit" : "Withdrawal"}</span></div>
                       {selected.type === "DEPOSIT" ? (
-                        <div className="flex justify-between"><span className="text-[#68736E]">Transaction ID / UTR</span><span className="font-mono text-xs text-[#10211D] text-right">{selected.transactionId || "-"}</span></div>
+                        <div className="flex justify-between"><span className="text-[#68736E]">Transaction / TXN ID</span><span className="font-mono text-xs text-[#10211D] text-right">{selected.transactionId || "-"}</span></div>
                       ) : (
-                        <div className="flex justify-between"><span className="text-[#68736E]">User UPI ID</span><span className="font-mono text-xs text-[#10211D] text-right">{selected.upiId || "-"}</span></div>
+                        <div className="flex justify-between"><span className="text-[#68736E]">USDT Payout Address</span><span className="font-mono text-xs text-[#10211D] text-right">{selected.upiId || "-"}</span></div>
                       )}
                       <div className="flex justify-between"><span className="text-[#68736E]">Submitted</span><span className="text-[#10211D] text-right">{fmtDate(selected.createdAt)}</span></div>
                       {selected.processedAt && <div className="flex justify-between"><span className="text-[#68736E]">Processed</span><span className="text-[#10211D] text-right">{fmtDate(selected.processedAt)}</span></div>}
@@ -296,7 +296,7 @@ export default function Support() {
                   {/* Withdrawal note */}
                   {selected.type === "WITHDRAWAL" && (
                     <div className="rounded-xl border border-[#DDE4DE] bg-[#F3F8EF] p-4 text-sm text-[#10211D]">
-                      Send <strong>{fmtAmt(selected)}</strong> to the user&apos;s UPI: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their wallet.
+                      Send <strong>{fmtAmt(selected)}</strong> in USDT to the user&apos;s address: <strong className="font-mono">{selected.upiId}</strong>. Then approve to deduct from their wallet.
                     </div>
                   )}
 
@@ -307,11 +307,11 @@ export default function Support() {
                       <ul className="text-sm text-[#10211D] space-y-1.5">
                         <li className="flex items-start gap-2">
                           <IconCheck size={14} className="mt-0.5 shrink-0 text-[#00A94F]" />
-                          Check screenshot matches the UPI ID / amount
+                          Check screenshot matches the wallet address / amount
                         </li>
                         <li className="flex items-start gap-2">
                           <IconCheck size={14} className="mt-0.5 shrink-0 text-[#00A94F]" />
-                          Verify Transaction ID / UTR is valid
+                          Verify Transaction / TXN ID is valid
                         </li>
                         <li className="flex items-start gap-2">
                           <IconCheck size={14} className="mt-0.5 shrink-0 text-[#00A94F]" />
@@ -366,7 +366,7 @@ export default function Support() {
               Reject {rejectModal.type === "DEPOSIT" ? "Deposit" : "Withdrawal"}
             </h3>
             <p className="text-sm text-[#68736E]">Provide a reason. The user will be notified.</p>
-            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Payment not received / screenshot unclear / UTR invalid..." rows={4}
+            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Payment not received / screenshot unclear / transaction ID invalid..." rows={4}
               className="w-full px-4 py-3 rounded-xl border border-[#DDE4DE] bg-[#F3F8EF] text-sm text-[#10211D] focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none" />
             <div className="flex gap-3 justify-end">
               <button onClick={() => setRejectModal(null)} disabled={actionLoading} className="px-4 py-2.5 rounded-xl border border-[#DDE4DE] text-sm font-medium text-[#68736E]">Cancel</button>
