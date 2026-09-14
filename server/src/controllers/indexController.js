@@ -93,6 +93,30 @@ async function creditPlatformWallet(prisma, amount, description, investmentId) {
 // ADMIN_FLAT_PERCENT of the capital — e.g. 2 + 0.5×4 + 1.8 = 5.8%.
 const ADMIN_FLAT_PERCENT = 1.8;
 
+// A referrer's own total Index investment (their ACTIVE + MATURED capital,
+// i.e. money they actually committed and kept invested) decides how many
+// referral levels they're allowed to earn from — the published 5-level
+// qualification structure. The three admin-configured minimums are
+// cumulative: clearing the level-1 minimum unlocks level 1 only, clearing
+// the level-1-3 minimum unlocks levels 1-3, and clearing the level-1-5
+// minimum unlocks all five.
+async function getReferrerMaxEligibleLevel(prisma, referrerId, settings) {
+  const invested = await prisma.indexInvestment.aggregate({
+    where: { userId: referrerId, status: { in: ["ACTIVE", "MATURED"] } },
+    _sum: { amount: true },
+  });
+  const totalInvested = parseFloat(invested._sum.amount || 0);
+
+  const tier1Min = parseFloat(settings.referralTierLevel1MinInvestment);
+  const tier123Min = parseFloat(settings.referralTierLevel123MinInvestment);
+  const tier12345Min = parseFloat(settings.referralTierLevel12345MinInvestment);
+
+  if (totalInvested >= tier12345Min) return 5;
+  if (totalInvested >= tier123Min) return 3;
+  if (totalInvested >= tier1Min) return 1;
+  return 0;
+}
+
 // Walks the referral chain up to 5 levels from the investor and pays each
 // qualified ancestor their configured cut of the invested CAPITAL (not the
 // maintenance fee). A fixed 1.8% of the capital always goes to the platform
@@ -130,16 +154,16 @@ async function distributeIndexCommission(prisma, investment, capitalAmount) {
     const percent = levelPercents[level - 1];
     const commissionAmount = (capitalAmount * percent) / 100;
 
-    // A referrer only earns commission on their downline's Index investment
-    // if they have purchased the Index themselves — an unqualified referrer
-    // (and everyone above them, once the chain breaks) is skipped entirely,
-    // and their share falls through to the platform wallet as leftover.
-    const referrerHasInvested = commissionAmount > 0 && (await prisma.indexInvestment.findFirst({
-      where: { userId: referral.referrerId },
-      select: { id: true },
-    }));
+    // A referrer only earns commission at this level if their own total
+    // Index investment clears the tier that unlocks it — e.g. a referrer
+    // sitting at $200 invested is qualified for level 1 only, so this
+    // level-2+ payout is skipped and falls through to the platform wallet,
+    // same as a referrer who never invested at all.
+    const referrerMaxLevel =
+      commissionAmount > 0 ? await getReferrerMaxEligibleLevel(prisma, referral.referrerId, settings) : 0;
+    const referrerQualifies = level <= referrerMaxLevel;
 
-    if (commissionAmount > 0 && referrerHasInvested) {
+    if (commissionAmount > 0 && referrerQualifies) {
       const referrerWallet = await prisma.wallet.findUnique({ where: { userId: referral.referrerId } });
       if (referrerWallet) {
         await prisma.wallet.update({
@@ -731,6 +755,7 @@ export const adminUpdateIndexSettings = async (req, res) => {
     const {
       maintenanceFeePercent, level1Percent, level2Percent, level3Percent, level4Percent, level5Percent,
       earlyWithdrawalPercent, maturityWithdrawalFee,
+      referralTierLevel1MinInvestment, referralTierLevel123MinInvestment, referralTierLevel12345MinInvestment,
     } = req.body;
     const settings = await getIndexSettings(getPrisma());
 
@@ -745,6 +770,9 @@ export const adminUpdateIndexSettings = async (req, res) => {
         ...(level5Percent !== undefined && { level5Percent: parseFloat(level5Percent) }),
         ...(earlyWithdrawalPercent !== undefined && { earlyWithdrawalPercent: parseFloat(earlyWithdrawalPercent) }),
         ...(maturityWithdrawalFee !== undefined && { maturityWithdrawalFee: parseFloat(maturityWithdrawalFee) }),
+        ...(referralTierLevel1MinInvestment !== undefined && { referralTierLevel1MinInvestment: parseFloat(referralTierLevel1MinInvestment) }),
+        ...(referralTierLevel123MinInvestment !== undefined && { referralTierLevel123MinInvestment: parseFloat(referralTierLevel123MinInvestment) }),
+        ...(referralTierLevel12345MinInvestment !== undefined && { referralTierLevel12345MinInvestment: parseFloat(referralTierLevel12345MinInvestment) }),
       },
     });
 

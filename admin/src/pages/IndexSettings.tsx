@@ -593,6 +593,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
     level5Percent: "0.5",
     earlyWithdrawalPercent: "17",
     maturityWithdrawalFee: "2",
+    referralTierLevel1MinInvestment: "200",
+    referralTierLevel123MinInvestment: "1000",
+    referralTierLevel12345MinInvestment: "2000",
   });
   const [saving, setSaving] = useState(false);
 
@@ -607,6 +610,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
         level5Percent: settings.level5Percent,
         earlyWithdrawalPercent: settings.earlyWithdrawalPercent ?? "17",
         maturityWithdrawalFee: settings.maturityWithdrawalFee ?? "2",
+        referralTierLevel1MinInvestment: settings.referralTierLevel1MinInvestment ?? "200",
+        referralTierLevel123MinInvestment: settings.referralTierLevel123MinInvestment ?? "1000",
+        referralTierLevel12345MinInvestment: settings.referralTierLevel12345MinInvestment ?? "2000",
       });
     }
   }, [settings]);
@@ -628,6 +634,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
         level5Percent: parseFloat(form.level5Percent),
         earlyWithdrawalPercent: parseFloat(form.earlyWithdrawalPercent),
         maturityWithdrawalFee: parseFloat(form.maturityWithdrawalFee),
+        referralTierLevel1MinInvestment: parseFloat(form.referralTierLevel1MinInvestment),
+        referralTierLevel123MinInvestment: parseFloat(form.referralTierLevel123MinInvestment),
+        referralTierLevel12345MinInvestment: parseFloat(form.referralTierLevel12345MinInvestment),
       });
       showToast("success", "Fee settings updated");
       await onRefresh();
@@ -709,6 +718,47 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
             className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
         </div>
         <p className="text-[11px] text-gray-400 mt-1">Flat fee charged if a user withdraws after their plan has fully matured.</p>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">5-Level Referral Income Qualification</h4>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          How many referral levels a user can earn commission from depends on how much they have personally
+          invested in the Index. Below the first threshold they earn nothing; each threshold unlocks more levels.
+        </p>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Level 1 unlocks at (min. self investment)</label>
+        <div className="relative mt-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+          <input type="number" step="1" min="0" value={form.referralTierLevel1MinInvestment}
+            onChange={(e) => setForm({ ...form, referralTierLevel1MinInvestment: e.target.value })}
+            className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Levels 1-3 unlock at (min. self investment)</label>
+        <div className="relative mt-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+          <input type="number" step="1" min="0" value={form.referralTierLevel123MinInvestment}
+            onChange={(e) => setForm({ ...form, referralTierLevel123MinInvestment: e.target.value })}
+            className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">All 5 levels unlock at (min. self investment)</label>
+        <div className="relative mt-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+          <input type="number" step="1" min="0" value={form.referralTierLevel12345MinInvestment}
+            onChange={(e) => setForm({ ...form, referralTierLevel12345MinInvestment: e.target.value })}
+            className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1">
+          Thresholds are cumulative and based on a user's total ACTIVE + MATURED Index investment.
+        </p>
       </div>
 
       <div className="flex justify-end">

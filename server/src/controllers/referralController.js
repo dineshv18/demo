@@ -7,13 +7,34 @@ function generateCode() {
 
 export const getMyStats = async (req, res) => {
   try {
-    const referrals = await getPrisma().referral.findMany({
+    const prisma = getPrisma();
+    const referrals = await prisma.referral.findMany({
       where: { referrerId: req.user.id },
       include: { commissions: true },
     });
 
-    const indexSettings = await getPrisma().indexSettings.findFirst();
+    const indexSettings = await prisma.indexSettings.findFirst();
     const commissionRate = indexSettings ? parseFloat(indexSettings.level1Percent) : 2;
+
+    // How many of the 5 referral levels this user has personally unlocked,
+    // based on their own total Index investment against the admin-published
+    // tier minimums — same rule the commission payout enforces server-side.
+    const invested = await prisma.indexInvestment.aggregate({
+      where: { userId: req.user.id, status: { in: ["ACTIVE", "MATURED"] } },
+      _sum: { amount: true },
+    });
+    const totalInvested = parseFloat(invested._sum.amount || 0);
+    const tier1Min = indexSettings ? parseFloat(indexSettings.referralTierLevel1MinInvestment) : 200;
+    const tier123Min = indexSettings ? parseFloat(indexSettings.referralTierLevel123MinInvestment) : 1000;
+    const tier12345Min = indexSettings ? parseFloat(indexSettings.referralTierLevel12345MinInvestment) : 2000;
+
+    let unlockedLevel = 0;
+    if (totalInvested >= tier12345Min) unlockedLevel = 5;
+    else if (totalInvested >= tier123Min) unlockedLevel = 3;
+    else if (totalInvested >= tier1Min) unlockedLevel = 1;
+
+    const nextTierMinInvestment =
+      unlockedLevel >= 5 ? null : unlockedLevel >= 1 ? tier123Min : tier1Min;
 
     const stats = {
       totalReferrals: referrals.length,
@@ -22,6 +43,16 @@ export const getMyStats = async (req, res) => {
       deposited: referrals.filter(r => ["DEPOSITED", "COMMISSION_PAID"].includes(r.status)).length,
       totalCommission: referrals.reduce((sum, r) => sum + r.commissions.reduce((cs, c) => cs + parseFloat(c.amount), 0), 0),
       commissionRate,
+      levelUnlock: {
+        totalInvested,
+        unlockedLevel,
+        nextTierMinInvestment,
+        tiers: {
+          level1MinInvestment: tier1Min,
+          level123MinInvestment: tier123Min,
+          level12345MinInvestment: tier12345Min,
+        },
+      },
     };
 
     return res.status(200).json({ stats });

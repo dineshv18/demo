@@ -381,6 +381,18 @@ model IndexSettings {
   level5Percent     Decimal  @default(0.5) @db.Decimal(5, 2)
   earlyWithdrawalPercent Decimal @default(17) @db.Decimal(5, 2)
   maturityWithdrawalFee  Decimal @default(2) @db.Decimal(18, 2)
+
+  // Minimum total Index investment (across all of a referrer's own
+  // investments) required to unlock each referral-income tier. Level 1 opens
+  // at referralTierLevel1MinInvestment; levels 2-3 additionally require
+  // referralTierLevel123MinInvestment; all 5 levels additionally require
+  // referralTierLevel12345MinInvestment. A referrer below a tier's minimum
+  // simply doesn't qualify for commission at those levels — their share
+  // falls through to the platform wallet like any other unfilled level.
+  referralTierLevel1MinInvestment      Decimal @default(200) @db.Decimal(18, 2)
+  referralTierLevel123MinInvestment    Decimal @default(1000) @db.Decimal(18, 2)
+  referralTierLevel12345MinInvestment  Decimal @default(2000) @db.Decimal(18, 2)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

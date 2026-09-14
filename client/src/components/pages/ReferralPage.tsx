@@ -5,7 +5,7 @@ import {
   IconCopy, IconUsers, IconCheck, IconWallet,
   IconShare, IconLink, IconUserPlus, IconTrophy, IconRefresh,
   IconAlertCircle, IconShield,
-  IconGift, IconCurrencyDollar, IconInfoCircle,
+  IconGift, IconCurrencyDollar, IconInfoCircle, IconLock, IconLockOpen,
 } from "@tabler/icons-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -14,7 +14,7 @@ import {
 import {
   referralAPI, indexAPI,
   type Referral, type ReferralStats, type ReferralDashboardStats,
-  type HierarchyItem, type ReferralEarningsBreakdown,
+  type HierarchyItem, type ReferralEarningsBreakdown, type ReferralLevelUnlock,
 } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,94 @@ function LineTooltip({ active, payload, label }: { active?: boolean; payload?: A
       <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
       <p className="text-sm font-bold text-foreground">${Number(payload[0].value).toFixed(2)}</p>
     </div>
+  );
+}
+
+/**
+ * The 5-level referral structure only pays out as many levels as a user has
+ * personally unlocked through their own Index investment (real, admin-set
+ * thresholds — never hardcoded here). This renders that ladder: which levels
+ * are already earning, which are still locked, and what it takes to open
+ * the next one.
+ */
+function LevelUnlockCard({ unlock }: { unlock: ReferralLevelUnlock }) {
+  const { totalInvested, unlockedLevel, nextTierMinInvestment, tiers } = unlock;
+  const rungs: { levels: string; min: number; unlockedAt: number }[] = [
+    { levels: "Level 1", min: tiers.level1MinInvestment, unlockedAt: 1 },
+    { levels: "Levels 1–3", min: tiers.level123MinInvestment, unlockedAt: 3 },
+    { levels: "Levels 1–5", min: tiers.level12345MinInvestment, unlockedAt: 5 },
+  ];
+  const progressPercent =
+    nextTierMinInvestment && nextTierMinInvestment > 0
+      ? Math.min(100, (totalInvested / nextTierMinInvestment) * 100)
+      : 100;
+
+  return (
+    <Card className="p-5 gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-base font-bold text-foreground">Your Referral Level Access</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            How many levels you earn from depends on your own total Index investment —
+            currently <span className="font-semibold text-foreground">${totalInvested.toFixed(2)}</span>.
+          </p>
+        </div>
+        <Badge variant="outline" className="gap-1.5 border-brand/25 bg-brand/10 text-brand font-semibold shrink-0">
+          {unlockedLevel > 0 ? <IconLockOpen size={12} /> : <IconLock size={12} />}
+          {unlockedLevel > 0 ? `${unlockedLevel} of 5 levels unlocked` : "No levels unlocked yet"}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {rungs.map((rung) => {
+          const isUnlocked = unlockedLevel >= rung.unlockedAt;
+          return (
+            <div
+              key={rung.levels}
+              className={`rounded-xl border p-4 ${
+                isUnlocked ? "border-success/25 bg-success-soft" : "border-border bg-muted/30"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {isUnlocked ? (
+                  <IconLockOpen className="size-4 text-success shrink-0" />
+                ) : (
+                  <IconLock className="size-4 text-muted-foreground shrink-0" />
+                )}
+                <p className={`text-sm font-semibold ${isUnlocked ? "text-success" : "text-foreground"}`}>
+                  {rung.levels}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                {isUnlocked
+                  ? "Unlocked — you earn commission at these levels."
+                  : `Unlocks at $${rung.min.toFixed(2)} invested`}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {nextTierMinInvestment !== null && (
+        <div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+            <span>Progress to next level tier</span>
+            <span className="font-medium text-foreground">
+              ${totalInvested.toFixed(2)} / ${nextTierMinInvestment.toFixed(2)}
+            </span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-brand transition-all"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Invest ${Math.max(0, nextTierMinInvestment - totalInvested).toFixed(2)} more in the Index to unlock the next tier of levels.
+          </p>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -299,6 +387,9 @@ export default function ReferralPage() {
         </div>
       </Card>
 
+      {/* Level Unlock — which of the 5 referral levels this user currently earns from */}
+      {dashStats?.levelUnlock && <LevelUnlockCard unlock={dashStats.levelUnlock} />}
+
       {/* Earnings Chart + Level Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Earnings Over Time */}
@@ -399,52 +490,75 @@ export default function ReferralPage() {
                 <TableRow>
                   <TableHead className="text-xs uppercase tracking-wider">Level</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider">Commission %</TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider">Access</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider text-right">Earnings</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {levelRates.map((rate, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium text-foreground">Level {i + 1}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-transparent font-semibold"
-                        style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
-                      >
-                        {rate.toFixed(2)}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-foreground">${(byLevel[i] || 0).toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
+                {levelRates.map((rate, i) => {
+                  const isUnlocked = (dashStats?.levelUnlock?.unlockedLevel ?? 5) >= i + 1;
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium text-foreground">Level {i + 1}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-transparent font-semibold"
+                          style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
+                        >
+                          {rate.toFixed(2)}%
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {isUnlocked ? (
+                          <Badge variant="outline" className="gap-1 border-success/25 bg-success-soft text-success font-semibold">
+                            <IconLockOpen size={10} /> Unlocked
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="gap-1 border-border bg-muted/50 text-muted-foreground font-semibold">
+                            <IconLock size={10} /> Locked
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-foreground">${(byLevel[i] || 0).toFixed(2)}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
 
           <ul className="divide-y divide-border sm:hidden">
-            {levelRates.map((rate, i) => (
-              <li key={i} className="flex items-center gap-3 py-3">
-                <span
-                  className="grid size-9 shrink-0 place-items-center rounded-lg text-xs font-bold"
-                  style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
-                >
-                  L{i + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-foreground">Level {i + 1}</p>
-                  <p className="text-[0.6875rem] text-muted-foreground">
-                    {rate.toFixed(2)}% commission
-                  </p>
-                </div>
-                <span className="text-money shrink-0 text-sm text-foreground">
-                  ${(byLevel[i] || 0).toFixed(2)}
-                </span>
-              </li>
-            ))}
+            {levelRates.map((rate, i) => {
+              const isUnlocked = (dashStats?.levelUnlock?.unlockedLevel ?? 5) >= i + 1;
+              return (
+                <li key={i} className="flex items-center gap-3 py-3">
+                  <span
+                    className="grid size-9 shrink-0 place-items-center rounded-lg text-xs font-bold"
+                    style={{ backgroundColor: `${LEVEL_COLORS[i]}1a`, color: LEVEL_COLORS[i] }}
+                  >
+                    L{i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">Level {i + 1}</p>
+                    <p className="text-[0.6875rem] text-muted-foreground flex items-center gap-1">
+                      {rate.toFixed(2)}% commission
+                      {isUnlocked ? (
+                        <IconLockOpen size={10} className="text-success" />
+                      ) : (
+                        <IconLock size={10} className="text-muted-foreground" />
+                      )}
+                    </p>
+                  </div>
+                  <span className="text-money shrink-0 text-sm text-foreground">
+                    ${(byLevel[i] || 0).toFixed(2)}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
           <p className="text-[11px] text-muted-foreground mt-3">
-            Applies to the maintenance fee taken when a referral invests in the Index. Levels 2–5 pay the ancestor referrers in your chain.
+            Applies to a referral&apos;s Index investment. Levels 2–5 pay the ancestor referrers in your chain, provided each has unlocked that level with their own investment.
           </p>
         </Card>
       )}

@@ -420,6 +420,17 @@ export interface HierarchyItem {
 }
 
 // ─── Referral API ───
+export type ReferralLevelUnlock = {
+  totalInvested: number;
+  unlockedLevel: number;
+  nextTierMinInvestment: number | null;
+  tiers: {
+    level1MinInvestment: number;
+    level123MinInvestment: number;
+    level12345MinInvestment: number;
+  };
+};
+
 export type ReferralDashboardStats = {
   totalReferrals: number;
   registered: number;
@@ -427,6 +438,7 @@ export type ReferralDashboardStats = {
   deposited: number;
   totalCommission: number;
   commissionRate: number;
+  levelUnlock?: ReferralLevelUnlock;
 };
 
 export interface ReferralEarningsBreakdown {

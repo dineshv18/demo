@@ -343,6 +343,9 @@ export interface IndexSettings {
   level5Percent: string;
   earlyWithdrawalPercent: string;
   maturityWithdrawalFee: string;
+  referralTierLevel1MinInvestment: string;
+  referralTierLevel123MinInvestment: string;
+  referralTierLevel12345MinInvestment: string;
 }
 
 export interface IndexInvestmentRecord {
@@ -388,7 +391,7 @@ export const indexAPI = {
   getInvestments: () => request<{ investments: IndexInvestmentRecord[] }>("/admin/index/investments"),
 
   getSettings: () => request<{ settings: IndexSettings }>("/admin/index/settings"),
-  updateSettings: (data: Partial<{ maintenanceFeePercent: number; level1Percent: number; level2Percent: number; level3Percent: number; level4Percent: number; level5Percent: number; earlyWithdrawalPercent: number; maturityWithdrawalFee: number }>) =>
+  updateSettings: (data: Partial<{ maintenanceFeePercent: number; level1Percent: number; level2Percent: number; level3Percent: number; level4Percent: number; level5Percent: number; earlyWithdrawalPercent: number; maturityWithdrawalFee: number; referralTierLevel1MinInvestment: number; referralTierLevel123MinInvestment: number; referralTierLevel12345MinInvestment: number }>) =>
     request<{ message: string; settings: IndexSettings }>("/admin/index/settings", { method: "PUT", body: JSON.stringify(data) }),
 };
 
