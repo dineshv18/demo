@@ -12,6 +12,29 @@ import { cn } from "@/lib/utils";
  * visual treatment moved to the navy/gold system.
  */
 
+/**
+ * Wraps a panel with four fine gold corner brackets — a certificate/
+ * invitation-style ornament for the public site's key cards (feature
+ * tiles, fact strips, forms). Purely decorative, so it's aria-hidden.
+ */
+export function CornerFrame({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("corner-frame", className)}>
+      <span aria-hidden className="corner-frame-marks -left-px -top-px border-t-2 border-l-2 rounded-tl-sm" />
+      <span aria-hidden className="corner-frame-marks -right-px -top-px border-t-2 border-r-2 rounded-tr-sm" />
+      <span aria-hidden className="corner-frame-marks -left-px -bottom-px border-b-2 border-l-2 rounded-bl-sm" />
+      <span aria-hidden className="corner-frame-marks -right-px -bottom-px border-b-2 border-r-2 rounded-br-sm" />
+      {children}
+    </div>
+  );
+}
+
 export function Section({
   children,
   className = "",

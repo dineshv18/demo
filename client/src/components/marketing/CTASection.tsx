@@ -55,7 +55,7 @@ export function CTASection({
             {eyebrow}
           </span>
 
-          <h2 className="font-display text-3xl font-semibold leading-tight tracking-[-0.03em] text-white md:text-4xl">
+          <h2 className="font-classic text-3xl font-bold leading-tight tracking-[-0.01em] text-white md:text-4xl">
             {title}
           </h2>
 

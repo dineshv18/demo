@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { IconArrowRight, IconCheck, IconShieldCheck, IconX } from "@tabler/icons-react";
+import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 
-import { Reveal, Section } from "@/components/site/primitives";
+import { Eyebrow, Reveal, Section } from "@/components/site/primitives";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
@@ -42,15 +42,12 @@ export function WhatYouGet({ id }: { id?: string }) {
       {/* Heading */}
       <div className="mx-auto max-w-3xl text-center">
         <Reveal>
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-card px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-foreground shadow-xs">
-            <IconShieldCheck className="size-3.5 text-brand" stroke={2} />
-            What You Get
-          </span>
+          <Eyebrow>What You Get</Eyebrow>
         </Reveal>
         <Reveal delay={0.05}>
-          <h2 className="mt-6 font-display text-3xl font-semibold tracking-[-0.03em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
+          <h2 className="mt-5 font-classic text-3xl font-bold tracking-[-0.01em] text-foreground md:text-[2.75rem] md:leading-[1.1]">
             Built differently,{" "}
-            <span className="text-gradient">on purpose.</span>
+            <span className="text-gradient italic">on purpose.</span>
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
@@ -65,7 +62,7 @@ export function WhatYouGet({ id }: { id?: string }) {
       <div className="mt-14 grid gap-5 lg:grid-cols-2 lg:gap-6">
         {/* ORVANTA */}
         <Reveal>
-          <article className="relative flex h-full flex-col overflow-hidden rounded-xl border border-brand/30 bg-card shadow-lifted">
+          <article className="relative flex h-full flex-col overflow-hidden rounded-md border-2 border-brand/35 bg-card shadow-lifted">
             {/* Gold hairline marks this as the recommended side */}
             <span
               aria-hidden
@@ -78,7 +75,7 @@ export function WhatYouGet({ id }: { id?: string }) {
 
             <header className="relative border-b border-border p-6 sm:p-7">
               <div className="flex flex-wrap items-center gap-3">
-                <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
+                <h3 className="font-classic text-xl font-bold tracking-tight text-foreground">
                   ORVANTA
                 </h3>
                 <span className="rounded-full bg-brand px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-brand-foreground">
@@ -118,7 +115,7 @@ export function WhatYouGet({ id }: { id?: string }) {
         <Reveal delay={0.08}>
           <article
             className={cn(
-              "flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface-2/50 shadow-card"
+              "flex h-full flex-col overflow-hidden rounded-md border border-brand/15 bg-surface-2/50 shadow-card"
             )}
           >
             <header className="border-b border-border p-6 sm:p-7">

@@ -228,6 +228,30 @@
   --shadow-tint-3: rgba(0, 0, 0, 0.66);
 }
 
+/* ---------------- CLASSIC: public marketing pages only ----------------
+   Home / About / Platform / Contact render inside a `.site-classic`
+   wrapper (see SiteShell). In light mode this swaps the plain white/off-
+   white ground for a warm ivory "paper" and richer gold-lined borders —
+   the rest of the app (dashboard, auth) is outside this scope and keeps
+   the standard navy/gold tokens untouched. Dark mode stays the same deep
+   navy as everywhere else, so only the light-mode block below overrides
+   anything. */
+html:not(.dark) .site-classic {
+  --background: #FBF6E9;
+  --surface: #FFFDF6;
+  --surface-2: #F5EDD8;
+  --card: #FFFDF6;
+  --card-foreground: #071426;
+  --accent: #F6ECCE;
+  --accent-foreground: #6B540E;
+  --border: #E3D6AD;
+  --hairline: #E3D6AD;
+  --muted: #F2E9D3;
+  --shadow-tint-1: rgba(90, 68, 8, 0.08);
+  --shadow-tint-2: rgba(90, 68, 8, 0.16);
+  --shadow-tint-3: rgba(90, 68, 8, 0.26);
+}
+
 @layer base {
   * { border-color: var(--color-border); }
 

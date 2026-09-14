@@ -110,7 +110,7 @@ function FeatureCard({
   return (
     <div
       className={cn(
-        "card-tilt group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card p-6 shadow-card",
+        "card-tilt group relative flex h-full flex-col overflow-hidden rounded-md border border-brand/20 bg-card p-6 shadow-card",
         className
       )}
     >
@@ -198,7 +198,7 @@ export default function PlatformPage() {
 
         {/* Quick capability strip — seamless, under the preview */}
         <Reveal delay={0.28}>
-          <dl className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border">
+          <dl className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-md border-2 border-brand/25 bg-brand/15">
             {[
               { label: "KYC", sub: "Gated access" },
               { label: "5-Level", sub: "Referrals" },
@@ -206,7 +206,7 @@ export default function PlatformPage() {
             ].map((s) => (
               <div key={s.sub} className="bg-card p-5 text-center sm:p-6">
                 <dt className="sr-only">{s.sub}</dt>
-                <dd className="font-display text-xl font-semibold text-brand sm:text-2xl">
+                <dd className="font-classic text-xl font-bold text-brand sm:text-2xl">
                   {s.label}
                 </dd>
                 <p className="mt-1 text-[0.6875rem] uppercase tracking-wide text-muted-foreground">

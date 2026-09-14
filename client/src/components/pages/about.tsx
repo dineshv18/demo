@@ -156,11 +156,11 @@ export default function AboutPage() {
 
         {/* Fact strip — sits directly under the hero, seamless like Home's */}
         <Reveal delay={0.25}>
-          <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+          <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-md border-2 border-brand/25 bg-brand/15 sm:grid-cols-4">
             {facts.map((f) => (
               <div key={f.label} className="bg-card p-5 text-center sm:p-6">
                 <dt className="sr-only">{f.label}</dt>
-                <dd className="font-display text-2xl font-semibold tracking-tight text-brand sm:text-3xl">
+                <dd className="font-classic text-2xl font-bold tracking-tight text-brand sm:text-3xl">
                   {f.value}
                 </dd>
                 <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug text-muted-foreground">

@@ -102,9 +102,9 @@ export function FeatureCard({
   );
 
   const shell = cn(
-    "group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card p-6 shadow-card",
+    "group relative flex h-full flex-col overflow-hidden rounded-md border border-brand/20 bg-card p-6 shadow-card",
     "transition-[transform,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)]",
-    "hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lifted",
+    "hover:-translate-y-0.5 hover:border-brand/45 hover:shadow-lifted",
     className
   );
 
@@ -338,16 +338,16 @@ export function FactStrip({
   facts: { icon: TablerIcon; value: string; label: string; detail: string }[];
 }) {
   return (
-    <div className="relative border-y border-border bg-card/50">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px overflow-hidden bg-border sm:grid-cols-2 lg:grid-cols-4">
+    <div className="relative border-y-2 border-brand/25 bg-card/50">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px overflow-hidden bg-brand/15 sm:grid-cols-2 lg:grid-cols-4">
         {facts.map((f, i) => (
           <Reveal key={f.label} delay={i * 0.06} className="bg-background">
             <div className="group h-full bg-card/50 p-6 transition-colors hover:bg-accent/40 lg:p-8">
               <IconChip icon={f.icon} size="sm" />
-              <p className="mt-5 font-display text-2xl font-semibold tracking-tight text-foreground">
+              <p className="mt-5 font-classic text-2xl font-bold tracking-tight text-brand">
                 {f.value}
               </p>
-              <p className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-brand">
+              <p className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-foreground">
                 {f.label}
               </p>
               <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">

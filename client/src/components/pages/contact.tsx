@@ -172,7 +172,7 @@ export default function ContactPage() {
     return (
       <Section className="py-14!">
         <Reveal>
-          <div className="relative mx-auto max-w-lg overflow-hidden rounded-xl border border-border bg-card p-8 text-center shadow-card sm:p-12">
+          <div className="relative mx-auto max-w-lg overflow-hidden rounded-md border border-brand/20 bg-card p-8 text-center shadow-card sm:p-12">
             <span
               aria-hidden
               className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-brand/50 to-transparent"
@@ -248,7 +248,7 @@ export default function ContactPage() {
       {/* ── CONTACT CHANNELS — seamless table, like a spec sheet ── */}
       <Section className="pt-0!">
         <Reveal>
-          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border shadow-card sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-md border-2 border-brand/25 bg-brand/15 shadow-card sm:grid-cols-3">
             {channels.map((c) => (
               <ChannelCard key={c.label} channel={c} />
             ))}
@@ -261,7 +261,7 @@ export default function ContactPage() {
         <div className="grid items-start gap-10 lg:grid-cols-12">
           {/* Form */}
           <Reveal className="lg:col-span-7">
-            <div className="rounded-xl border border-border bg-card p-6 shadow-card sm:p-10">
+            <div className="rounded-md border border-brand/20 bg-card p-6 shadow-card sm:p-10">
               <span aria-hidden className="gold-rule block w-14" />
               <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-foreground sm:text-3xl">
                 Send a message
@@ -388,7 +388,7 @@ export default function ContactPage() {
             </Reveal>
 
             <Reveal delay={0.14}>
-              <div className="flex items-start gap-4 rounded-xl border border-border bg-card p-6 shadow-card">
+              <div className="flex items-start gap-4 rounded-md border border-brand/20 bg-card p-6 shadow-card">
                 <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-accent text-brand ring-1 ring-brand/15">
                   <IconShieldCheck className="size-5" stroke={1.75} />
                 </span>
@@ -410,7 +410,7 @@ export default function ContactPage() {
       {/* ── FAQ ── */}
       <Section>
         <Reveal>
-          <div className="rounded-xl border border-border bg-card p-8 shadow-card md:p-12">
+          <div className="rounded-md border border-brand/20 bg-card p-8 shadow-card md:p-12">
             <span aria-hidden className="gold-rule block w-14" />
             <h2 className="mt-5 font-display text-2xl font-semibold tracking-[-0.02em] text-foreground md:text-3xl">
               Common questions
