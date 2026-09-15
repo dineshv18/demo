@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Eyebrow, Reveal, Section } from "../site/primitives";
+import { SplitSection } from "@/components/marketing/sections";
 import { CtaBanner } from "../site/CtaBanner";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
@@ -259,6 +260,33 @@ export default function ContactPage() {
           </div>
         </Reveal>
       </Section>
+
+      {/* ── REAL SUPPORT DESK ── */}
+      <SplitSection
+        id="real-support"
+        eyebrow="Support"
+        title={
+          <>
+            A real person, not{" "}
+            <span className="text-gradient">an unmonitored inbox.</span>
+          </>
+        }
+        description="Every ticket you open from your dashboard is tracked, referenced, and answered by our support desk — usually within 2–3 working hours, not lost in a queue."
+        visual={
+          <div className="relative mx-auto w-full max-w-xs">
+            <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/illustrations/contact-support.jpg"
+                alt="Chat bubbles representing responsive support"
+                className="w-full rounded-xl"
+              />
+            </div>
+          </div>
+        }
+        reversed
+      />
 
       {/* ── FORM + ASIDE ── */}
       <Section>

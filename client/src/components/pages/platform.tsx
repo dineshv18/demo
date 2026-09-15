@@ -23,7 +23,7 @@ import {
 import { Eyebrow, Reveal, Section, SectionTitle } from "../site/primitives";
 import { HeroPreview } from "@/components/marketing/HeroPreview";
 import { CTASection } from "@/components/marketing/CTASection";
-import { FeatureGrid as SharedFeatureGrid, StatementSection } from "@/components/marketing/sections";
+import { FeatureGrid as SharedFeatureGrid, SplitSection, StatementSection } from "@/components/marketing/sections";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
@@ -248,6 +248,32 @@ export default function PlatformPage() {
           ))}
         </div>
       </Section>
+
+      {/* ─── ONE DASHBOARD ─── */}
+      <SplitSection
+        id="one-dashboard"
+        eyebrow="Your Platform"
+        title={
+          <>
+            Everything in{" "}
+            <span className="text-gradient">one dashboard.</span>
+          </>
+        }
+        description="Wallet, Index tiers, referral earnings, and live performance charts — all in a single view that updates the moment something changes. No separate statements, no spreadsheets."
+        visual={
+          <div className="relative mx-auto w-full max-w-sm">
+            <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/illustrations/platform-dashboard.jpg"
+                alt="A dashboard panel with growth charts, tiers, and a wallet"
+                className="w-full rounded-xl"
+              />
+            </div>
+          </div>
+        }
+      />
 
       {/* ─── WALLET ─── */}
       <SharedFeatureGrid

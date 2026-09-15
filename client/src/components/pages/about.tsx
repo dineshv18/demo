@@ -14,7 +14,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Eyebrow, Reveal, Section } from "../site/primitives";
-import { FeatureGrid, StatementSection } from "@/components/marketing/sections";
+import { FeatureGrid, SplitSection, StatementSection } from "@/components/marketing/sections";
 import { CTASection } from "@/components/marketing/CTASection";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { useAuth } from "@/lib/AuthContext";
@@ -193,6 +193,33 @@ export default function AboutPage() {
           </div>
         </Reveal>
       </Section>
+
+      {/* IDENTITY VERIFIED FIRST */}
+      <SplitSection
+        id="verified-first"
+        eyebrow="Security"
+        title={
+          <>
+            Every account is{" "}
+            <span className="text-gradient">verified, not assumed.</span>
+          </>
+        }
+        description="No deposit, allocation, or withdrawal happens until identity verification clears. It's the one step every account completes before anything else — the baseline the rest of the platform is built on."
+        visual={
+          <div className="relative mx-auto w-full max-w-xs">
+            <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/illustrations/about-verify.jpg"
+                alt="A verification shield over identity documents"
+                className="w-full rounded-xl"
+              />
+            </div>
+          </div>
+        }
+        reversed
+      />
 
       {/* PRINCIPLES */}
       <FeatureGrid
