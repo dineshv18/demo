@@ -423,14 +423,21 @@ export default function IndexPage() {
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                           <Input
-                            type="number"
+                            type="number" inputMode="decimal"
                             min="0"
                             step="0.01"
                             value={topUpAmount}
                             onChange={(e) => setTopUpAmount(e.target.value)}
                             placeholder="Amount to add"
-                            className="pl-7"
+                            className="pl-7 pr-16"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setTopUpAmount(String(balance))}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
+                          >
+                            Max
+                          </button>
                         </div>
                         <Button
                           onClick={handleTopUp}
@@ -574,14 +581,21 @@ export default function IndexPage() {
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
               <Input
-                type="number"
+                type="number" inputMode="decimal"
                 min="0"
                 step="0.01"
                 value={investAmount}
                 onChange={(e) => setInvestAmount(e.target.value)}
                 placeholder="Enter amount to invest"
-                className="pl-7"
+                className="pl-7 pr-16"
               />
+              <button
+                type="button"
+                onClick={() => setInvestAmount(String(balance))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
+              >
+                Max
+              </button>
             </div>
             {investAmountNum > 0 && matchingTiers.length === 0 && (
               <p className="text-xs text-warning">No plan matches this amount — check the ranges above.</p>

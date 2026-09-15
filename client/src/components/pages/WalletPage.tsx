@@ -671,7 +671,7 @@ export default function WalletPage() {
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
                       <Input
-                        type="number"
+                        type="number" inputMode="decimal"
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(e.target.value)}
                         placeholder="0.00"
@@ -783,8 +783,15 @@ export default function WalletPage() {
                     <Label className="text-xs font-medium text-muted-foreground mb-1">Amount *</Label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
-                      <Input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
-                        className="pl-8" />
+                      <Input type="number" inputMode="decimal" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="0.00" min="0" max={withdrawSource === "bonus" ? bonusBalance : balance} step="0.01"
+                        className="pl-8 pr-16" />
+                      <button
+                        type="button"
+                        onClick={() => setWithdrawAmount(String(withdrawSource === "bonus" ? bonusBalance : balance))}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
+                      >
+                        Max
+                      </button>
                     </div>
                     {withdrawalSettings && (
                       <p className="text-[11px] text-muted-foreground mt-1">
@@ -876,8 +883,15 @@ export default function WalletPage() {
                   <Label className="text-xs font-medium text-muted-foreground mb-1">Amount *</Label>
                   <div className="relative">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 font-medium">{sym}</span>
-                    <Input type="number" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} placeholder="0.00" min="0" max={bonusBalance} step="0.01"
-                      className="pl-8" />
+                    <Input type="number" inputMode="decimal" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} placeholder="0.00" min="0" max={bonusBalance} step="0.01"
+                      className="pl-8 pr-16" />
+                    <button
+                      type="button"
+                      onClick={() => setTransferAmount(String(bonusBalance))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
+                    >
+                      Max
+                    </button>
                   </div>
                 </div>
                 <div className="flex gap-3">
