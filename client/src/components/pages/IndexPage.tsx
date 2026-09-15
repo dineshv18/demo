@@ -41,7 +41,10 @@ function AllocationDonutTooltip({ active, payload }: { active?: boolean; payload
   if (!active || !payload?.length) return null;
   const p = payload[0];
   return (
-    <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-xl">
+    <div
+      className="rounded-xl border border-border px-3 py-2 shadow-xl"
+      style={{ backgroundColor: "var(--card)", opacity: 1 }}
+    >
       <p className="text-[11px] text-muted-foreground mb-1">{p.name}</p>
       <p className="text-sm font-bold text-foreground">{p.value.toFixed(2)}%</p>
     </div>
@@ -798,8 +801,8 @@ export default function IndexPage() {
                   When you invest in an Index tier, your funds are strategically allocated across multiple asset classes to reduce risk and maximize returns.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-6 items-center">
-                  <div className="h-48 w-48 mx-auto relative shrink-0">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:items-center">
+                  <div className="h-52 w-52 sm:h-56 sm:w-56 mx-auto relative shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -816,7 +819,7 @@ export default function IndexPage() {
                             <Cell key={a.id} fill={ALLOCATION_COLORS[i % ALLOCATION_COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip content={<AllocationDonutTooltip />} />
+                        <Tooltip content={<AllocationDonutTooltip />} wrapperStyle={{ outline: "none", zIndex: 20 }} />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -825,25 +828,25 @@ export default function IndexPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
                     {allocations.map((a, i) => (
                       <div key={a.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-3">
                         {a.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={a.imageUrl} alt="" className="size-12 shrink-0 rounded-lg object-contain bg-card p-1 ring-1 ring-border" />
+                          <img src={a.imageUrl} alt="" className="size-16 sm:size-20 shrink-0 rounded-lg object-contain bg-card p-1.5 ring-1 ring-border" />
                         ) : (
                           <span
                             aria-hidden
-                            className="size-12 shrink-0 rounded-lg"
+                            className="size-16 sm:size-20 shrink-0 rounded-lg"
                             style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
                           />
                         )}
                         <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-semibold text-foreground">
+                          <p className="text-sm font-semibold text-foreground">
                             {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>
                           </p>
                           {a.description && (
-                            <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
+                            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
                           )}
                         </div>
                       </div>
@@ -858,15 +861,17 @@ export default function IndexPage() {
                         <p className="text-xs font-semibold text-foreground mb-2">{a.label}</p>
                         <div className="space-y-1.5">
                           {a.details!.map((d) => (
-                            <div key={d.label} className="flex items-center gap-2">
-                              <span className="w-20 shrink-0 text-[11px] text-muted-foreground">{d.label}</span>
-                              <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                                <span
-                                  className="block h-full rounded-full bg-brand"
-                                  style={{ width: `${Math.min(d.percent, 100)}%` }}
-                                />
+                            <div key={d.label} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                              <span className="text-[11px] text-muted-foreground sm:w-28 sm:shrink-0 truncate" title={d.label}>{d.label}</span>
+                              <div className="flex flex-1 items-center gap-2">
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                  <span
+                                    className="block h-full rounded-full bg-brand"
+                                    style={{ width: `${Math.min(d.percent, 100)}%` }}
+                                  />
+                                </div>
+                                <span className="w-9 shrink-0 text-right text-[11px] font-medium text-foreground">{d.percent}%</span>
                               </div>
-                              <span className="w-8 shrink-0 text-right text-[11px] font-medium text-foreground">{d.percent}%</span>
                             </div>
                           ))}
                         </div>
