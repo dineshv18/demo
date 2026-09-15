@@ -74,6 +74,17 @@ export function AuthBrandPanel({
         />
       </svg>
 
+      {/* Padlock graphic — a large, softly faded background element (transparent
+          PNG) rather than a boxed icon, so it reads as part of the panel's own
+          artwork instead of a mismatched card sitting on top of it. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/illustrations/auth-secure-transparent.png"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute -right-10 top-16 hidden w-72 opacity-25 mix-blend-screen xl:block"
+      />
+
       <div className="relative z-10 flex w-full flex-col justify-between p-10 text-white xl:p-14">
         <div className="flex items-start justify-between gap-4">
           <Link href="/" aria-label="ORVANTA Financial — home">
@@ -86,20 +97,9 @@ export function AuthBrandPanel({
         </div>
 
         <div>
-          <div className="mb-6 flex items-center gap-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/illustrations/auth-secure.png"
-              alt=""
-              aria-hidden
-              className="hidden size-24 shrink-0 rounded-2xl border border-white/10 bg-white/95 p-2 shadow-lg xl:block"
-            />
-            <div>
-              <h1 className="font-classic text-4xl font-bold leading-[1.02] tracking-[-0.03em] xl:text-[3.6rem]">
-                {title}
-              </h1>
-            </div>
-          </div>
+          <h1 className="mb-5 max-w-xl font-classic text-4xl font-bold leading-[1.02] tracking-[-0.03em] xl:text-[3.6rem]">
+            {title}
+          </h1>
           <p className="max-w-sm text-base leading-relaxed text-white/60">{description}</p>
 
           <p className="mt-8 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-brand">
