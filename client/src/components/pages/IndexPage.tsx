@@ -564,16 +564,26 @@ export default function IndexPage() {
                         <Button
                           size="sm"
                           onClick={() => {
+                            if (isSelected) {
+                              // Tap the already-selected plan again to switch
+                              // it back off — the clearest way to reset and
+                              // pick a different one.
+                              setSelectedTierId("");
+                              setInvestAmount("");
+                              return;
+                            }
                             setSelectedTierId(t.id);
-                            if (!investAmount) setInvestAmount(t.minAmount);
+                            // Switching plans should always work — reset the
+                            // amount to the new tier's own minimum rather
+                            // than leaving a figure that only fit the old one.
+                            setInvestAmount(t.minAmount);
                           }}
-                          disabled={investAmountNum > 0 && !isEligible}
                           className={`w-full sm:w-auto shrink-0 gap-1.5 font-semibold ${isSelected ? "" : "btn-glow btn-glow-hover"}`}
                           variant={isSelected ? "outline" : "default"}
                         >
                           {isSelected ? (
                             <>
-                              <IconCircleCheck className="h-4 w-4" /> Selected
+                              <IconCircleCheck className="h-4 w-4" /> Selected — tap to change
                             </>
                           ) : (
                             "Choose Plan"
