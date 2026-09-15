@@ -597,6 +597,73 @@ export default function IndexPage() {
                           <p className="text-xs sm:text-sm font-bold text-foreground mt-0.5">${parseFloat(t.minAmount).toLocaleString()}</p>
                         </div>
                       </div>
+
+                      {/* Amount + invest — sits right inside the selected
+                          tier's own card, so it's obvious which plan the
+                          input applies to instead of being one shared block
+                          at the bottom of a long list. */}
+                      {isSelected && (
+                        <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                            <Input
+                              type="number" inputMode="decimal"
+                              min="0"
+                              step="0.01"
+                              value={investAmount}
+                              onChange={(e) => setInvestAmount(e.target.value)}
+                              placeholder="Enter amount to invest"
+                              className="pl-7 pr-16"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setInvestAmount(String(balance))}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
+                            >
+                              Max
+                            </button>
+                          </div>
+                          {investAmountNum > 0 && matchingTiers.length === 0 && (
+                            <p className="text-xs text-warning">No plan matches this amount — check the ranges above.</p>
+                          )}
+
+                          <Button
+                            onClick={handleInvest}
+                            disabled={investLoading || balance <= 0 || !selectedTierId}
+                            className="w-full btn-glow btn-glow-hover gap-2"
+                          >
+                            {investLoading ? (
+                              <>
+                                <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
+                              </>
+                            ) : balance <= 0 ? (
+                              "Add funds to your wallet first"
+                            ) : (
+                              "Invest Now"
+                            )}
+                          </Button>
+
+                          {selectedTier && (
+                            <div className="rounded-lg border border-warning/25 bg-warning-soft px-3 py-2">
+                              <p className="text-xs text-warning font-medium">
+                                A {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% one-time fee applies when you invest
+                              </p>
+                              {investAmountNum > 0 && (
+                                <p className="text-[11px] text-muted-foreground mt-0.5">
+                                  ${investAmountNum.toFixed(2)} − ${((investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} fee = $
+                                  {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} actually invested
+                                </p>
+                              )}
+                              <p className="text-[11px] text-muted-foreground mt-1">
+                                Withdrawing early costs {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}%. Waiting until it matures costs only {parseFloat(selectedTier.exitFeePercent).toFixed(2)}%.
+                              </p>
+                            </div>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Amount comes out of your wallet balance (${balance.toFixed(2)} available).
+                          </p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -605,66 +672,9 @@ export default function IndexPage() {
               <p className="text-xs text-muted-foreground py-4 text-center">No investment plans available right now.</p>
             )}
 
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
-              <Input
-                type="number" inputMode="decimal"
-                min="0"
-                step="0.01"
-                value={investAmount}
-                onChange={(e) => setInvestAmount(e.target.value)}
-                placeholder="Enter amount to invest"
-                className="pl-7 pr-16"
-              />
-              <button
-                type="button"
-                onClick={() => setInvestAmount(String(balance))}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-accent/70"
-              >
-                Max
-              </button>
-            </div>
-            {investAmountNum > 0 && matchingTiers.length === 0 && (
-              <p className="text-xs text-warning">No plan matches this amount — check the ranges above.</p>
+            {!selectedTierId && activeTiers.length > 0 && (
+              <p className="text-xs text-muted-foreground text-center py-2">Pick a plan above to continue</p>
             )}
-
-            <Button
-              onClick={handleInvest}
-              disabled={investLoading || balance <= 0 || !selectedTierId}
-              className="w-full btn-glow btn-glow-hover gap-2"
-            >
-              {investLoading ? (
-                <>
-                  <IconLoader2 className="h-4 w-4 animate-spin" /> Investing...
-                </>
-              ) : balance <= 0 ? (
-                "Add funds to your wallet first"
-              ) : !selectedTierId ? (
-                "Pick a plan above to continue"
-              ) : (
-                "Invest Now"
-              )}
-            </Button>
-
-            {selectedTier && (
-              <div className="rounded-lg border border-warning/25 bg-warning-soft px-3 py-2">
-                <p className="text-xs text-warning font-medium">
-                  A {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% one-time fee applies when you invest
-                </p>
-                {investAmountNum > 0 && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    ${investAmountNum.toFixed(2)} − ${((investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} fee = $
-                    {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} actually invested
-                  </p>
-                )}
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Withdrawing early costs {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}%. Waiting until it matures costs only {parseFloat(selectedTier.exitFeePercent).toFixed(2)}%.
-                </p>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Amount comes out of your wallet balance (${balance.toFixed(2)} available).
-            </p>
           </div>
         </Card>
 
