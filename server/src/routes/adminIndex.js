@@ -3,6 +3,7 @@ import {
   adminGetTiers, adminCreateTier, adminUpdateTier, adminDeleteTier,
   adminGetPrices, adminCreatePrice, adminUpdatePrice, adminDeletePrice,
   adminGetManager, adminUpsertManager,
+  adminGetFundAllocations, adminCreateFundAllocation, adminUpdateFundAllocation, adminDeleteFundAllocation,
   adminGetInvestments,
   adminGetIndexSettings, adminUpdateIndexSettings,
 } from "../controllers/indexController.js";
@@ -26,6 +27,12 @@ router.delete("/prices/:id", adminDeletePrice);
 // Manager
 router.get("/manager", adminGetManager);
 router.post("/manager", adminUpsertManager);
+
+// Fund Allocation
+router.get("/fund-allocations", adminGetFundAllocations);
+router.post("/fund-allocations", adminCreateFundAllocation);
+router.put("/fund-allocations/:id", adminUpdateFundAllocation);
+router.delete("/fund-allocations/:id", adminDeleteFundAllocation);
 
 // Investments
 router.get("/investments", adminGetInvestments);

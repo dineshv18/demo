@@ -408,6 +408,28 @@ model IndexManager {
   updatedAt   DateTime @updatedAt
 }
 
+// How the Index's pooled capital is actually diversified across asset
+// classes (e.g. Forex, Crypto, Metals, CFDs) — admin-published so the
+// client dashboard can show real, disclosed allocation instead of an
+// invented breakdown. `percent` values are expected to sum to 100 across
+// active rows, enforced in the admin UI rather than the database.
+model FundAllocation {
+  id          String   @id @default(uuid())
+  label       String
+  percent     Decimal  @db.Decimal(5, 2)
+  description String?
+  // Free-form sub-items shown under the category (e.g. "EUR/USD — 10%")
+  // as a JSON array of { label, percent } so admin can adjust the detail
+  // rows without a schema change.
+  details     Json?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
 enum IndexInvestmentStatus {
   ACTIVE
   MATURED

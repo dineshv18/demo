@@ -496,6 +496,19 @@ export interface IndexData {
   manager: IndexManager | null;
 }
 
+export interface FundAllocationDetail {
+  label: string;
+  percent: number;
+}
+
+export interface FundAllocation {
+  id: string;
+  label: string;
+  percent: number;
+  description: string | null;
+  details: FundAllocationDetail[] | null;
+}
+
 export interface IndexInvestment {
   id: string;
   userId: string;
@@ -517,6 +530,7 @@ export interface IndexInvestment {
 export const indexAPI = {
   getData: () => request<IndexData>("/index"),
   getMyInvestments: () => request<{ investments: IndexInvestment[] }>("/index/investments"),
+  getFundAllocations: () => request<{ allocations: FundAllocation[] }>("/index/fund-allocations"),
   invest: (amount: number, tierId: string) =>
     request<{ message: string; investment: IndexInvestment }>("/index/invest", {
       method: "POST",

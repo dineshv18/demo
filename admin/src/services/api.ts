@@ -348,6 +348,21 @@ export interface IndexSettings {
   referralTierLevel12345MinInvestment: string;
 }
 
+export interface FundAllocationDetail {
+  label: string;
+  percent: number;
+}
+
+export interface FundAllocation {
+  id: string;
+  label: string;
+  percent: string;
+  description: string | null;
+  details: FundAllocationDetail[] | null;
+  sortOrder: number;
+  isActive: boolean;
+}
+
 export interface IndexInvestmentRecord {
   id: string;
   userId: string;
@@ -387,6 +402,14 @@ export const indexAPI = {
   getManager: () => request<{ manager: IndexManager | null }>("/admin/index/manager"),
   upsertManager: (data: { name: string; title: string; bio?: string; imageUrl?: string }) =>
     request<{ message: string; manager: IndexManager }>("/admin/index/manager", { method: "POST", body: JSON.stringify(data) }),
+
+  getFundAllocations: () => request<{ allocations: FundAllocation[] }>("/admin/index/fund-allocations"),
+  createFundAllocation: (data: { label: string; percent: number; description?: string; details?: FundAllocationDetail[]; sortOrder?: number }) =>
+    request<{ message: string; allocation: FundAllocation }>("/admin/index/fund-allocations", { method: "POST", body: JSON.stringify(data) }),
+  updateFundAllocation: (id: string, data: Partial<{ label: string; percent: number; description: string; details: FundAllocationDetail[]; sortOrder: number; isActive: boolean }>) =>
+    request<{ message: string; allocation: FundAllocation }>(`/admin/index/fund-allocations/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteFundAllocation: (id: string) =>
+    request<{ message: string }>(`/admin/index/fund-allocations/${id}`, { method: "DELETE" }),
 
   getInvestments: () => request<{ investments: IndexInvestmentRecord[] }>("/admin/index/investments"),
 

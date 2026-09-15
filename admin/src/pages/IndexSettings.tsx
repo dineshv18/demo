@@ -2,17 +2,18 @@
 import { useState, useEffect } from "react";
 import {
   IconPlus, IconEdit, IconTrash, IconCheck,
-  IconChartLine, IconUser, IconCoin, IconPercentage,
+  IconChartLine, IconUser, IconCoin, IconPercentage, IconChartPie,
 } from "@tabler/icons-react";
-import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager, type IndexSettings as IndexSettingsData } from "../services/api";
+import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager, type IndexSettings as IndexSettingsData, type FundAllocation, type FundAllocationDetail } from "../services/api";
 
-type Tab = "tiers" | "prices" | "manager" | "fees";
+type Tab = "tiers" | "prices" | "manager" | "allocations" | "fees";
 
 export default function IndexSettings() {
   const [tab, setTab] = useState<Tab>("tiers");
   const [tiers, setTiers] = useState<IndexTier[]>([]);
   const [prices, setPrices] = useState<IndexPriceEntry[]>([]);
   const [manager, setManager] = useState<IndexManager | null>(null);
+  const [allocations, setAllocations] = useState<FundAllocation[]>([]);
   const [feeSettings, setFeeSettings] = useState<IndexSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -25,15 +26,17 @@ export default function IndexSettings() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [tiersRes, pricesRes, managerRes, settingsRes] = await Promise.allSettled([
+      const [tiersRes, pricesRes, managerRes, allocationsRes, settingsRes] = await Promise.allSettled([
         indexAPI.getTiers(),
         indexAPI.getPrices(),
         indexAPI.getManager(),
+        indexAPI.getFundAllocations(),
         indexAPI.getSettings(),
       ]);
       if (tiersRes.status === "fulfilled") setTiers(tiersRes.value.tiers);
       if (pricesRes.status === "fulfilled") setPrices(pricesRes.value.prices);
       if (managerRes.status === "fulfilled") setManager(managerRes.value.manager);
+      if (allocationsRes.status === "fulfilled") setAllocations(allocationsRes.value.allocations);
       if (settingsRes.status === "fulfilled") setFeeSettings(settingsRes.value.settings);
     } catch (err: any) {
       showToast("error", err.message || "Failed to load data");
@@ -58,15 +61,16 @@ export default function IndexSettings() {
       </div>
 
       {/* Tabs */}
-      <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900">
-        {(["tiers", "prices", "manager", "fees"] as const).map((t) => (
+      <div className="inline-flex flex-wrap rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white dark:bg-gray-900">
+        {(["tiers", "prices", "manager", "allocations", "fees"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${tab === t ? "bg-[#EAF7E8] text-[#00A94F]" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
             {t === "tiers" && <IconCoin size={16} />}
             {t === "prices" && <IconChartLine size={16} />}
             {t === "manager" && <IconUser size={16} />}
+            {t === "allocations" && <IconChartPie size={16} />}
             {t === "fees" && <IconPercentage size={16} />}
-            {t === "tiers" ? "Investment Tiers" : t === "prices" ? "Price History" : t === "manager" ? "Index Manager" : "Fees & Commission"}
+            {t === "tiers" ? "Investment Tiers" : t === "prices" ? "Price History" : t === "manager" ? "Index Manager" : t === "allocations" ? "Fund Allocation" : "Fees & Commission"}
           </button>
         ))}
       </div>
@@ -78,6 +82,7 @@ export default function IndexSettings() {
           {tab === "tiers" && <TiersTab tiers={tiers} onRefresh={fetchAll} showToast={showToast} />}
           {tab === "prices" && <PricesTab prices={prices} onRefresh={fetchAll} showToast={showToast} />}
           {tab === "manager" && <ManagerTab manager={manager} onRefresh={fetchAll} showToast={showToast} />}
+          {tab === "allocations" && <AllocationsTab allocations={allocations} onRefresh={fetchAll} showToast={showToast} />}
           {tab === "fees" && <FeesTab settings={feeSettings} onRefresh={fetchAll} showToast={showToast} />}
         </>
       )}
@@ -520,6 +525,214 @@ function PricesTab({ prices, onRefresh, showToast }: { prices: IndexPriceEntry[]
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: FundAllocation[]; onRefresh: () => Promise<void>; showToast: (t: "success" | "error", m: string) => void }) {
+  const [editId, setEditId] = useState<string | null>(null);
+  const [newRow, setNewRow] = useState(false);
+  const [form, setForm] = useState({ label: "", percent: "", description: "", detailsText: "" });
+  const [saving, setSaving] = useState(false);
+
+  const resetForm = () => setForm({ label: "", percent: "", description: "", detailsText: "" });
+
+  // Sub-items are edited as plain "Label — 10" lines, one per row, and parsed
+  // into the { label, percent }[] JSON the API expects.
+  const parseDetails = (text: string): FundAllocationDetail[] | undefined => {
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return undefined;
+    const details: FundAllocationDetail[] = [];
+    for (const line of lines) {
+      const m = line.match(/^(.+?)\s*[—-]\s*([\d.]+)%?$/);
+      if (m) details.push({ label: m[1].trim(), percent: parseFloat(m[2]) });
+    }
+    return details.length > 0 ? details : undefined;
+  };
+
+  const detailsToText = (details: FundAllocationDetail[] | null) =>
+    (details || []).map((d) => `${d.label} — ${d.percent}`).join("\n");
+
+  const totalPercent = allocations.filter((a) => a.isActive).reduce((sum, a) => sum + parseFloat(a.percent), 0);
+
+  const startEdit = (a: FundAllocation) => {
+    setEditId(a.id);
+    setNewRow(false);
+    setForm({ label: a.label, percent: a.percent, description: a.description || "", detailsText: detailsToText(a.details) });
+  };
+
+  const handleCreate = async () => {
+    if (!form.label || !form.percent) return;
+    setSaving(true);
+    try {
+      await indexAPI.createFundAllocation({
+        label: form.label,
+        percent: parseFloat(form.percent),
+        description: form.description || undefined,
+        details: parseDetails(form.detailsText),
+        sortOrder: allocations.length,
+      });
+      showToast("success", "Allocation created");
+      setNewRow(false);
+      resetForm();
+      await onRefresh();
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to create");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdate = async (id: string) => {
+    setSaving(true);
+    try {
+      await indexAPI.updateFundAllocation(id, {
+        label: form.label,
+        percent: parseFloat(form.percent),
+        description: form.description || undefined,
+        details: parseDetails(form.detailsText),
+      });
+      showToast("success", "Allocation updated");
+      setEditId(null);
+      resetForm();
+      await onRefresh();
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to update");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleActive = async (a: FundAllocation) => {
+    try {
+      await indexAPI.updateFundAllocation(a.id, { isActive: !a.isActive });
+      showToast("success", a.isActive ? "Allocation hidden" : "Allocation shown");
+      await onRefresh();
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to update");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this allocation category?")) return;
+    try {
+      await indexAPI.deleteFundAllocation(id);
+      showToast("success", "Allocation deleted");
+      await onRefresh();
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to delete");
+    }
+  };
+
+  const FormFields = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label className="text-xs font-medium text-gray-500">Category label *</label>
+        <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })}
+          placeholder="e.g. Forex" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+      </div>
+      <div>
+        <label className="text-xs font-medium text-gray-500">Allocation % *</label>
+        <input type="number" step="0.01" value={form.percent} onChange={(e) => setForm({ ...form, percent: e.target.value })}
+          placeholder="35" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+      </div>
+      <div className="sm:col-span-2">
+        <label className="text-xs font-medium text-gray-500">Description</label>
+        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+          placeholder="e.g. Major currency pairs (EUR/USD, GBP/USD, USD/JPY etc.)" className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+      </div>
+      <div className="sm:col-span-2">
+        <label className="text-xs font-medium text-gray-500">Sub-items (one per line, e.g. &quot;EUR/USD — 10&quot;)</label>
+        <textarea value={form.detailsText} onChange={(e) => setForm({ ...form, detailsText: e.target.value })}
+          rows={4} placeholder={"EUR/USD — 10\nGBP/USD — 8\nUSD/JPY — 5"}
+          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40 font-mono" />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {allocations.length} categories — active total: <span className={totalPercent === 100 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-amber-600 dark:text-amber-400 font-semibold"}>{totalPercent.toFixed(2)}%</span>
+        </p>
+        <button onClick={() => { setNewRow(true); setEditId(null); resetForm(); }}
+          className="flex items-center gap-2 px-4 py-2 bg-[#10211D] hover:bg-[#10211D]/90 text-white rounded-xl text-sm font-semibold transition-colors">
+          <IconPlus size={16} /> Add Category
+        </button>
+      </div>
+
+      {totalPercent !== 100 && allocations.length > 0 && (
+        <p className="text-xs text-amber-600 dark:text-amber-400">Active categories should add up to 100% — this is what the client dashboard will display as-is.</p>
+      )}
+
+      {newRow && (
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Allocation Category</h3>
+          <FormFields />
+          <div className="flex gap-3 justify-end">
+            <button onClick={() => { setNewRow(false); resetForm(); }}
+              className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>
+            <button onClick={handleCreate} disabled={saving || !form.label || !form.percent}
+              className="px-4 py-2.5 rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+              {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
+              Create
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {allocations.map((a) => (
+          <div key={a.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+            {editId === a.id ? (
+              <div className="space-y-4">
+                <FormFields />
+                <div className="flex gap-3 justify-end">
+                  <button onClick={() => { setEditId(null); resetForm(); }}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400">Cancel</button>
+                  <button onClick={() => handleUpdate(a.id)} disabled={saving}
+                    className="px-4 py-2.5 rounded-xl bg-[#10211D] hover:bg-[#10211D]/90 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2">
+                    {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <IconCheck size={16} />}
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-gray-900 dark:text-white">{a.label}</p>
+                    <span className="text-sm font-bold text-[#00A94F]">{parseFloat(a.percent).toFixed(2)}%</span>
+                    {!a.isActive && <span className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">Hidden</span>}
+                  </div>
+                  {a.description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{a.description}</p>}
+                  {a.details && a.details.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                      {a.details.map((d) => (
+                        <li key={d.label}>{d.label} — {d.percent}%</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button onClick={() => handleToggleActive(a)} title={a.isActive ? "Hide from dashboard" : "Show on dashboard"}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    {a.isActive ? "Hide" : "Show"}
+                  </button>
+                  <button onClick={() => startEdit(a)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"><IconEdit size={16} /></button>
+                  <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"><IconTrash size={16} /></button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {allocations.length === 0 && !newRow && (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center text-sm text-gray-500">
+            No allocation categories yet — add one to show fund diversification on the client dashboard.
+          </div>
+        )}
       </div>
     </div>
   );

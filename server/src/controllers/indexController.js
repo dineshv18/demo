@@ -721,6 +721,106 @@ export const adminUpsertManager = async (req, res) => {
   }
 };
 
+// Fund Allocation — how the pooled Index capital is diversified across
+// asset classes, published by admin. Same active-only / ordered pattern as
+// tiers, so the client dashboard always shows real, disclosed allocation.
+export const adminGetFundAllocations = async (req, res) => {
+  try {
+    const allocations = await getPrisma().fundAllocation.findMany({
+      orderBy: { sortOrder: "asc" },
+    });
+    return res.status(200).json({ allocations });
+  } catch (error) {
+    console.error("Admin get fund allocations error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const adminCreateFundAllocation = async (req, res) => {
+  try {
+    const { label, percent, description, details, sortOrder } = req.body;
+    if (!label || percent === undefined) {
+      return res.status(400).json({ message: "label and percent are required" });
+    }
+
+    const allocation = await getPrisma().fundAllocation.create({
+      data: {
+        label,
+        percent: parseFloat(percent),
+        description: description || null,
+        details: details ?? undefined,
+        sortOrder: parseInt(sortOrder || 0),
+      },
+    });
+
+    return res.status(201).json({ message: "Allocation created", allocation });
+  } catch (error) {
+    console.error("Admin create fund allocation error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const adminUpdateFundAllocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { label, percent, description, details, sortOrder, isActive } = req.body;
+
+    const existing = await getPrisma().fundAllocation.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Allocation not found" });
+
+    const allocation = await getPrisma().fundAllocation.update({
+      where: { id },
+      data: {
+        ...(label !== undefined && { label }),
+        ...(percent !== undefined && { percent: parseFloat(percent) }),
+        ...(description !== undefined && { description: description || null }),
+        ...(details !== undefined && { details }),
+        ...(sortOrder !== undefined && { sortOrder: parseInt(sortOrder) }),
+        ...(isActive !== undefined && { isActive }),
+      },
+    });
+
+    return res.status(200).json({ message: "Allocation updated", allocation });
+  } catch (error) {
+    console.error("Admin update fund allocation error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const adminDeleteFundAllocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const existing = await getPrisma().fundAllocation.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Allocation not found" });
+
+    await getPrisma().fundAllocation.delete({ where: { id } });
+    return res.status(200).json({ message: "Allocation deleted" });
+  } catch (error) {
+    console.error("Admin delete fund allocation error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// User-facing — only active allocations, in display order.
+export const getFundAllocations = async (req, res) => {
+  try {
+    const allocations = await getPrisma().fundAllocation.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, label: true, percent: true, description: true, details: true },
+    });
+    return res.status(200).json({
+      allocations: allocations.map((a) => ({
+        ...a,
+        percent: parseFloat(a.percent),
+      })),
+    });
+  } catch (error) {
+    console.error("Get fund allocations error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Investments
 export const adminGetInvestments = async (req, res) => {
   try {
