@@ -181,7 +181,7 @@ export function StepGrid({
   eyebrow?: string;
   title: ReactNode;
   description?: string;
-  steps: { icon: TablerIcon; title: string; desc: string }[];
+  steps: { icon: TablerIcon; title: string; desc: string; image?: string }[];
   id?: string;
 }) {
   return (
@@ -191,28 +191,45 @@ export function StepGrid({
       <ol className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
         {steps.map((s, i) => (
           <Reveal key={s.title} delay={i * 0.07}>
-            <li className="group relative flex h-full flex-col rounded-xl border border-border bg-card p-6 shadow-card transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand/35">
+            <li className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand/35">
               {i < steps.length - 1 && (
                 <span
                   aria-hidden
                   className="absolute -right-3 top-11 hidden h-px w-6 bg-border lg:block"
                 />
               )}
-              <div className="flex items-center justify-between">
-                <IconChip icon={s.icon} />
-                <span
-                  aria-hidden
-                  className="font-display text-[0.6875rem] font-semibold tracking-[0.2em] text-brand/40"
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+              {s.image && (
+                <div className="relative flex h-32 shrink-0 items-center justify-center overflow-hidden bg-accent/40">
+                  <span aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.image} alt="" aria-hidden className="relative h-24 w-24 object-contain" />
+                  <span
+                    aria-hidden
+                    className="absolute right-3 top-3 font-display text-[0.6875rem] font-semibold tracking-[0.2em] text-brand/50"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+              )}
+              <div className="flex flex-1 flex-col p-6">
+                {!s.image && (
+                  <div className="flex items-center justify-between">
+                    <IconChip icon={s.icon} />
+                    <span
+                      aria-hidden
+                      className="font-display text-[0.6875rem] font-semibold tracking-[0.2em] text-brand/40"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                )}
+                <h3 className={cn("font-display text-lg font-semibold tracking-tight text-foreground", !s.image && "mt-5")}>
+                  {s.title}
+                </h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+                  {s.desc}
+                </p>
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold tracking-tight text-foreground">
-                {s.title}
-              </h3>
-              <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
-                {s.desc}
-              </p>
             </li>
           </Reveal>
         ))}

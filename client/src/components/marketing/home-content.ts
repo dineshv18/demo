@@ -53,26 +53,30 @@ export const structuralFacts: {
 ];
 
 /** The onboarding sequence the product actually enforces, in order. */
-export const onboardingSteps: { icon: TablerIcon; title: string; desc: string }[] = [
+export const onboardingSteps: { icon: TablerIcon; title: string; desc: string; image: string }[] = [
   {
     icon: IconShieldCheck,
     title: "Verify your identity",
     desc: "Complete KYC once. Until it clears, no funds move — that gate protects you as much as the platform.",
+    image: "/illustrations/step-id.png",
   },
   {
     icon: IconWallet,
     title: "Fund your wallet",
     desc: "Deposit by crypto or bank transfer. Your wallet balance stays separate from anything you've allocated.",
+    image: "/illustrations/step-wallet.png",
   },
   {
     icon: IconStack2,
     title: "Choose an Index tier",
     desc: "Each tier publishes its minimum, maximum and maturity period in your dashboard before you commit.",
+    image: "/illustrations/step-tier.png",
   },
   {
     icon: IconChartLine,
     title: "Track it in real time",
     desc: "Watch your position, wallet and referral commission update together from a single dashboard.",
+    image: "/illustrations/step-track.png",
   },
 ];
 
