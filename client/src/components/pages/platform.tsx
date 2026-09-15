@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Eyebrow, Reveal, Section, SectionTitle } from "../site/primitives";
+import { Float } from "@/components/shared/motion";
 import { HeroPreview } from "@/components/marketing/HeroPreview";
 import { CTASection } from "@/components/marketing/CTASection";
 import { FeatureGrid as SharedFeatureGrid, SplitSection, StatementSection } from "@/components/marketing/sections";
@@ -261,7 +262,7 @@ export default function PlatformPage() {
         }
         description="Wallet, Index tiers, referral earnings, and live performance charts — all in a single view that updates the moment something changes. No separate statements, no spreadsheets."
         visual={
-          <div className="relative mx-auto w-full max-w-sm">
+          <Float distance={8} duration={4.2} className="relative mx-auto w-full max-w-sm">
             <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -271,7 +272,7 @@ export default function PlatformPage() {
                 className="w-full rounded-xl"
               />
             </div>
-          </div>
+          </Float>
         }
       />
 

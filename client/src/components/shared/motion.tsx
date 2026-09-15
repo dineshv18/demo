@@ -138,6 +138,43 @@ export function PageTransition({ children, ...props }: HTMLMotionProps<"div">) {
   );
 }
 
+type FloatProps = HTMLMotionProps<"div"> & {
+  /** Vertical travel in pixels, up and down from rest. Keep small — this is
+   * an ambient "alive" cue, not a bounce. */
+  distance?: number;
+  /** Full cycle length in seconds. */
+  duration?: number;
+  /** Offsets the animation phase so a row of cards doesn't move in lockstep. */
+  delay?: number;
+};
+
+/**
+ * A gentle, continuous up-down float — the ambient "this page is alive"
+ * cue used on marketing tiles and preview panels. Runs forever on a smooth
+ * sine-like easing (not a bounce), and collapses to a static render under
+ * `prefers-reduced-motion`.
+ */
+export function Float({
+  distance = 8,
+  duration = 4,
+  delay = 0,
+  children,
+  ...props
+}: FloatProps) {
+  const reduce = useReducedMotion();
+  if (reduce) return <div {...(props as React.ComponentProps<"div">)}>{children as React.ReactNode}</div>;
+
+  return (
+    <motion.div
+      animate={{ y: [0, -distance, 0] }}
+      transition={{ duration, delay, ease: EASE_IN_OUT, repeat: Infinity, repeatType: "loop" }}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 /**
  * Counts a financial figure up to its value.
  *

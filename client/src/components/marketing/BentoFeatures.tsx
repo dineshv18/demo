@@ -13,6 +13,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Reveal, Section, SectionTitle } from "@/components/site/primitives";
+import { Float } from "@/components/shared/motion";
 import { cn } from "@/lib/utils";
 
 type TablerIcon = React.ComponentType<IconProps>;
@@ -291,8 +292,12 @@ export function BentoFeatures({ id }: { id?: string }) {
                   : "flex-col"
               )}
             >
-              {/* Visual sits on top — or alongside, on the full-width tile */}
-              <div className={cn("flex", t.span === 6 && "lg:w-1/2")}>{t.visual}</div>
+              {/* Visual sits on top — or alongside, on the full-width tile.
+                  A gentle continuous float keeps the section feeling live
+                  rather than static, with each tile phased slightly apart. */}
+              <Float distance={6} duration={3.6} delay={i * 0.35} className={cn("flex", t.span === 6 && "lg:w-1/2")}>
+                {t.visual}
+              </Float>
 
               <div
                 className={cn(

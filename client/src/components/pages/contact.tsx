@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Eyebrow, Reveal, Section } from "../site/primitives";
+import { Float } from "@/components/shared/motion";
 import { SplitSection } from "@/components/marketing/sections";
 import { CtaBanner } from "../site/CtaBanner";
 import { SheenButton } from "@/components/marketing/SheenButton";
@@ -240,13 +241,15 @@ export default function ContactPage() {
           <div className="relative flex min-h-[320px] flex-col justify-end overflow-hidden bg-[#09070c] p-8 text-white lg:p-10">
             <span aria-hidden className="bg-ticker absolute inset-0 opacity-30" />
             <span aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-brand/30 blur-3xl" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/illustrations/contact-clock-transparent.png"
-              alt=""
+            <Float
+              distance={9}
+              duration={4}
               aria-hidden
               className="pointer-events-none absolute -top-8 right-0 w-64 opacity-25 mix-blend-screen"
-            />
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/illustrations/contact-clock-transparent.png" alt="" className="w-full" />
+            </Float>
             <div className="relative">
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-purple-300">Expected response</p>
               <p className="mt-3 font-classic text-4xl font-bold">2–3 hours</p>
@@ -280,7 +283,7 @@ export default function ContactPage() {
         }
         description="Every ticket you open from your dashboard is tracked, referenced, and answered by our support desk — usually within 2–3 working hours, not lost in a queue."
         visual={
-          <div className="relative mx-auto w-full max-w-xs">
+          <Float distance={8} duration={4.2} className="relative mx-auto w-full max-w-xs">
             <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -290,7 +293,7 @@ export default function ContactPage() {
                 className="w-full rounded-xl"
               />
             </div>
-          </div>
+          </Float>
         }
         reversed
       />

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IconArrowRight, type IconProps } from "@tabler/icons-react";
 
 import { Reveal, Section, SectionTitle } from "@/components/site/primitives";
+import { Float } from "@/components/shared/motion";
 import { cn } from "@/lib/utils";
 
 type TablerIcon = React.ComponentType<IconProps>;
@@ -201,8 +202,10 @@ export function StepGrid({
               {s.image && (
                 <div className="relative flex h-32 shrink-0 items-center justify-center overflow-hidden bg-accent/40">
                   <span aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.image} alt="" aria-hidden className="relative h-24 w-24 object-contain" />
+                  <Float distance={5} duration={3.4} delay={i * 0.3}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.image} alt="" aria-hidden className="relative h-24 w-24 object-contain" />
+                  </Float>
                   <span
                     aria-hidden
                     className="absolute right-3 top-3 font-display text-[0.6875rem] font-semibold tracking-[0.2em] text-brand/50"

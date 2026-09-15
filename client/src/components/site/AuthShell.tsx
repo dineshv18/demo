@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import { BrandMark } from "@/components/shared/BrandMark";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Float } from "@/components/shared/motion";
 import { EASE_OUT } from "@/components/shared/motion";
 
 /**
@@ -77,13 +78,15 @@ export function AuthBrandPanel({
       {/* Padlock graphic — a large, softly faded background element (transparent
           PNG) rather than a boxed icon, so it reads as part of the panel's own
           artwork instead of a mismatched card sitting on top of it. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/illustrations/auth-secure-transparent.png"
-        alt=""
+      <Float
+        distance={10}
+        duration={4.6}
         aria-hidden
         className="pointer-events-none absolute -right-10 top-16 hidden w-72 opacity-25 mix-blend-screen xl:block"
-      />
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/illustrations/auth-secure-transparent.png" alt="" className="w-full" />
+      </Float>
 
       <div className="relative z-10 flex w-full flex-col justify-between p-10 text-white xl:p-14">
         <div className="flex items-start justify-between gap-4">

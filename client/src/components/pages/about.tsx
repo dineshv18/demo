@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Eyebrow, Reveal, Section } from "../site/primitives";
+import { Float } from "@/components/shared/motion";
 import { FeatureGrid, SplitSection, StatementSection } from "@/components/marketing/sections";
 import { CTASection } from "@/components/marketing/CTASection";
 import { SheenButton } from "@/components/marketing/SheenButton";
@@ -129,13 +130,15 @@ export default function AboutPage() {
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-brand/12 blur-3xl"
                 />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/illustrations/about-shield-transparent.png"
-                  alt=""
+                <Float
+                  distance={10}
+                  duration={4.5}
                   aria-hidden
                   className="pointer-events-none absolute -bottom-10 -right-12 w-80 opacity-30 mix-blend-screen sm:w-96"
-                />
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/illustrations/about-shield-transparent.png" alt="" className="w-full" />
+                </Float>
 
                 <div className="relative flex h-full flex-col justify-between">
                   <IconShieldCheck className="size-10 text-brand" stroke={1.5} />
@@ -213,7 +216,7 @@ export default function AboutPage() {
         }
         description="No deposit, allocation, or withdrawal happens until identity verification clears. It's the one step every account completes before anything else — the baseline the rest of the platform is built on."
         visual={
-          <div className="relative mx-auto w-full max-w-xs">
+          <Float distance={8} duration={4.2} className="relative mx-auto w-full max-w-xs">
             <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl" />
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-lifted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -223,7 +226,7 @@ export default function AboutPage() {
                 className="w-full rounded-xl"
               />
             </div>
-          </div>
+          </Float>
         }
         reversed
       />

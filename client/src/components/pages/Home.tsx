@@ -3,6 +3,7 @@
 import { IconShieldCheck } from "@tabler/icons-react";
 
 import { Section, Reveal } from "../site/primitives";
+import { Float } from "@/components/shared/motion";
 import { PortfolioMockup } from "../site/PortfolioMockup";
 import { Hero } from "@/components/marketing/Hero";
 import { CTASection } from "@/components/marketing/CTASection";
@@ -78,12 +79,14 @@ export default function Home() {
               aria-hidden
               className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-brand/15 blur-3xl"
             />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/illustrations/home-clarity-transparent.png"
-              alt="A tablet displaying a rising performance chart under a magnifying glass"
-              className="relative w-3/4 max-w-72"
-            />
+            <Float distance={10} duration={4.4} className="relative w-3/4 max-w-72">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/illustrations/home-clarity-transparent.png"
+                alt="A tablet displaying a rising performance chart under a magnifying glass"
+                className="w-full"
+              />
+            </Float>
           </div>
         }
       />

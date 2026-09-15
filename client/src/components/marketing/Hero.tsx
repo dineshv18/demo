@@ -10,7 +10,7 @@ import {
   IconUserCheck,
 } from "@tabler/icons-react";
 
-import { EASE_OUT } from "@/components/shared/motion";
+import { EASE_OUT, Float } from "@/components/shared/motion";
 import { HeroPreview } from "@/components/marketing/HeroPreview";
 import { SheenButton } from "@/components/marketing/SheenButton";
 import { useAuth } from "@/lib/AuthContext";
@@ -82,9 +82,11 @@ export function Hero() {
               </div>
               <span className="hidden rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/65 sm:block">Live overview</span>
             </div>
-            <div className="rotate-[1.5deg] rounded-2xl border border-white/12 bg-white/7 p-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0 sm:p-3">
-              <HeroPreview />
-            </div>
+            <Float distance={7} duration={5}>
+              <div className="rotate-[1.5deg] rounded-2xl border border-white/12 bg-white/7 p-2 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0 sm:p-3">
+                <HeroPreview />
+              </div>
+            </Float>
             <div className="mt-5 grid grid-cols-3 gap-2">
               {["Wallet", "Index", "Referrals"].map((item, index) => (
                 <div key={item} className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
