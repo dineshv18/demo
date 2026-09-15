@@ -842,12 +842,17 @@ export default function IndexPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 {allocations.map((a, i) => (
-                  <div key={a.id} className="flex items-start gap-2">
-                    <span
-                      aria-hidden
-                      className="mt-1 size-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
-                    />
+                  <div key={a.id} className="flex items-start gap-2.5 rounded-lg border border-border bg-surface-2/40 p-2.5">
+                    {a.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={a.imageUrl} alt="" className="size-9 shrink-0 rounded-lg object-cover" />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="mt-1 size-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
+                      />
+                    )}
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-foreground">
                         {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>

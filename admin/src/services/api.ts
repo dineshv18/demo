@@ -42,8 +42,11 @@ export interface ApiResponse {
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem("token");
 
+  // FormData needs the browser to set its own multipart boundary — never
+  // force a JSON Content-Type on it.
+  const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...((options.headers as Record<string, string>) || {}),
   };
 
@@ -358,6 +361,7 @@ export interface FundAllocation {
   label: string;
   percent: string;
   description: string | null;
+  imageUrl: string | null;
   details: FundAllocationDetail[] | null;
   sortOrder: number;
   isActive: boolean;
@@ -404,12 +408,17 @@ export const indexAPI = {
     request<{ message: string; manager: IndexManager }>("/admin/index/manager", { method: "POST", body: JSON.stringify(data) }),
 
   getFundAllocations: () => request<{ allocations: FundAllocation[] }>("/admin/index/fund-allocations"),
-  createFundAllocation: (data: { label: string; percent: number; description?: string; details?: FundAllocationDetail[]; sortOrder?: number }) =>
+  createFundAllocation: (data: { label: string; percent: number; description?: string; details?: FundAllocationDetail[]; sortOrder?: number; imageUrl?: string }) =>
     request<{ message: string; allocation: FundAllocation }>("/admin/index/fund-allocations", { method: "POST", body: JSON.stringify(data) }),
-  updateFundAllocation: (id: string, data: Partial<{ label: string; percent: number; description: string; details: FundAllocationDetail[]; sortOrder: number; isActive: boolean }>) =>
+  updateFundAllocation: (id: string, data: Partial<{ label: string; percent: number; description: string; details: FundAllocationDetail[]; sortOrder: number; isActive: boolean; imageUrl: string }>) =>
     request<{ message: string; allocation: FundAllocation }>(`/admin/index/fund-allocations/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteFundAllocation: (id: string) =>
     request<{ message: string }>(`/admin/index/fund-allocations/${id}`, { method: "DELETE" }),
+  uploadFundAllocationImage: (file: File) => {
+    const fd = new FormData();
+    fd.append("image", file);
+    return request<{ message: string; imageUrl: string }>("/admin/index/fund-allocations/upload-image", { method: "POST", body: fd });
+  },
 
   getInvestments: () => request<{ investments: IndexInvestmentRecord[] }>("/admin/index/investments"),
 

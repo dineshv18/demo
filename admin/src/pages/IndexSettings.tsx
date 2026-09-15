@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   IconPlus, IconEdit, IconTrash, IconCheck,
-  IconChartLine, IconUser, IconCoin, IconPercentage, IconChartPie,
+  IconChartLine, IconUser, IconCoin, IconPercentage, IconChartPie, IconUpload,
 } from "@tabler/icons-react";
 import { indexAPI, type IndexTier, type IndexPriceEntry, type IndexManager, type IndexSettings as IndexSettingsData, type FundAllocation, type FundAllocationDetail } from "../services/api";
 
@@ -533,10 +533,24 @@ function PricesTab({ prices, onRefresh, showToast }: { prices: IndexPriceEntry[]
 function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: FundAllocation[]; onRefresh: () => Promise<void>; showToast: (t: "success" | "error", m: string) => void }) {
   const [editId, setEditId] = useState<string | null>(null);
   const [newRow, setNewRow] = useState(false);
-  const [form, setForm] = useState({ label: "", percent: "", description: "", detailsText: "" });
+  const [form, setForm] = useState({ label: "", percent: "", description: "", detailsText: "", imageUrl: "" });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const resetForm = () => setForm({ label: "", percent: "", description: "", detailsText: "" });
+  const resetForm = () => setForm({ label: "", percent: "", description: "", detailsText: "", imageUrl: "" });
+
+  const handleImageSelect = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await indexAPI.uploadFundAllocationImage(file);
+      setForm((f) => ({ ...f, imageUrl: res.imageUrl }));
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Sub-items are edited as plain "Label — 10" lines, one per row, and parsed
   // into the { label, percent }[] JSON the API expects.
@@ -559,7 +573,7 @@ function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: Fu
   const startEdit = (a: FundAllocation) => {
     setEditId(a.id);
     setNewRow(false);
-    setForm({ label: a.label, percent: a.percent, description: a.description || "", detailsText: detailsToText(a.details) });
+    setForm({ label: a.label, percent: a.percent, description: a.description || "", detailsText: detailsToText(a.details), imageUrl: a.imageUrl || "" });
   };
 
   const handleCreate = async () => {
@@ -572,6 +586,7 @@ function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: Fu
         description: form.description || undefined,
         details: parseDetails(form.detailsText),
         sortOrder: allocations.length,
+        imageUrl: form.imageUrl || undefined,
       });
       showToast("success", "Allocation created");
       setNewRow(false);
@@ -592,6 +607,7 @@ function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: Fu
         percent: parseFloat(form.percent),
         description: form.description || undefined,
         details: parseDetails(form.detailsText),
+        imageUrl: form.imageUrl || undefined,
       });
       showToast("success", "Allocation updated");
       setEditId(null);
@@ -648,6 +664,24 @@ function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: Fu
           rows={4} placeholder={"EUR/USD — 10\nGBP/USD — 8\nUSD/JPY — 5"}
           className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40 font-mono" />
       </div>
+      <div className="sm:col-span-2">
+        <label className="text-xs font-medium text-gray-500">Category image</label>
+        <div className="mt-1 flex items-center gap-3">
+          {form.imageUrl && (
+            <img src={form.imageUrl} alt="" className="h-14 w-14 rounded-lg object-cover border border-gray-200 dark:border-gray-800" />
+          )}
+          <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+            {uploading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" /> : <IconUpload size={16} />}
+            {form.imageUrl ? "Replace image" : "Upload image"}
+            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={uploading}
+              onChange={(e) => handleImageSelect(e.target.files?.[0])} />
+          </label>
+          {form.imageUrl && (
+            <button type="button" onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+              className="text-xs text-red-500 hover:underline">Remove</button>
+          )}
+        </div>
+      </div>
     </div>
   );
 
@@ -701,20 +735,25 @@ function AllocationsTab({ allocations, onRefresh, showToast }: { allocations: Fu
               </div>
             ) : (
               <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-gray-900 dark:text-white">{a.label}</p>
-                    <span className="text-sm font-bold text-[#00A94F]">{parseFloat(a.percent).toFixed(2)}%</span>
-                    {!a.isActive && <span className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">Hidden</span>}
-                  </div>
-                  {a.description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{a.description}</p>}
-                  {a.details && a.details.length > 0 && (
-                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                      {a.details.map((d) => (
-                        <li key={d.label}>{d.label} — {d.percent}%</li>
-                      ))}
-                    </ul>
+                <div className="flex min-w-0 items-start gap-3">
+                  {a.imageUrl && (
+                    <img src={a.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover border border-gray-200 dark:border-gray-800" />
                   )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-gray-900 dark:text-white">{a.label}</p>
+                      <span className="text-sm font-bold text-[#00A94F]">{parseFloat(a.percent).toFixed(2)}%</span>
+                      {!a.isActive && <span className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">Hidden</span>}
+                    </div>
+                    {a.description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{a.description}</p>}
+                    {a.details && a.details.length > 0 && (
+                      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                        {a.details.map((d) => (
+                          <li key={d.label}>{d.label} — {d.percent}%</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button onClick={() => handleToggleActive(a)} title={a.isActive ? "Hide from dashboard" : "Show on dashboard"}

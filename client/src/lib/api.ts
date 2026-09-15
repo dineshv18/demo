@@ -506,6 +506,7 @@ export interface FundAllocation {
   label: string;
   percent: number;
   description: string | null;
+  imageUrl: string | null;
   details: FundAllocationDetail[] | null;
 }
 

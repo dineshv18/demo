@@ -418,6 +418,7 @@ model FundAllocation {
   label       String
   percent     Decimal  @db.Decimal(5, 2)
   description String?
+  imageUrl    String?
   // Free-form sub-items shown under the category (e.g. "EUR/USD — 10%")
   // as a JSON array of { label, percent } so admin can adjust the detail
   // rows without a schema change.

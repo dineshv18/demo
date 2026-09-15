@@ -1,13 +1,24 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   adminGetTiers, adminCreateTier, adminUpdateTier, adminDeleteTier,
   adminGetPrices, adminCreatePrice, adminUpdatePrice, adminDeletePrice,
   adminGetManager, adminUpsertManager,
   adminGetFundAllocations, adminCreateFundAllocation, adminUpdateFundAllocation, adminDeleteFundAllocation,
+  adminUploadFundAllocationImage,
   adminGetInvestments,
   adminGetIndexSettings, adminUpdateIndexSettings,
 } from "../controllers/indexController.js";
 import { authenticate } from "../middleware/auth.js";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    cb(null, allowed.includes(file.mimetype));
+  },
+});
 
 const router = Router();
 router.use(authenticate);
@@ -33,6 +44,7 @@ router.get("/fund-allocations", adminGetFundAllocations);
 router.post("/fund-allocations", adminCreateFundAllocation);
 router.put("/fund-allocations/:id", adminUpdateFundAllocation);
 router.delete("/fund-allocations/:id", adminDeleteFundAllocation);
+router.post("/fund-allocations/upload-image", upload.single("image"), adminUploadFundAllocationImage);
 
 // Investments
 router.get("/investments", adminGetInvestments);

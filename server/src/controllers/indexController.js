@@ -738,7 +738,7 @@ export const adminGetFundAllocations = async (req, res) => {
 
 export const adminCreateFundAllocation = async (req, res) => {
   try {
-    const { label, percent, description, details, sortOrder } = req.body;
+    const { label, percent, description, details, sortOrder, imageUrl } = req.body;
     if (!label || percent === undefined) {
       return res.status(400).json({ message: "label and percent are required" });
     }
@@ -750,6 +750,7 @@ export const adminCreateFundAllocation = async (req, res) => {
         description: description || null,
         details: details ?? undefined,
         sortOrder: parseInt(sortOrder || 0),
+        imageUrl: imageUrl || null,
       },
     });
 
@@ -763,7 +764,7 @@ export const adminCreateFundAllocation = async (req, res) => {
 export const adminUpdateFundAllocation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, percent, description, details, sortOrder, isActive } = req.body;
+    const { label, percent, description, details, sortOrder, isActive, imageUrl } = req.body;
 
     const existing = await getPrisma().fundAllocation.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: "Allocation not found" });
@@ -777,12 +778,29 @@ export const adminUpdateFundAllocation = async (req, res) => {
         ...(details !== undefined && { details }),
         ...(sortOrder !== undefined && { sortOrder: parseInt(sortOrder) }),
         ...(isActive !== undefined && { isActive }),
+        ...(imageUrl !== undefined && { imageUrl: imageUrl || null }),
       },
     });
 
     return res.status(200).json({ message: "Allocation updated", allocation });
   } catch (error) {
     console.error("Admin update fund allocation error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Uploads a category image to R2 and returns its public URL — the admin UI
+// calls this first, then sends the resulting URL along with the rest of the
+// allocation form (create or update), same two-step pattern as KYC/support
+// attachments.
+export const adminUploadFundAllocationImage = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "Image file is required" });
+    const { uploadToR2 } = await import("../config/r2.js");
+    const uploaded = await uploadToR2(req.file, "fund-allocations");
+    return res.status(201).json({ message: "Image uploaded", imageUrl: uploaded.url });
+  } catch (error) {
+    console.error("Admin upload fund allocation image error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -807,7 +825,7 @@ export const getFundAllocations = async (req, res) => {
     const allocations = await getPrisma().fundAllocation.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
-      select: { id: true, label: true, percent: true, description: true, details: true },
+      select: { id: true, label: true, percent: true, description: true, details: true, imageUrl: true },
     });
     return res.status(200).json({
       allocations: allocations.map((a) => ({
