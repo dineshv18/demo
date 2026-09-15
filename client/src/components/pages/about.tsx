@@ -129,6 +129,13 @@ export default function AboutPage() {
                   aria-hidden
                   className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-brand/12 blur-3xl"
                 />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/illustrations/about-shield-transparent.png"
+                  alt=""
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-10 -right-12 w-80 opacity-30 mix-blend-screen sm:w-96"
+                />
 
                 <div className="relative flex h-full flex-col justify-between">
                   <IconShieldCheck className="size-10 text-brand" stroke={1.5} />

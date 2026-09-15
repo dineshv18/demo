@@ -240,6 +240,13 @@ export default function ContactPage() {
           <div className="relative flex min-h-[320px] flex-col justify-end overflow-hidden bg-[#09070c] p-8 text-white lg:p-10">
             <span aria-hidden className="bg-ticker absolute inset-0 opacity-30" />
             <span aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-brand/30 blur-3xl" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/illustrations/contact-clock-transparent.png"
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute -top-8 right-0 w-64 opacity-25 mix-blend-screen"
+            />
             <div className="relative">
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-purple-300">Expected response</p>
               <p className="mt-3 font-classic text-4xl font-bold">2–3 hours</p>
