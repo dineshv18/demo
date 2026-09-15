@@ -322,6 +322,15 @@ export default function WalletPage() {
         description="Manage your balance, deposits and withdrawals."
         actions={
           <>
+            {kycApproved && (
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-success/25 bg-success-soft px-3 py-1.5 text-xs font-bold text-success"
+                title="Full wallet access enabled"
+              >
+                <IconShieldCheck className="h-3.5 w-3.5" /> KYC Verified
+              </Badge>
+            )}
             {wallet?.currency && (
               <Badge variant="outline" className="gap-1.5 border-border px-3 py-1.5 text-xs font-bold text-foreground">
                 $ {wallet.currency}
@@ -350,11 +359,6 @@ export default function WalletPage() {
         />
       ) : (
         <>
-          <div className="flex items-center gap-3 rounded-lg border border-success/25 bg-success-soft px-4 py-3">
-            <IconShieldCheck className="h-5 w-5 text-success shrink-0" />
-            <p className="text-sm font-medium text-success">KYC verified — full wallet access enabled</p>
-          </div>
-
           {/* Pending Request Banner */}
           {hasPending && (
             <Card className="border-warning/25 bg-warning-soft p-4 gap-0">
