@@ -6,7 +6,7 @@ import {
   IconLoader2, IconAlertCircle, IconShieldCheck,
   IconTrendingUp, IconTrendingDown, IconUser,
   IconRefresh, IconWallet, IconInfoCircle,
-  IconClock, IconCircleCheck, IconArrowRight, IconChartPie,
+  IconClock, IconCircleCheck, IconChartPie,
 } from "@tabler/icons-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { indexAPI, kycAPI, type IndexData, type KycData, type IndexInvestment, type FundAllocation } from "@/lib/api";
@@ -15,7 +15,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeading } from "@/components/dashboard/SectionCard";
 import { KycLockedState } from "@/components/dashboard/LockedState";
 import { DashboardSkeleton } from "@/components/dashboard/Skeletons";
@@ -84,7 +83,6 @@ export default function IndexPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [allocationOpen, setAllocationOpen] = useState(false);
 
   const [timeframe, setTimeframe] = useState<Timeframe>("ALL");
 
@@ -762,23 +760,13 @@ export default function IndexPage() {
           </div>
         </Card>
 
-        {/* Index Manager */}
+        {/* Index Manager + Fund Allocation — shown together, in the open,
+            not tucked behind a click. Diversification is exactly what
+            admin has published: no category or percentage is invented
+            on the client. */}
         {manager && (
-          <Card
-            className="p-4 sm:p-6 gap-0 cursor-pointer transition-colors hover:border-brand/35"
-            onClick={() => setAllocationOpen(true)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setAllocationOpen(true); }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-base sm:text-lg font-semibold">Index Manager</h2>
-              {allocations.length > 0 && (
-                <span className="flex items-center gap-1 text-xs font-medium text-brand">
-                  View fund allocation <IconArrowRight className="h-3.5 w-3.5" />
-                </span>
-              )}
-            </div>
+          <Card className="p-4 sm:p-6 gap-0">
+            <h2 className="font-display text-base sm:text-lg font-semibold mb-4">Index Manager</h2>
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-lg bg-linear-to-br from-brand to-brand-2 shrink-0">
                 <IconUser className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
@@ -789,6 +777,95 @@ export default function IndexPage() {
                 {manager.bio && <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 leading-relaxed">{manager.bio}</p>}
               </div>
             </div>
+
+            {allocations.length > 0 && (
+              <div className="mt-6 border-t border-border pt-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <IconChartPie className="h-4 w-4 text-brand shrink-0" />
+                  <h3 className="font-display text-sm sm:text-base font-semibold text-foreground">How Your Investment Is Diversified</h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-5">
+                  When you invest in an Index tier, your funds are strategically allocated across multiple asset classes to reduce risk and maximize returns.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-6 items-center">
+                  <div className="h-48 w-48 mx-auto relative shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={allocations.map((a) => ({ name: a.label, value: a.percent }))}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius="58%"
+                          outerRadius="85%"
+                          paddingAngle={2}
+                          stroke="var(--card)"
+                          strokeWidth={2}
+                        >
+                          {allocations.map((a, i) => (
+                            <Cell key={a.id} fill={ALLOCATION_COLORS[i % ALLOCATION_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<AllocationDonutTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
+                      <p className="text-lg font-bold text-foreground">100%</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                    {allocations.map((a, i) => (
+                      <div key={a.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-3">
+                        {a.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={a.imageUrl} alt="" className="size-12 shrink-0 rounded-lg object-contain bg-card p-1 ring-1 ring-border" />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className="size-12 shrink-0 rounded-lg"
+                            style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
+                          />
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-semibold text-foreground">
+                            {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>
+                          </p>
+                          {a.description && (
+                            <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {allocations.some((a) => a.details && a.details.length > 0) && (
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {allocations.filter((a) => a.details && a.details.length > 0).map((a) => (
+                      <div key={a.id} className="rounded-lg border border-border bg-surface-2/50 p-3.5">
+                        <p className="text-xs font-semibold text-foreground mb-2">{a.label}</p>
+                        <div className="space-y-1.5">
+                          {a.details!.map((d) => (
+                            <div key={d.label} className="flex items-center gap-2">
+                              <span className="w-20 shrink-0 text-[11px] text-muted-foreground">{d.label}</span>
+                              <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                                <span
+                                  className="block h-full rounded-full bg-brand"
+                                  style={{ width: `${Math.min(d.percent, 100)}%` }}
+                                />
+                              </div>
+                              <span className="w-8 shrink-0 text-right text-[11px] font-medium text-foreground">{d.percent}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
         )}
 
@@ -801,105 +878,6 @@ export default function IndexPage() {
           </p>
         </div>
       </div>
-
-      {/* Fund Allocation — how the pooled Index capital is diversified,
-          published by admin. Purely real, disclosed data: no category or
-          percentage here is invented on the client. */}
-      <Dialog open={allocationOpen} onOpenChange={setAllocationOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <IconChartPie className="h-5 w-5 text-brand" />
-              How Your Investment Is Diversified
-            </DialogTitle>
-          </DialogHeader>
-
-          {allocations.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              Fund allocation hasn&apos;t been published yet — check back soon.
-            </p>
-          ) : (
-            <div className="space-y-5">
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                When you invest in an Index tier, your funds are strategically allocated across multiple asset classes to reduce risk and maximize returns.
-              </p>
-
-              <div className="h-56 relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={allocations.map((a) => ({ name: a.label, value: a.percent }))}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius="58%"
-                      outerRadius="85%"
-                      paddingAngle={2}
-                      stroke="var(--card)"
-                      strokeWidth={2}
-                    >
-                      {allocations.map((a, i) => (
-                        <Cell key={a.id} fill={ALLOCATION_COLORS[i % ALLOCATION_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<AllocationDonutTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
-                  <p className="text-lg font-bold text-foreground">100%</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {allocations.map((a, i) => (
-                  <div key={a.id} className="flex items-start gap-2.5 rounded-lg border border-border bg-surface-2/40 p-2.5">
-                    {a.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.imageUrl} alt="" className="size-9 shrink-0 rounded-lg object-cover" />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="mt-1 size-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground">
-                        {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>
-                      </p>
-                      {a.description && (
-                        <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-3">
-                {allocations.filter((a) => a.details && a.details.length > 0).map((a) => (
-                  <div key={a.id} className="rounded-lg border border-border bg-surface-2/50 p-3.5">
-                    <p className="text-xs font-semibold text-foreground mb-2">{a.label}</p>
-                    <div className="space-y-1.5">
-                      {a.details!.map((d) => (
-                        <div key={d.label} className="flex items-center gap-2">
-                          <span className="w-20 shrink-0 text-[11px] text-muted-foreground">{d.label}</span>
-                          <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                            <span
-                              className="block h-full rounded-full bg-brand"
-                              style={{ width: `${Math.min(d.percent, 100)}%` }}
-                            />
-                          </div>
-                          <span className="w-8 shrink-0 text-right text-[11px] font-medium text-foreground">{d.percent}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Investment Base Popup — first-visit intro only */}
       {showPopup && (
