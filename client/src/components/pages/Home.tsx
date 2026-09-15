@@ -72,23 +72,18 @@ export default function Home() {
         }
         description="Whether you're allocating your first tier or tracking a growing position, ORVANTA gives you one place to see exactly where your capital stands — published terms, live performance, and a wallet that never leaves you guessing."
         visual={
-          <div className="relative mx-auto w-full max-w-md">
-            {/* Soft brand-tinted glow behind the frame, so the illustration's
-                own cream ground reads as a deliberately framed print rather
-                than a mismatched box against the page background — works in
-                both light and dark. */}
+          <div className="surface-navy relative mx-auto flex aspect-4/5 w-full max-w-md items-center justify-center overflow-hidden rounded-2xl">
+            <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
             <span
               aria-hidden
-              className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-brand/10 blur-2xl"
+              className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-brand/15 blur-3xl"
             />
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lifted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/illustrations/investor-hero.jpg"
-                alt="An investor reviewing their portfolio's growth on a tablet"
-                className="w-full rounded-xl"
-              />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/illustrations/home-clarity-transparent.png"
+              alt="A tablet displaying a rising performance chart under a magnifying glass"
+              className="relative w-3/4 max-w-72"
+            />
           </div>
         }
       />
