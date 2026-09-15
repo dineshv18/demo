@@ -60,6 +60,27 @@ export default function Home() {
       {/* STRUCTURAL FACTS */}
       <FactStrip facts={structuralFacts} />
 
+      {/* BUILT FOR INVESTORS LIKE YOU */}
+      <SplitSection
+        id="built-for-you"
+        eyebrow="Who It's For"
+        title={
+          <>
+            Built for investors who want{" "}
+            <span className="text-gradient">clarity, not guesswork.</span>
+          </>
+        }
+        description="Whether you're allocating your first tier or tracking a growing position, ORVANTA gives you one place to see exactly where your capital stands — published terms, live performance, and a wallet that never leaves you guessing."
+        visual={
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/illustrations/investor-hero.jpg"
+            alt="An investor reviewing their portfolio's growth on a tablet"
+            className="mx-auto w-full max-w-md rounded-2xl"
+          />
+        }
+      />
+
       {/* HOW IT WORKS */}
       <StepGrid
         id="how-it-works"
