@@ -29,11 +29,11 @@ type Tab = "referrals" | "leadership" | "howItWorks";
 // referral charts read as part of the same product as the rest of the dashboard.
 const LEVEL_COLORS = [
   "var(--brand)",
-  "var(--navy-500)",
+  "var(--color-navy-500)",
   "var(--color-success)",
   "var(--brand-glow)",
   "var(--color-info)",
-  "var(--navy-400)",
+  "var(--color-navy-400)",
 ];
 
 function statusBadge(status: string) {
