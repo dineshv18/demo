@@ -568,50 +568,60 @@ export default function IndexPage() {
                   const isEligible = investAmountNum > 0
                     ? investAmountNum >= parseFloat(t.minAmount) && investAmountNum <= parseFloat(t.maxAmount)
                     : true;
+                  const selectTierCard = () => {
+                    if (isSelected) {
+                      // Tap the already-selected card again to deselect it.
+                      setSelectedTierId("");
+                      setInvestAmount("");
+                      return;
+                    }
+                    setSelectedTierId(t.id);
+                    // Switching plans should always work — reset the amount
+                    // to the new tier's own minimum rather than leaving a
+                    // figure that only fit the old one.
+                    setInvestAmount(t.minAmount);
+                  };
+
                   return (
                     <div
                       key={t.id}
-                      className={`rounded-2xl border-2 p-4 sm:p-5 transition-colors ${isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border"
+                      role="button"
+                      tabIndex={0}
+                      onClick={selectTierCard}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectTierCard(); } }}
+                      className={`rounded-2xl border-2 p-4 sm:p-5 transition-colors cursor-pointer ${isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border hover:border-brand/40"
                         }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
-                          <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-linear-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
-                            {i + 1}
-                          </div>
+                          {t.imageUrl ? (
+                            <img
+                              src={t.imageUrl}
+                              alt=""
+                              className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-sm ring-1 ring-border"
+                            />
+                          ) : (
+                            <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-linear-to-br ${TIER_COLORS[i % TIER_COLORS.length]} text-white text-sm font-bold shadow-sm`}>
+                              {i + 1}
+                            </div>
+                          )}
                           <div className="min-w-0">
                             <p className="text-base font-bold text-foreground break-words">{t.label}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{t.tagline || `For amounts between $${parseFloat(t.minAmount).toLocaleString()} and $${parseFloat(t.maxAmount).toLocaleString()}`}</p>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            if (isSelected) {
-                              // Tap the already-selected plan again to switch
-                              // it back off — the clearest way to reset and
-                              // pick a different one.
-                              setSelectedTierId("");
-                              setInvestAmount("");
-                              return;
-                            }
-                            setSelectedTierId(t.id);
-                            // Switching plans should always work — reset the
-                            // amount to the new tier's own minimum rather
-                            // than leaving a figure that only fit the old one.
-                            setInvestAmount(t.minAmount);
-                          }}
-                          className={`w-full sm:w-auto shrink-0 gap-1.5 font-semibold ${isSelected ? "" : "btn-glow btn-glow-hover"}`}
-                          variant={isSelected ? "outline" : "default"}
+                        <Badge
+                          variant={isSelected ? "default" : "outline"}
+                          className={`w-full sm:w-auto shrink-0 justify-center gap-1.5 font-semibold ${isSelected ? "" : "text-muted-foreground"}`}
                         >
                           {isSelected ? (
                             <>
-                              <IconCircleCheck className="h-4 w-4" /> Selected — tap to change
+                              <IconCircleCheck className="h-3.5 w-3.5" /> Selected — tap to deselect
                             </>
                           ) : (
-                            "Choose Plan"
+                            "Tap to select"
                           )}
-                        </Button>
+                        </Badge>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-4 pt-4 border-t border-border/60">
@@ -634,7 +644,7 @@ export default function IndexPage() {
                           input applies to instead of being one shared block
                           at the bottom of a long list. */}
                       {isSelected && (
-                        <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
+                        <div className="mt-4 space-y-3 border-t border-border/60 pt-4" onClick={(e) => e.stopPropagation()}>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                             <Input

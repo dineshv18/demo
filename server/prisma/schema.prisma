@@ -343,6 +343,7 @@ model IndexTier {
   maxAmount         Decimal  @db.Decimal(18, 2)
   label             String
   tagline           String?
+  imageUrl          String?
   durationMonths    Int      @default(18)
   weeklyReturn      Decimal  @db.Decimal(8, 4)
   monthlyReturn     Decimal  @db.Decimal(8, 4)

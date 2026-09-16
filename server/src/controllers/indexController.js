@@ -487,7 +487,7 @@ export const adminGetTiers = async (req, res) => {
 export const adminCreateTier = async (req, res) => {
   try {
     const {
-      minAmount, maxAmount, label, tagline, durationMonths,
+      minAmount, maxAmount, label, tagline, imageUrl, durationMonths,
       weeklyReturn, monthlyReturn, halfYearlyReturn,
       maintenanceFeePercent, exitFeePercent, earlyExitFeePercent,
     } = req.body;
@@ -501,6 +501,7 @@ export const adminCreateTier = async (req, res) => {
         maxAmount: parseFloat(maxAmount),
         label,
         tagline: tagline || null,
+        imageUrl: imageUrl || null,
         durationMonths: parseInt(durationMonths || 18),
         weeklyReturn: parseFloat(weeklyReturn || 0),
         monthlyReturn: parseFloat(monthlyReturn || 0),
@@ -522,7 +523,7 @@ export const adminUpdateTier = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      minAmount, maxAmount, label, tagline, durationMonths,
+      minAmount, maxAmount, label, tagline, imageUrl, durationMonths,
       weeklyReturn, monthlyReturn, halfYearlyReturn, isActive,
       maintenanceFeePercent, exitFeePercent, earlyExitFeePercent,
     } = req.body;
@@ -537,6 +538,7 @@ export const adminUpdateTier = async (req, res) => {
         ...(maxAmount !== undefined && { maxAmount: parseFloat(maxAmount) }),
         ...(label !== undefined && { label }),
         ...(tagline !== undefined && { tagline: tagline || null }),
+        ...(imageUrl !== undefined && { imageUrl: imageUrl || null }),
         ...(durationMonths !== undefined && { durationMonths: parseInt(durationMonths) }),
         ...(weeklyReturn !== undefined && { weeklyReturn: parseFloat(weeklyReturn) }),
         ...(monthlyReturn !== undefined && { monthlyReturn: parseFloat(monthlyReturn) }),
@@ -753,6 +755,18 @@ export const adminUpdateFundAllocation = async (req, res) => {
 // calls this first, then sends the resulting URL along with the rest of the
 // allocation form (create or update), same two-step pattern as KYC/support
 // attachments.
+export const adminUploadTierImage = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "Image file is required" });
+    const { uploadToR2 } = await import("../config/r2.js");
+    const uploaded = await uploadToR2(req.file, "index-tiers");
+    return res.status(201).json({ message: "Image uploaded", imageUrl: uploaded.url });
+  } catch (error) {
+    console.error("Admin upload tier image error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const adminUploadFundAllocationImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "Image file is required" });

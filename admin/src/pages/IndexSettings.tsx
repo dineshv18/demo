@@ -94,17 +94,31 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
   const [editTier, setEditTier] = useState<IndexTier | null>(null);
   const [newTier, setNewTier] = useState(false);
   const [form, setForm] = useState({
-    minAmount: "", maxAmount: "", label: "", tagline: "", durationMonths: "18",
+    minAmount: "", maxAmount: "", label: "", tagline: "", imageUrl: "", durationMonths: "18",
     weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "",
     maintenanceFeePercent: "5", exitFeePercent: "2", earlyExitFeePercent: "17",
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const resetForm = () => setForm({
-    minAmount: "", maxAmount: "", label: "", tagline: "", durationMonths: "18",
+    minAmount: "", maxAmount: "", label: "", tagline: "", imageUrl: "", durationMonths: "18",
     weeklyReturn: "", monthlyReturn: "", halfYearlyReturn: "",
     maintenanceFeePercent: "5", exitFeePercent: "2", earlyExitFeePercent: "17",
   });
+
+  const handleImageSelect = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await indexAPI.uploadTierImage(file);
+      setForm((f) => ({ ...f, imageUrl: res.imageUrl }));
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const openEdit = (tier: IndexTier) => {
     setEditTier(tier);
@@ -113,6 +127,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
       maxAmount: tier.maxAmount,
       label: tier.label,
       tagline: tier.tagline || "",
+      imageUrl: tier.imageUrl || "",
       durationMonths: String(tier.durationMonths ?? 18),
       weeklyReturn: tier.weeklyReturn,
       monthlyReturn: tier.monthlyReturn,
@@ -132,6 +147,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           maxAmount: form.maxAmount,
           label: form.label,
           tagline: form.tagline || null,
+          imageUrl: form.imageUrl || null,
           durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: form.weeklyReturn,
           monthlyReturn: form.monthlyReturn,
@@ -147,6 +163,7 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
           maxAmount: parseFloat(form.maxAmount),
           label: form.label,
           tagline: form.tagline || undefined,
+          imageUrl: form.imageUrl || undefined,
           durationMonths: parseInt(form.durationMonths || "18"),
           weeklyReturn: parseFloat(form.weeklyReturn || "0"),
           monthlyReturn: parseFloat(form.monthlyReturn || "0"),
@@ -230,6 +247,24 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               <input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })}
                 placeholder="e.g. New Beginner, Ideal for entry investors"
                 className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Tier image</label>
+              <div className="mt-1 flex items-center gap-3">
+                {form.imageUrl && (
+                  <img src={form.imageUrl} alt="" className="h-14 w-14 rounded-lg object-cover border border-gray-200 dark:border-gray-800" />
+                )}
+                <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+                  {uploading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" /> : <IconUpload size={16} />}
+                  {form.imageUrl ? "Replace image" : "Upload image"}
+                  <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={uploading}
+                    onChange={(e) => handleImageSelect(e.target.files?.[0])} />
+                </label>
+                {form.imageUrl && (
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                    className="text-xs text-red-500 hover:underline">Remove</button>
+                )}
+              </div>
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Duration (months)</label>
@@ -366,10 +401,17 @@ function TiersTab({ tiers, onRefresh, showToast }: { tiers: IndexTier[]; onRefre
               {tiers.map((tier) => (
                 <tr key={tier.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="px-5 py-4 font-medium text-gray-900 dark:text-white">
-                    {tier.label}
-                    {tier.tagline && (
-                      <div className="mt-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">{tier.tagline}</div>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {tier.imageUrl && (
+                        <img src={tier.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover border border-gray-200 dark:border-gray-800" />
+                      )}
+                      <div>
+                        {tier.label}
+                        {tier.tagline && (
+                          <div className="mt-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">{tier.tagline}</div>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-4 text-right text-gray-600 dark:text-gray-400">{tier.durationMonths} months</td>
                   <td className="px-5 py-4 text-right text-emerald-600 dark:text-emerald-400 font-medium">{parseFloat(tier.weeklyReturn).toFixed(2)}%</td>

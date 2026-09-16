@@ -458,6 +458,7 @@ export interface IndexTier {
   maxAmount: string;
   label: string;
   tagline: string | null;
+  imageUrl: string | null;
   durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;

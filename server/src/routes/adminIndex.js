@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import {
-  adminGetTiers, adminCreateTier, adminUpdateTier, adminDeleteTier,
+  adminGetTiers, adminCreateTier, adminUpdateTier, adminDeleteTier, adminUploadTierImage,
   adminGetPrices, adminCreatePrice, adminUpdatePrice, adminDeletePrice,
   adminGetManager, adminUpsertManager,
   adminGetFundAllocations, adminCreateFundAllocation, adminUpdateFundAllocation, adminDeleteFundAllocation,
@@ -28,6 +28,7 @@ router.get("/tiers", adminGetTiers);
 router.post("/tiers", adminCreateTier);
 router.put("/tiers/:id", adminUpdateTier);
 router.delete("/tiers/:id", adminDeleteTier);
+router.post("/tiers/upload-image", upload.single("image"), adminUploadTierImage);
 
 // Price History
 router.get("/prices", adminGetPrices);

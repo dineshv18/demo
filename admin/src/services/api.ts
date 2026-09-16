@@ -306,6 +306,7 @@ export interface IndexTier {
   maxAmount: string;
   label: string;
   tagline: string | null;
+  imageUrl: string | null;
   durationMonths: number;
   weeklyReturn: string;
   monthlyReturn: string;
@@ -388,12 +389,17 @@ export interface IndexInvestmentRecord {
 // ─── Index API ───
 export const indexAPI = {
   getTiers: () => request<{ tiers: IndexTier[] }>("/admin/index/tiers"),
-  createTier: (data: { minAmount: number; maxAmount: number; label: string; tagline?: string; durationMonths?: number; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number; maintenanceFeePercent?: number; exitFeePercent?: number; earlyExitFeePercent?: number }) =>
+  createTier: (data: { minAmount: number; maxAmount: number; label: string; tagline?: string; imageUrl?: string; durationMonths?: number; weeklyReturn: number; monthlyReturn: number; halfYearlyReturn: number; maintenanceFeePercent?: number; exitFeePercent?: number; earlyExitFeePercent?: number }) =>
     request<{ message: string; tier: IndexTier }>("/admin/index/tiers", { method: "POST", body: JSON.stringify(data) }),
   updateTier: (id: string, data: Partial<IndexTier>) =>
     request<{ message: string; tier: IndexTier }>(`/admin/index/tiers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteTier: (id: string) =>
     request<{ message: string }>(`/admin/index/tiers/${id}`, { method: "DELETE" }),
+  uploadTierImage: (file: File) => {
+    const fd = new FormData();
+    fd.append("image", file);
+    return request<{ message: string; imageUrl: string }>("/admin/index/tiers/upload-image", { method: "POST", body: fd });
+  },
 
   getPrices: () => request<{ prices: IndexPriceEntry[] }>("/admin/index/prices"),
   createPrice: (data: { price: number; changePercent?: number; changeAmount?: number; dateLabel?: string }) =>
