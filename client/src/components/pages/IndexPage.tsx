@@ -765,8 +765,8 @@ export default function IndexPage() {
                 onClick={() => setTimeframe(tf.key)}
                 aria-pressed={activeFrame.key === tf.key}
                 className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${activeFrame.key === tf.key
-                    ? "bg-card text-brand shadow-xs ring-1 ring-brand/20"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "bg-card text-brand shadow-xs ring-1 ring-brand/20"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {tf.label}
@@ -840,7 +840,7 @@ export default function IndexPage() {
         )}
 
         <Dialog open={allocationOpen} onOpenChange={setAllocationOpen}>
-          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto overflow-x-hidden w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] p-4 sm:p-6">
+          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto overflow-x-hidden w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <IconChartPie className="h-4 w-4 text-brand shrink-0" /> How Your Investment Is Diversified
