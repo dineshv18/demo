@@ -370,13 +370,27 @@ export default function IndexPage() {
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeInvestments.map((inv) => {
                 const isMature = inv.maturesAt ? new Date() >= new Date(inv.maturesAt) : false;
                 const exitPercent = isMature ? parseFloat(inv.tier.exitFeePercent) : parseFloat(inv.tier.earlyExitFeePercent);
                 const estExitFee = (parseFloat(inv.netAmount) * exitPercent) / 100;
                 const isTopUpTarget = topUpTargetId === inv.id;
                 const isWithdrawTarget = withdrawTargetId === inv.id;
+
+                // Accrued return since activation, computed by compounding the
+                // tier's own published weekly return (the same rate shown on
+                // Investment Tiers) daily over the real elapsed time — not an
+                // invented figure.
+                const netAmountNum = parseFloat(inv.netAmount || inv.amount);
+                const weeklyReturn = parseFloat(inv.tier.weeklyReturn) || 0;
+                const daysElapsed = Math.max(
+                  0,
+                  (Date.now() - new Date(inv.activatedAt).getTime()) / (24 * 60 * 60 * 1000)
+                );
+                const dailyRate = Math.pow(1 + weeklyReturn / 100, 1 / 7) - 1;
+                const roiPercent = (Math.pow(1 + dailyRate, daysElapsed) - 1) * 100;
+                const roiAmount = netAmountNum * (roiPercent / 100);
 
                 return (
                   <div key={inv.id} className={`rounded-xl border p-4 ${isMature ? "border-brand/30 bg-brand/5" : "border-success/25 bg-success-soft"}`}>
@@ -386,6 +400,11 @@ export default function IndexPage() {
                         <p className={`text-lg font-bold mt-0.5 ${isMature ? "text-brand" : "text-success"}`}>
                           ${parseFloat(inv.netAmount || inv.amount).toFixed(2)}
                         </p>
+                        {roiPercent > 0 && (
+                          <p className="text-xs font-semibold text-success mt-0.5">
+                            +${roiAmount.toFixed(2)} (+{roiPercent.toFixed(2)}%)
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-1">
                           Duration: <span className="font-medium text-foreground">{inv.tier.durationMonths} months</span>
                         </p>
