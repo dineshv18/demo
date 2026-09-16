@@ -31,11 +31,11 @@ const TIER_COLORS = [
 // semantic tones, cycled if admin publishes more categories than colors.
 const ALLOCATION_COLORS = [
   "var(--brand)",
-  "var(--color-navy-500)",
+  "var(--color-purple-400)",
   "var(--color-success)",
-  "var(--brand-glow)",
+  "var(--color-purple-700)",
   "var(--color-info)",
-  "var(--color-navy-400)",
+  "var(--color-purple-300)",
 ];
 
 function AllocationDonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) {
@@ -840,7 +840,7 @@ export default function IndexPage() {
         )}
 
         <Dialog open={allocationOpen} onOpenChange={setAllocationOpen}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto overflow-x-hidden w-[calc(100%-2rem)]">
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto overflow-x-hidden w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <IconChartPie className="h-4 w-4 text-brand shrink-0" /> How Your Investment Is Diversified
