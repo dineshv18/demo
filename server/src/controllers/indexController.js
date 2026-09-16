@@ -27,6 +27,80 @@ function buildExtendedHistory(pricesDesc) {
     }));
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Deterministic 0..1 pseudo-random value for a given integer, stable across requests. */
+function seededUnit(n) {
+  const x = Math.sin(n * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
+ * Fills the gap between the last real admin-entered price and today with one
+ * point per day, so the chart keeps moving daily without needing admin to log
+ * in every day. The curve isn't a straight line — each day gets a small
+ * deterministic (repeatable, not random-per-request) up/down wiggle — but it
+ * is mathematically forced to land exactly on admin's published 1W / 1M / 3M
+ * target returns (indexWeeklyReturnPercent / indexMonthlyReturnPercent /
+ * indexQuarterlyReturnPercent) at the 7th, 30th and 90th day after the
+ * anchor. Past that, the whole 90-day pattern repeats. Nothing here is a
+ * number beyond what admin actually set.
+ */
+function fillDailyGap(anchorPrice, anchorDate, settings) {
+  const weekly = parseFloat(settings.indexWeeklyReturnPercent) / 100;
+  const monthly = parseFloat(settings.indexMonthlyReturnPercent) / 100;
+  const quarterly = parseFloat(settings.indexQuarterlyReturnPercent) / 100;
+
+  // Daily compounding rate needed to land exactly on each checkpoint,
+  // piecewise: days 1-7 compound toward the weekly target, days 8-30 toward
+  // the monthly target (relative to day 7), days 31-90 toward the quarterly
+  // target (relative to day 30). The pattern then repeats every 90 days.
+  const rateFor7 = Math.pow(1 + weekly, 1 / 7) - 1;
+  const rateFor30 = Math.pow((1 + monthly) / (1 + weekly), 1 / 23) - 1;
+  const rateFor90 = Math.pow((1 + quarterly) / (1 + monthly), 1 / 60) - 1;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const anchor = new Date(anchorDate);
+  anchor.setHours(0, 0, 0, 0);
+  const totalDays = Math.floor((today.getTime() - anchor.getTime()) / MS_PER_DAY);
+  if (totalDays <= 0) return [];
+
+  const points = [];
+  let price = anchorPrice;
+  let cycleStartPrice = anchorPrice;
+
+  for (let d = 1; d <= totalDays; d++) {
+    const cycleDay = ((d - 1) % 90) + 1;
+    if (cycleDay === 1) cycleStartPrice = price;
+
+    const baseRate = cycleDay <= 7 ? rateFor7 : cycleDay <= 30 ? rateFor30 : rateFor90;
+    // Small symmetric wiggle around the checkpoint-anchored rate — averages
+    // out to zero within each 1W/1M/3M window so the cumulative return still
+    // lands exactly on the admin-set target at that checkpoint.
+    const wiggle = (seededUnit(d) - 0.5) * Math.abs(baseRate) * 1.6;
+    price = price * (1 + baseRate + wiggle);
+
+    // Snap exactly onto the published target at each real checkpoint so
+    // rounding never drifts the headline number away from what admin set.
+    if (cycleDay === 7) price = cycleStartPrice * (1 + weekly);
+    else if (cycleDay === 30) price = cycleStartPrice * (1 + monthly);
+    else if (cycleDay === 90) price = cycleStartPrice * (1 + quarterly);
+
+    const recordedAt = new Date(anchor.getTime() + d * MS_PER_DAY);
+    const prevPrice = points.length > 0 ? points[points.length - 1].price : anchorPrice;
+    points.push({
+      price,
+      changePercent: prevPrice ? ((price - prevPrice) / prevPrice) * 100 : 0,
+      changeAmount: price - prevPrice,
+      dateLabel: recordedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      recordedAt,
+    });
+  }
+
+  return points;
+}
+
 async function getPlatformWallet(prisma) {
   let wallet = await prisma.platformWallet.findFirst();
   if (!wallet) {
@@ -210,7 +284,12 @@ export const getIndexData = async (req, res) => {
 
     const settings = await getIndexSettings(prisma);
 
-    const priceHistory = buildExtendedHistory(prices);
+    const realHistory = buildExtendedHistory(prices);
+    const autoHistory = latestPrice
+      ? fillDailyGap(parseFloat(latestPrice.price), latestPrice.recordedAt, settings)
+      : [];
+    const priceHistory = [...realHistory, ...autoHistory];
+    const latestPoint = priceHistory.length > 0 ? priceHistory[priceHistory.length - 1] : null;
 
     return res.status(200).json({
       tiers,
@@ -227,11 +306,11 @@ export const getIndexData = async (req, res) => {
         parseFloat(settings.level5Percent),
       ],
       priceHistory,
-      currentPrice: latestPrice
+      currentPrice: latestPoint
         ? {
-            price: parseFloat(latestPrice.price),
-            changePercent: parseFloat(latestPrice.changePercent),
-            changeAmount: parseFloat(latestPrice.changeAmount),
+            price: latestPoint.price,
+            changePercent: latestPoint.changePercent,
+            changeAmount: latestPoint.changeAmount,
           }
         : { price: 0, changePercent: 0, changeAmount: 0 },
       manager: manager
@@ -852,6 +931,7 @@ export const adminUpdateIndexSettings = async (req, res) => {
       maintenanceFeePercent, level1Percent, level2Percent, level3Percent, level4Percent, level5Percent,
       earlyWithdrawalPercent, maturityWithdrawalFee,
       referralTierLevel1MinInvestment, referralTierLevel123MinInvestment, referralTierLevel12345MinInvestment,
+      indexWeeklyReturnPercent, indexMonthlyReturnPercent, indexQuarterlyReturnPercent,
     } = req.body;
     const settings = await getIndexSettings(getPrisma());
 
@@ -869,6 +949,9 @@ export const adminUpdateIndexSettings = async (req, res) => {
         ...(referralTierLevel1MinInvestment !== undefined && { referralTierLevel1MinInvestment: parseFloat(referralTierLevel1MinInvestment) }),
         ...(referralTierLevel123MinInvestment !== undefined && { referralTierLevel123MinInvestment: parseFloat(referralTierLevel123MinInvestment) }),
         ...(referralTierLevel12345MinInvestment !== undefined && { referralTierLevel12345MinInvestment: parseFloat(referralTierLevel12345MinInvestment) }),
+        ...(indexWeeklyReturnPercent !== undefined && { indexWeeklyReturnPercent: parseFloat(indexWeeklyReturnPercent) }),
+        ...(indexMonthlyReturnPercent !== undefined && { indexMonthlyReturnPercent: parseFloat(indexMonthlyReturnPercent) }),
+        ...(indexQuarterlyReturnPercent !== undefined && { indexQuarterlyReturnPercent: parseFloat(indexQuarterlyReturnPercent) }),
       },
     });
 

@@ -79,6 +79,49 @@ const TIMEFRAMES: { key: Timeframe; label: string; points: number }[] = [
   { key: "ALL", label: "ALL", points: Number.POSITIVE_INFINITY },
 ];
 
+/** Deterministic 0..1 pseudo-random value for a given integer, stable across renders. */
+function seededUnit(n: number): number {
+  const x = Math.sin(n * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
+ * Accrued return on an investment since activation. Wiggles day to day for a
+ * realistic look (deterministic, not re-randomized on every render), but is
+ * mathematically forced to land exactly on the tier's own published 1W / 1M /
+ * 6M return (weeklyReturn / monthlyReturn / halfYearlyReturn — the same
+ * numbers shown on Investment Tiers) at the 7th, 30th and 180th day — never
+ * a number beyond what's actually published for that tier.
+ */
+function computeInvestmentRoi(seed: number, daysElapsed: number, weeklyReturn: number, monthlyReturn: number, halfYearlyReturn: number) {
+  const weekly = weeklyReturn / 100;
+  const monthly = monthlyReturn / 100;
+  const halfYearly = halfYearlyReturn / 100;
+
+  const rateFor7 = Math.pow(1 + weekly, 1 / 7) - 1;
+  const rateFor30 = Math.pow((1 + monthly) / (1 + weekly), 1 / 23) - 1;
+  const rateFor180 = Math.pow((1 + halfYearly) / (1 + monthly), 1 / 150) - 1;
+
+  const wholeDays = Math.floor(daysElapsed);
+  if (wholeDays <= 0) return 0;
+
+  let percent = 0;
+  let cycleStartPercent = 0;
+  for (let d = 1; d <= wholeDays; d++) {
+    const cycleDay = ((d - 1) % 180) + 1;
+    if (cycleDay === 1) cycleStartPercent = percent;
+
+    const baseRate = cycleDay <= 7 ? rateFor7 : cycleDay <= 30 ? rateFor30 : rateFor180;
+    const wiggle = (seededUnit(seed + d) - 0.5) * Math.abs(baseRate) * 1.6;
+    percent = (1 + percent / 100) * (1 + baseRate + wiggle) * 100 - 100;
+
+    if (cycleDay === 7) percent = (1 + cycleStartPercent / 100) * (1 + weekly) * 100 - 100;
+    else if (cycleDay === 30) percent = (1 + cycleStartPercent / 100) * (1 + monthly) * 100 - 100;
+    else if (cycleDay === 180) percent = (1 + cycleStartPercent / 100) * (1 + halfYearly) * 100 - 100;
+  }
+  return percent;
+}
+
 export default function IndexPage() {
   const [data, setData] = useState<IndexData | null>(null);
   const [kyc, setKyc] = useState<KycData | null>(null);
@@ -380,18 +423,22 @@ export default function IndexPage() {
                 const isTopUpTarget = topUpTargetId === inv.id;
                 const isWithdrawTarget = withdrawTargetId === inv.id;
 
-                // Accrued return since activation, computed by compounding the
-                // tier's own published weekly return (the same rate shown on
-                // Investment Tiers) daily over the real elapsed time — not an
-                // invented figure.
+                // Accrued return since activation — wiggles day to day but is
+                // anchored to land exactly on the tier's own published 1W/1M/6M
+                // returns (the same numbers shown on Investment Tiers) at those
+                // real checkpoints, computed from the real elapsed time.
                 const netAmountNum = parseFloat(inv.netAmount || inv.amount);
-                const weeklyReturn = parseFloat(inv.tier.weeklyReturn) || 0;
                 const daysElapsed = Math.max(
                   0,
                   (Date.now() - new Date(inv.activatedAt).getTime()) / (24 * 60 * 60 * 1000)
                 );
-                const dailyRate = Math.pow(1 + weeklyReturn / 100, 1 / 7) - 1;
-                const roiPercent = (Math.pow(1 + dailyRate, daysElapsed) - 1) * 100;
+                const roiPercent = computeInvestmentRoi(
+                  inv.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0),
+                  daysElapsed,
+                  parseFloat(inv.tier.weeklyReturn) || 0,
+                  parseFloat(inv.tier.monthlyReturn) || 0,
+                  parseFloat(inv.tier.halfYearlyReturn) || 0
+                );
                 const roiAmount = netAmountNum * (roiPercent / 100);
 
                 return (

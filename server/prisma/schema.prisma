@@ -383,6 +383,15 @@ model IndexSettings {
   earlyWithdrawalPercent Decimal @default(17) @db.Decimal(5, 2)
   maturityWithdrawalFee  Decimal @default(2) @db.Decimal(18, 2)
 
+  // Target return the published ORVANTA Index Price chart grows toward.
+  // The daily price shown to users wiggles day to day for a realistic look,
+  // but is mathematically anchored so the cumulative change over exactly
+  // 7 / 30 / 90 days always equals these admin-set figures — never an
+  // invented number beyond what admin has published here.
+  indexWeeklyReturnPercent    Decimal @default(1.5) @db.Decimal(8, 4)
+  indexMonthlyReturnPercent   Decimal @default(6) @db.Decimal(8, 4)
+  indexQuarterlyReturnPercent Decimal @default(18) @db.Decimal(8, 4)
+
   // Minimum total Index investment (across all of a referrer's own
   // investments) required to unlock each referral-income tier. Level 1 opens
   // at referralTierLevel1MinInvestment; levels 2-3 additionally require

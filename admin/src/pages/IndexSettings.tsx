@@ -890,6 +890,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
     referralTierLevel1MinInvestment: "200",
     referralTierLevel123MinInvestment: "1000",
     referralTierLevel12345MinInvestment: "2000",
+    indexWeeklyReturnPercent: "1.5",
+    indexMonthlyReturnPercent: "6",
+    indexQuarterlyReturnPercent: "18",
   });
   const [saving, setSaving] = useState(false);
 
@@ -907,6 +910,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
         referralTierLevel1MinInvestment: settings.referralTierLevel1MinInvestment ?? "200",
         referralTierLevel123MinInvestment: settings.referralTierLevel123MinInvestment ?? "1000",
         referralTierLevel12345MinInvestment: settings.referralTierLevel12345MinInvestment ?? "2000",
+        indexWeeklyReturnPercent: settings.indexWeeklyReturnPercent ?? "1.5",
+        indexMonthlyReturnPercent: settings.indexMonthlyReturnPercent ?? "6",
+        indexQuarterlyReturnPercent: settings.indexQuarterlyReturnPercent ?? "18",
       });
     }
   }, [settings]);
@@ -931,6 +937,9 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
         referralTierLevel1MinInvestment: parseFloat(form.referralTierLevel1MinInvestment),
         referralTierLevel123MinInvestment: parseFloat(form.referralTierLevel123MinInvestment),
         referralTierLevel12345MinInvestment: parseFloat(form.referralTierLevel12345MinInvestment),
+        indexWeeklyReturnPercent: parseFloat(form.indexWeeklyReturnPercent),
+        indexMonthlyReturnPercent: parseFloat(form.indexMonthlyReturnPercent),
+        indexQuarterlyReturnPercent: parseFloat(form.indexQuarterlyReturnPercent),
       });
       showToast("success", "Fee settings updated");
       await onRefresh();
@@ -959,6 +968,46 @@ function FeesTab({ settings, onRefresh, showToast }: { settings: IndexSettingsDa
           split across up to 5 levels of their referral chain. Whatever the fee doesn't cover goes to the platform —
           this is never shown to users.
         </p>
+      </div>
+
+      <div className="rounded-xl border border-[#00A94F]/25 bg-[#EAF7E8]/40 p-4 space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">ORVANTA Index Price — target returns</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            The shared Index Price chart on the client Index page moves automatically every day between
+            your Price History entries, wiggling up and down for a realistic look — but the total change
+            over exactly 1 week / 1 month / 3 months always lands on these numbers.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">1 Week target</label>
+            <div className="relative mt-1">
+              <input type="number" step="0.01" value={form.indexWeeklyReturnPercent}
+                onChange={(e) => setForm({ ...form, indexWeeklyReturnPercent: e.target.value })}
+                className="w-full px-4 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">1 Month target</label>
+            <div className="relative mt-1">
+              <input type="number" step="0.01" value={form.indexMonthlyReturnPercent}
+                onChange={(e) => setForm({ ...form, indexMonthlyReturnPercent: e.target.value })}
+                className="w-full px-4 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">3 Month target</label>
+            <div className="relative mt-1">
+              <input type="number" step="0.01" value={form.indexQuarterlyReturnPercent}
+                onChange={(e) => setForm({ ...form, indexQuarterlyReturnPercent: e.target.value })}
+                className="w-full px-4 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00A94F]/40" />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {fields.map((f) => (
