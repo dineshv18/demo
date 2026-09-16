@@ -89,13 +89,15 @@ export function WalletOverview({
                     <Tooltip
                       {...tooltipStyles(theme)}
                       cursor={false}
+                      wrapperStyle={{ outline: "none", zIndex: 20 }}
+                      contentStyle={{ ...tooltipStyles(theme).contentStyle, backgroundColor: theme.tooltipBg, opacity: 1 }}
                       formatter={(value: unknown, name: unknown) => [formatMoney(Number(value)), String(name)] as [string, string]}
                     />
                   )}
                 </PieChart>
               </ResponsiveContainer>
 
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center">
                 <span className="text-eyebrow text-[0.625rem]">Total</span>
                 <span className="text-money mt-0.5 text-lg text-foreground">
                   {formatMoney(total)}
