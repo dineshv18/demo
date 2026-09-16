@@ -460,6 +460,7 @@ model IndexInvestment {
   withdrawnAt DateTime?
   withdrawalFee   Decimal?           @db.Decimal(18, 2)
   payoutAmount    Decimal?           @db.Decimal(18, 2)
+  maturityNotifiedAt DateTime?
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
 

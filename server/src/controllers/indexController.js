@@ -481,7 +481,7 @@ export const withdrawInvestment = async (req, res) => {
 
     const investment = await getPrisma().indexInvestment.findFirst({
       where: { id: investmentId, userId: req.user.id, status: "ACTIVE" },
-      include: { tier: true },
+      include: { tier: true, user: { select: { id: true, name: true, email: true } } },
     });
     if (!investment) {
       return res.status(400).json({ message: "Active investment not found" });
@@ -526,6 +526,23 @@ export const withdrawInvestment = async (req, res) => {
         : `Early exit fee (${exitFeePercent.toFixed(2)}%) — ${investment.tier.label}`,
       investment.id
     );
+
+    // Best-effort email to both the investor and admin — the withdrawal is
+    // still completed even if mail fails.
+    try {
+      const admins = await getPrisma().user.findMany({
+        where: { role: { in: ["SUPER_ADMIN", "ADMIN"] }, isActive: true },
+        select: { email: true },
+      });
+      const adminRecipients = new Set([...admins.map((a) => a.email), "codeshorts007@gmail.com"]);
+      const { sendIndexWithdrawalUserEmail, sendIndexWithdrawalAdminEmail } = await import("../config/nodemailer.js");
+      await Promise.all([
+        sendIndexWithdrawalUserEmail(investment.user, investment, payoutAmount, withdrawalFee, isMature),
+        sendIndexWithdrawalAdminEmail([...adminRecipients], investment.user, investment, payoutAmount, withdrawalFee, isMature),
+      ]);
+    } catch (mailErr) {
+      console.error("Index withdrawal notification email failed:", mailErr);
+    }
 
     return res.status(200).json({
       message: isMature

@@ -367,6 +367,176 @@ export const sendTransferSenderCompleted = async (transfer) => {
   });
 };
 
+// ─── Index Investment: withdrawal notification (user) ───
+export const sendIndexWithdrawalUserEmail = async (user, investment, payoutAmount, withdrawalFee, wasMature) => {
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: user.email,
+    subject: wasMature
+      ? `Your ${investment.tier.label} investment matured and was withdrawn`
+      : `Your ${investment.tier.label} investment was withdrawn early`,
+    headers: getBaseHeaders(),
+    text: `Hello ${user.name},\n\nYour ${investment.tier.label} investment has been withdrawn.\n\nStatus: ${wasMature ? "Matured" : "Withdrawn early"}\nExit fee: $${withdrawalFee.toFixed(2)}\nAmount credited to your wallet: $${payoutAmount.toFixed(2)}\n\nORVANTA Financial Team`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#0b0712;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#0b0712;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#15101c;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+              <tr><td style="background:linear-gradient(135deg,#7c3aed,#5b21b6);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">${wasMature ? "Investment Matured" : "Investment Withdrawn"}</h1>
+                <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;">${investment.tier.label}</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#e5e7eb;font-size:15px;margin:0 0 8px;">Hello ${user.name},</p>
+                <p style="color:#9ca3af;font-size:14px;margin:0 0 20px;line-height:1.6;">
+                  Your <strong>${investment.tier.label}</strong> investment has been withdrawn${wasMature ? " after reaching maturity" : " early"}.
+                </p>
+                <div style="background:#1e1729;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#a78bfa;font-size:11px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">Credited to your wallet</p>
+                  <p style="color:#fff;font-size:24px;font-weight:700;margin:0 0 10px;">$${payoutAmount.toFixed(2)}</p>
+                  <p style="color:#9ca3af;font-size:12px;margin:0;">Exit fee applied: $${withdrawalFee.toFixed(2)}</p>
+                </div>
+                <p style="color:#6b7280;font-size:12px;margin:0;">This is now available in your Wallet balance.</p>
+              </td></tr>
+              <tr><td style="background:#1e1729;padding:20px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+                <p style="color:#6b7280;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Index Investment: withdrawal notification (admin) ───
+export const sendIndexWithdrawalAdminEmail = async (adminEmails, user, investment, payoutAmount, withdrawalFee, wasMature) => {
+  if (!adminEmails.length) return;
+  const adminUrl = `${getEnv().ADMIN_URL || "http://localhost:5173"}/dashboard/index-settings`;
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: adminEmails,
+    subject: `Index withdrawal: ${user.name} — ${investment.tier.label} (${wasMature ? "matured" : "early"})`,
+    headers: getBaseHeaders(),
+    text: `A user withdrew from the Index.\n\nUser: ${user.name} (${user.email})\nTier: ${investment.tier.label}\nStatus: ${wasMature ? "Matured" : "Withdrawn early"}\nExit fee: $${withdrawalFee.toFixed(2)}\nAmount paid out: $${payoutAmount.toFixed(2)}\n\nView in admin panel: ${adminUrl}\n\nORVANTA Financial`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <tr><td style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:20px;font-weight:700;">Index Withdrawal</h1>
+                <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;">${wasMature ? "Matured" : "Early exit"}</p>
+              </td></tr>
+              <tr><td style="padding:36px 40px;">
+                <div style="background:#f9fafb;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>User:</strong> ${user.name} (${user.email})</p>
+                  <p style="color:#374151;font-size:13px;margin:0;"><strong>Tier:</strong> ${investment.tier.label}</p>
+                </div>
+                <p style="color:#111827;font-size:24px;font-weight:700;margin:0 0 8px;">$${payoutAmount.toFixed(2)}</p>
+                <p style="color:#6b7280;font-size:13px;margin:0 0 24px;">Exit fee collected: $${withdrawalFee.toFixed(2)}</p>
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${adminUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View in Admin Panel</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Index Investment: matured (before withdrawal), notify the user ───
+export const sendIndexMaturedUserEmail = async (user, investment) => {
+  const netAmount = parseFloat(investment.netAmount);
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: user.email,
+    subject: `Your ${investment.tier.label} investment has matured`,
+    headers: getBaseHeaders(),
+    text: `Hello ${user.name},\n\nYour ${investment.tier.label} investment has reached maturity and is now ready to withdraw at the full maturity rate (no early-exit fee).\n\nCurrent value: $${netAmount.toFixed(2)}\n\nWithdraw anytime from your Index page: ${getEnv().CLIENT_URL || "http://localhost:3000"}/dashboard/index\n\nORVANTA Financial Team`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#0b0712;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#0b0712;padding:40px 0;">
+          <tr><td align="center">
+            <table width="480" cellpadding="0" cellspacing="0" style="background:#15101c;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+              <tr><td style="background:linear-gradient(135deg,#059669,#10b981);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Investment Matured!</h1>
+                <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;">${investment.tier.label}</p>
+              </td></tr>
+              <tr><td style="padding:40px;">
+                <p style="color:#e5e7eb;font-size:15px;margin:0 0 8px;">Hello ${user.name},</p>
+                <p style="color:#9ca3af;font-size:14px;margin:0 0 20px;line-height:1.6;">
+                  Great news — your <strong>${investment.tier.label}</strong> investment has reached maturity. You can now withdraw at the full maturity rate with the lowest exit fee.
+                </p>
+                <div style="background:#1e1729;border-radius:12px;padding:18px 20px;margin:0 0 20px;text-align:center;">
+                  <p style="color:#a78bfa;font-size:11px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">Current Value</p>
+                  <p style="color:#fff;font-size:24px;font-weight:700;margin:0;">$${netAmount.toFixed(2)}</p>
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${getEnv().CLIENT_URL || "http://localhost:3000"}/dashboard/index" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View & Withdraw</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#1e1729;padding:20px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+                <p style="color:#6b7280;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
+// ─── Index Investment: matured (before withdrawal), notify admin ───
+export const sendIndexMaturedAdminEmail = async (adminEmails, user, investment) => {
+  if (!adminEmails.length) return;
+  const adminUrl = `${getEnv().ADMIN_URL || "http://localhost:5173"}/dashboard/index-settings`;
+  const netAmount = parseFloat(investment.netAmount);
+  return getTransporter().sendMail({
+    from: `"ORVANTA Financial" <${getEnv().BREVO_SENDER_EMAIL}>`,
+    to: adminEmails,
+    subject: `Index investment matured: ${user.name} — ${investment.tier.label}`,
+    headers: getBaseHeaders(),
+    text: `An investment has reached maturity.\n\nUser: ${user.name} (${user.email})\nTier: ${investment.tier.label}\nCurrent value: $${netAmount.toFixed(2)}\n\nThey have not withdrawn yet. View in admin panel: ${adminUrl}\n\nORVANTA Financial`,
+    html: `
+      <!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+      <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Tahoma,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 0;">
+          <tr><td align="center">
+            <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <tr><td style="background:linear-gradient(135deg,#059669,#10b981);padding:32px 40px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:20px;font-weight:700;">Investment Matured</h1>
+                <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;">Not yet withdrawn</p>
+              </td></tr>
+              <tr><td style="padding:36px 40px;">
+                <div style="background:#f9fafb;border-radius:12px;padding:18px 20px;margin:0 0 20px;">
+                  <p style="color:#374151;font-size:13px;margin:0 0 6px;"><strong>User:</strong> ${user.name} (${user.email})</p>
+                  <p style="color:#374151;font-size:13px;margin:0;"><strong>Tier:</strong> ${investment.tier.label}</p>
+                </div>
+                <p style="color:#111827;font-size:24px;font-weight:700;margin:0 0 24px;">$${netAmount.toFixed(2)}</p>
+                <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                  <a href="${adminUrl}" style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">View in Admin Panel</a>
+                </td></tr></table>
+              </td></tr>
+              <tr><td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #f3f4f6;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} ORVANTA Financial. All rights reserved.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body></html>
+    `,
+  });
+};
+
 // ─── Internal Transfer: notify the receiver funds have arrived ───
 export const sendTransferReceiverCompleted = async (transfer) => {
   return getTransporter().sendMail({
