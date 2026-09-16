@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   IconChartLine,
   IconClock,
-  IconCoins,
   IconGift,
   IconTrendingUp,
   IconUser,
@@ -120,12 +119,6 @@ export default function ClientDashboard() {
     [transactions]
   );
 
-  const referralEarned = earnings?.totalEarned ?? referralStats?.totalCommission ?? 0;
-
-  // "Total Earnings" is the sum of the two earning streams the API reports —
-  // referral commission plus the current value of active Index positions.
-  const totalEarnings = referralEarned + totalIndexValue;
-
   const recentTx = useMemo(
     () =>
       transactions.slice(0, 5).map((t) => ({
@@ -156,10 +149,10 @@ export default function ClientDashboard() {
       />
 
       {/* Headline figures */}
-      <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Rise data-tour="stat-wallet">
           <StatCard
-            label="Total Balance"
+            label="Wallet Balance"
             value={balance}
             icon={IconWallet}
             accent="navy"
@@ -192,7 +185,7 @@ export default function ClientDashboard() {
 
         <Rise data-tour="stat-bonus">
           <StatCard
-            label="Bonus Earnings"
+            label="Referral Earning"
             value={bonusBalance}
             icon={IconGift}
             accent="success"
@@ -223,17 +216,6 @@ export default function ClientDashboard() {
               </Link>
             </div>
           </StatCard>
-        </Rise>
-
-        <Rise>
-          <StatCard
-            label="Total Earnings"
-            value={totalEarnings}
-            icon={IconCoins}
-            accent="info"
-            hint="Referral commission + Index value"
-            href="/dashboard/referral"
-          />
         </Rise>
       </Stagger>
 
