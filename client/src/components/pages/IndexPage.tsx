@@ -547,11 +547,6 @@ export default function IndexPage() {
           </p>
 
           <div className="space-y-3">
-            {investError && (
-              <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
-                <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {investError}
-              </div>
-            )}
             {investSuccess && (
               <div className="flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft px-3 py-2 text-xs text-success">
                 <IconShieldCheck className="h-3.5 w-3.5 shrink-0" /> {investSuccess}
@@ -605,7 +600,9 @@ export default function IndexPage() {
                           )}
                           <div className="min-w-0">
                             <p className="text-base font-bold text-foreground break-words">{t.label}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{t.tagline || `For amounts between $${parseFloat(t.minAmount).toLocaleString()} and $${parseFloat(t.maxAmount).toLocaleString()}`}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {t.tagline || `For amounts $${parseFloat(t.minAmount).toLocaleString()} ${parseFloat(t.maxAmount) >= 999999999 ? "and above" : `and $${parseFloat(t.maxAmount).toLocaleString()}`}`}
+                            </p>
                           </div>
                         </div>
                         <Badge
@@ -664,6 +661,11 @@ export default function IndexPage() {
                           </div>
                           {investAmountNum > 0 && matchingTiers.length === 0 && (
                             <p className="text-xs text-warning">No plan matches this amount — check the ranges above.</p>
+                          )}
+                          {investError && (
+                            <div className="flex items-center gap-2 rounded-lg border border-danger/25 bg-danger-soft px-3 py-2 text-xs text-destructive">
+                              <IconAlertCircle className="h-3.5 w-3.5 shrink-0" /> {investError}
+                            </div>
                           )}
 
                           <Button

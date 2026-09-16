@@ -271,7 +271,11 @@ export const investInIndex = async (req, res) => {
       return res.status(400).json({ message: "Selected tier is not available" });
     }
     if (parsedAmount < parseFloat(tier.minAmount) || parsedAmount > parseFloat(tier.maxAmount)) {
-      return res.status(400).json({ message: `Amount must be between $${tier.minAmount} and $${tier.maxAmount} for this tier` });
+      const minLabel = `$${Number(tier.minAmount).toLocaleString()}`;
+      const maxLabel = Number(tier.maxAmount) >= 999999999
+        ? "and above"
+        : `and $${Number(tier.maxAmount).toLocaleString()}`;
+      return res.status(400).json({ message: `Amount must be between ${minLabel} ${maxLabel} for this tier` });
     }
 
     const feePercent = parseFloat(tier.maintenanceFeePercent);
