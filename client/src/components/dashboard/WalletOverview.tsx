@@ -12,35 +12,40 @@ import { formatMoney } from "./format";
 import { SectionCard } from "./SectionCard";
 
 /**
- * Wallet composition donut.
+ * Total account composition donut.
  *
- * The three figures are passed straight through from the wallet API; the total
- * is their sum and nothing else. When every figure is zero the donut renders as
- * a neutral ring rather than a misleading full segment.
+ * The four figures are derived straight from real API data (wallet, active
+ * Index investments, referral earnings) — "Others" is whatever's left in the
+ * wallet balance once bonus/locked funds are excluded. The total is their sum
+ * and nothing else. When every figure is zero the donut renders as a neutral
+ * ring rather than a misleading full segment.
  */
 export function WalletOverview({
   balance,
-  bonusBalance,
-  locked,
+  indexValue,
+  referralEarnings,
+  others,
   className,
 }: {
   balance: number;
-  bonusBalance: number;
-  locked: number;
+  indexValue: number;
+  referralEarnings: number;
+  others: number;
   className?: string;
 }) {
   const { theme, mounted } = useChartTheme();
 
   const segments = React.useMemo(
     () => [
-      { name: "Wallet Balance", value: balance, color: theme.series[0] },
-      { name: "Bonus Balance", value: bonusBalance, color: theme.series[1] },
-      { name: "Locked Amount", value: locked, color: theme.series[2] },
+      { name: "Wallet", value: balance, color: theme.series[0] },
+      { name: "Index", value: indexValue, color: theme.series[1] },
+      { name: "Referral", value: referralEarnings, color: theme.series[2] },
+      { name: "Others", value: others, color: theme.series[3] ?? theme.series[0] },
     ],
-    [balance, bonusBalance, locked, theme.series]
+    [balance, indexValue, referralEarnings, others, theme.series]
   );
 
-  const total = balance + bonusBalance + locked;
+  const total = balance + indexValue + referralEarnings + others;
   const hasValue = total > 0;
 
   const chartData = hasValue
@@ -49,10 +54,10 @@ export function WalletOverview({
 
   return (
     <SectionCard
-      title="Wallet Overview"
+      title="Total Overview"
       icon={IconWallet}
       actionHref="/dashboard/wallet"
-      actionLabel="View Wallet"
+      actionLabel="Overview"
       className={className}
     >
       <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-5">
@@ -135,7 +140,7 @@ export function WalletOverview({
           "text-sm font-semibold text-foreground transition-colors hover:border-brand/40 hover:bg-accent hover:text-brand"
         )}
       >
-        View Wallet
+        Overview
       </Link>
     </SectionCard>
   );

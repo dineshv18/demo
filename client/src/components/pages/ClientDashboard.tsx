@@ -98,6 +98,8 @@ export default function ClientDashboard() {
     [activeInvestments]
   );
 
+  const referralEarned = earnings?.totalEarned ?? referralStats?.totalCommission ?? 0;
+
   const totalDeposits = useMemo(
     () =>
       transactions
@@ -229,7 +231,12 @@ export default function ClientDashboard() {
           priceHistory={indexData?.priceHistory ?? []}
           currentPrice={indexData?.currentPrice ?? null}
         />
-        <WalletOverview balance={balance} bonusBalance={bonusBalance} locked={frozen} />
+        <WalletOverview
+          balance={balance}
+          indexValue={totalIndexValue}
+          referralEarnings={referralEarned}
+          others={bonusBalance + frozen}
+        />
       </div>
 
       {/* Account + stats + activity */}
