@@ -384,84 +384,86 @@ export default function WalletPage() {
             </Card>
           )}
 
-          {/* Primary balance — the page's headline figure, on the navy ground */}
-          <section className="surface-navy relative overflow-hidden rounded-2xl p-6 sm:p-8">
-            <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-brand/12 blur-3xl"
-            />
-            <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/50">
-                  Wallet Balance
-                </p>
-                <p className="text-money mt-2 text-4xl leading-none text-white sm:text-5xl">
-                  {sym}{balance.toFixed(2)}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/55">
-                  <span>{wallet?.currency || "USD"}</span>
-                  {frozen > 0 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <IconLock className="h-3.5 w-3.5" /> {sym}{frozen.toFixed(2)} locked
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button onClick={openDeposit} disabled={hasPending}
-                  size="lg"
-                  className="gap-2 btn-glow btn-glow-hover"
-                  title={hasPending ? "You have a pending request" : undefined}>
-                  <IconPlus className="h-4 w-4" /> Add Funds
-                </Button>
-                <Button onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
-                  size="lg"
-                  title={balance <= 0 ? "No balance" : hasPending ? "You have a pending request" : undefined}
-                  className="gap-2 border border-white/20 bg-transparent text-white hover:border-brand/50 hover:bg-white/5 hover:text-purple-300">
-                  <IconMinus className="h-4 w-4" /> Withdraw
-                </Button>
-              </div>
-            </div>
-          </section>
-
-          {/* Bonus Card */}
-          <Card className="gap-0 border-brand/25 bg-linear-to-br from-accent to-transparent p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="grid size-8 place-items-center rounded-lg bg-brand/15 text-brand">
-                    <IconGift className="h-4 w-4" />
-                  </span>
-                  <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    Bonus Balance
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 lg:items-stretch">
+            {/* Primary balance — the page's headline figure, on the navy ground */}
+            <section className="surface-navy relative overflow-hidden rounded-2xl p-6 sm:p-8">
+              <span aria-hidden className="bg-ticker pointer-events-none absolute inset-0 opacity-30" />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-brand/12 blur-3xl"
+              />
+              <div className="relative flex h-full flex-col justify-between gap-6">
+                <div>
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/50">
+                    Wallet Balance
                   </p>
+                  <p className="text-money mt-2 text-4xl leading-none text-white sm:text-5xl">
+                    {sym}{balance.toFixed(2)}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/55">
+                    <span>{wallet?.currency || "USD"}</span>
+                    {frozen > 0 && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <IconLock className="h-3.5 w-3.5" /> {sym}{frozen.toFixed(2)} locked
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-money mt-2.5 text-3xl leading-none text-foreground sm:text-4xl">
-                  {sym}{bonusBalance.toFixed(2)}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">Earned from your referral commissions</p>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={openDeposit} disabled={hasPending}
+                    size="lg"
+                    className="gap-2 btn-glow btn-glow-hover"
+                    title={hasPending ? "You have a pending request" : undefined}>
+                    <IconPlus className="h-4 w-4" /> Add Funds
+                  </Button>
+                  <Button onClick={() => openWithdraw("wallet")} disabled={balance <= 0 || hasPending}
+                    size="lg"
+                    title={balance <= 0 ? "No balance" : hasPending ? "You have a pending request" : undefined}
+                    className="gap-2 border border-white/20 bg-transparent text-white hover:border-brand/50 hover:bg-white/5 hover:text-purple-300">
+                    <IconMinus className="h-4 w-4" /> Withdraw
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button onClick={openTransfer} disabled={bonusBalance <= 0}
-                  title={bonusBalance <= 0 ? "No bonus balance" : undefined}
-                  className="gap-2">
-                  <IconArrowRight className="h-4 w-4" /> Add to Wallet
-                </Button>
-                <Button variant="outline" onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
-                  title={bonusBalance <= 0 ? "No bonus balance" : pendingBonusRequest ? "You have a pending bonus withdrawal" : undefined}
-                  className="gap-2">
-                  <IconMinus className="h-4 w-4" /> Withdraw
-                </Button>
+            </section>
+
+            {/* Bonus Card */}
+            <Card className="gap-0 border-brand/25 bg-linear-to-br from-accent to-transparent p-6 sm:p-8">
+              <div className="flex h-full flex-col justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="grid size-8 place-items-center rounded-lg bg-brand/15 text-brand">
+                      <IconGift className="h-4 w-4" />
+                    </span>
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Bonus Balance
+                    </p>
+                  </div>
+                  <p className="text-money mt-2.5 text-3xl leading-none text-foreground sm:text-4xl">
+                    {sym}{bonusBalance.toFixed(2)}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">Earned from your referral commissions</p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={openTransfer} disabled={bonusBalance <= 0}
+                    title={bonusBalance <= 0 ? "No bonus balance" : undefined}
+                    className="gap-2">
+                    <IconArrowRight className="h-4 w-4" /> Add to Wallet
+                  </Button>
+                  <Button variant="outline" onClick={() => openWithdraw("bonus")} disabled={bonusBalance <= 0 || !!pendingBonusRequest}
+                    title={bonusBalance <= 0 ? "No bonus balance" : pendingBonusRequest ? "You have a pending bonus withdrawal" : undefined}
+                    className="gap-2">
+                    <IconMinus className="h-4 w-4" /> Withdraw
+                  </Button>
+                </div>
               </div>
-            </div>
-            {pendingBonusRequest && (
-              <div className="mt-4 flex items-center gap-2 text-xs text-warning">
-                <IconClock className="h-3.5 w-3.5" />
-                Bonus withdrawal of {sym}{parseFloat(pendingBonusRequest.amount).toFixed(2)} is under review.
-              </div>
-            )}
-          </Card>
+              {pendingBonusRequest && (
+                <div className="mt-4 flex items-center gap-2 text-xs text-warning">
+                  <IconClock className="h-3.5 w-3.5" />
+                  Bonus withdrawal of {sym}{parseFloat(pendingBonusRequest.amount).toFixed(2)} is under review.
+                </div>
+              )}
+            </Card>
+          </div>
 
           {/* Transaction History */}
           <Card className="overflow-hidden p-0 gap-0">
