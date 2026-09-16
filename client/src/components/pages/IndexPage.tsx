@@ -45,7 +45,7 @@ function AllocationDonutTooltip({ active, payload }: { active?: boolean; payload
       className="rounded-xl border border-border px-3 py-2 shadow-xl"
       style={{ backgroundColor: "var(--card)", opacity: 1 }}
     >
-      <p className="text-[11px] text-muted-foreground mb-1">{p.name}</p>
+      <p className="text-xs sm:text-[11px] text-muted-foreground mb-1">{p.name}</p>
       <p className="text-sm font-bold text-foreground">{p.value.toFixed(2)}%</p>
     </div>
   );
@@ -55,7 +55,7 @@ function ChartTooltipContent({ active, payload, label }: { active?: boolean; pay
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-xl">
-      <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+      <p className="text-xs sm:text-[11px] text-muted-foreground mb-1">{label}</p>
       <p className="text-sm font-bold text-foreground">${Number(payload[0].value).toFixed(4)}</p>
     </div>
   );
@@ -320,7 +320,7 @@ export default function IndexPage() {
                   <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand text-white text-xs font-bold">{s.n}</div>
                   <div>
                     <p className="text-xs font-semibold text-foreground">{s.title}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                    <p className="text-xs sm:text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -328,32 +328,31 @@ export default function IndexPage() {
           </Card>
         )}
 
-        <div className={`grid grid-cols-1 gap-4 sm:gap-6 ${activeInvestments.length > 0 ? "lg:grid-cols-2" : ""}`}>
-          {/* Wallet Balance */}
-          <Card className="p-4 sm:p-5 gap-0">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-linear-to-br from-navy-600 to-navy-800 shrink-0">
-                  <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
-                  <p className="text-page-title text-foreground mt-0.5">
-                    <span className="text-gradient">${balance.toFixed(2)}</span>
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">This is the money available to invest</p>
-                </div>
+        {/* Wallet Balance */}
+        <Card className="p-4 sm:p-5 gap-0">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-linear-to-br from-navy-600 to-navy-800 shrink-0">
+                <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              {balance <= 0 && (
-                <Button asChild size="sm" className="shrink-0 btn-glow btn-glow-hover">
-                  <Link href="/dashboard/wallet">Add Funds</Link>
-                </Button>
-              )}
+              <div className="min-w-0">
+                <p className="text-sm sm:text-sm text-muted-foreground">Your Wallet Balance</p>
+                <p className="text-page-title text-foreground mt-0.5">
+                  <span className="text-gradient">${balance.toFixed(2)}</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">This is the money available to invest</p>
+              </div>
             </div>
-          </Card>
+            {balance <= 0 && (
+              <Button asChild size="sm" className="shrink-0 btn-glow btn-glow-hover">
+                <Link href="/dashboard/wallet">Add Funds</Link>
+              </Button>
+            )}
+          </div>
+        </Card>
 
-          {/* Active / Matured Investments */}
-          {activeInvestments.length > 0 && (
+        {/* Active / Matured Investments */}
+        {activeInvestments.length > 0 && (
           <Card className="p-4 sm:p-6 gap-0">
             <h2 className="font-display text-base sm:text-lg font-semibold mb-1">
               Your Investments ({activeInvestments.length})
@@ -371,7 +370,7 @@ export default function IndexPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={`grid grid-cols-1 gap-3 ${activeInvestments.length > 1 ? "sm:grid-cols-2" : ""}`}>
               {activeInvestments.map((inv) => {
                 const isMature = inv.maturesAt ? new Date() >= new Date(inv.maturesAt) : false;
                 const exitPercent = isMature ? parseFloat(inv.tier.exitFeePercent) : parseFloat(inv.tier.earlyExitFeePercent);
@@ -410,12 +409,12 @@ export default function IndexPage() {
                           Duration: <span className="font-medium text-foreground">{inv.tier.durationMonths} months</span>
                         </p>
                         {parseFloat(inv.feeAmount) > 0 && (
-                          <p className="text-[11px] text-muted-foreground mt-1">
+                          <p className="text-xs sm:text-[11px] text-muted-foreground mt-1">
                             ${parseFloat(inv.amount).toFixed(2)} invested − ${parseFloat(inv.feeAmount).toFixed(2)} fee at start
                           </p>
                         )}
                         {inv.maturesAt && (
-                          <p className="text-[11px] text-muted-foreground mt-1">
+                          <p className="text-xs sm:text-[11px] text-muted-foreground mt-1">
                             {isMature ? "Ready to withdraw since" : "Matures on"} {new Date(inv.maturesAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                           </p>
                         )}
@@ -534,8 +533,7 @@ export default function IndexPage() {
               })}
             </div>
           </Card>
-          )}
-        </div>
+        )}
 
         {/* Invest / Choose a Plan */}
         <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
@@ -626,15 +624,15 @@ export default function IndexPage() {
 
                       <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-4 pt-4 border-t border-border/60">
                         <div className="text-center px-0.5">
-                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Return (up to)</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground uppercase tracking-wide">Return (up to)</p>
                           <p className="text-xs sm:text-sm font-bold text-brand mt-0.5">{parseFloat(t.monthlyReturn).toFixed(2)}%/mo</p>
                         </div>
                         <div className="text-center px-0.5 border-x border-border/60">
-                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Duration</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground uppercase tracking-wide">Duration</p>
                           <p className="text-xs sm:text-sm font-bold text-foreground mt-0.5">{t.durationMonths} months</p>
                         </div>
                         <div className="text-center px-0.5">
-                          <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">Min Invest</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground uppercase tracking-wide">Min Invest</p>
                           <p className="text-xs sm:text-sm font-bold text-foreground mt-0.5">${parseFloat(t.minAmount).toLocaleString()}</p>
                         </div>
                       </div>
@@ -690,12 +688,12 @@ export default function IndexPage() {
                                 A {parseFloat(selectedTier.maintenanceFeePercent).toFixed(2)}% one-time fee applies when you invest
                               </p>
                               {investAmountNum > 0 && (
-                                <p className="text-[11px] text-muted-foreground mt-0.5">
+                                <p className="text-xs sm:text-[11px] text-muted-foreground mt-0.5">
                                   ${investAmountNum.toFixed(2)} − ${((investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} fee = $
                                   {(investAmountNum - (investAmountNum * parseFloat(selectedTier.maintenanceFeePercent)) / 100).toFixed(2)} actually invested
                                 </p>
                               )}
-                              <p className="text-[11px] text-muted-foreground mt-1">
+                              <p className="text-xs sm:text-[11px] text-muted-foreground mt-1">
                                 Withdrawing early costs {parseFloat(selectedTier.earlyExitFeePercent).toFixed(2)}%. Waiting until it matures costs only {parseFloat(selectedTier.exitFeePercent).toFixed(2)}%.
                               </p>
                             </div>
@@ -852,7 +850,7 @@ export default function IndexPage() {
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
                       <p className="text-lg font-bold text-foreground">100%</p>
                     </div>
                   </div>
@@ -875,7 +873,7 @@ export default function IndexPage() {
                             {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>
                           </p>
                           {a.description && (
-                            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
+                            <p className="text-xs sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
                           )}
                         </div>
                       </div>
@@ -891,7 +889,7 @@ export default function IndexPage() {
                         <div className="space-y-1.5">
                           {a.details!.map((d) => (
                             <div key={d.label} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                              <span className="text-[11px] text-muted-foreground sm:w-28 sm:shrink-0 truncate" title={d.label}>{d.label}</span>
+                              <span className="text-xs sm:text-[11px] text-muted-foreground sm:w-28 sm:shrink-0 truncate" title={d.label}>{d.label}</span>
                               <div className="flex flex-1 items-center gap-2">
                                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                                   <span
@@ -899,7 +897,7 @@ export default function IndexPage() {
                                     style={{ width: `${Math.min(d.percent, 100)}%` }}
                                   />
                                 </div>
-                                <span className="w-9 shrink-0 text-right text-[11px] font-medium text-foreground">{d.percent}%</span>
+                                <span className="w-9 shrink-0 text-right text-xs sm:text-[11px] font-medium text-foreground">{d.percent}%</span>
                               </div>
                             </div>
                           ))}
@@ -916,7 +914,7 @@ export default function IndexPage() {
         {/* Help footer */}
         <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/20 px-4 py-3">
           <IconInfoCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-xs sm:text-[11px] text-muted-foreground leading-relaxed">
             Every plan&apos;s fee, return, and duration is shown before you invest — nothing hidden. Need help? Reach out from the{" "}
             <Link href="/dashboard/support" className="text-brand font-medium hover:underline">Support</Link> page.
           </p>
