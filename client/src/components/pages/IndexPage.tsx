@@ -897,13 +897,16 @@ export default function IndexPage() {
                         />
                       )}
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                          <span
-                            aria-hidden
-                            className="size-2 shrink-0 rounded-full"
-                            style={{ backgroundColor: color }}
-                          />
-                          {a.label} <span style={{ color }}>{a.percent.toFixed(0)}%</span>
+                        <p className="text-sm font-semibold text-foreground">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              aria-hidden
+                              className="size-2 shrink-0 rounded-full"
+                              style={{ backgroundColor: color }}
+                            />
+                            {a.label}
+                          </span>{" "}
+                          <span className="whitespace-nowrap" style={{ color }}>{a.percent.toFixed(0)}%</span>
                         </p>
                         {a.description && (
                           <p className="text-xs sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
