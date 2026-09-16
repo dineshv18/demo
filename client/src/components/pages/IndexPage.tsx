@@ -328,31 +328,32 @@ export default function IndexPage() {
           </Card>
         )}
 
-        {/* Wallet Balance */}
-        <Card className="p-4 sm:p-5 gap-0">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-linear-to-br from-navy-600 to-navy-800 shrink-0">
-                <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+        <div className={`grid grid-cols-1 gap-4 sm:gap-6 ${activeInvestments.length > 0 ? "lg:grid-cols-2" : ""}`}>
+          {/* Wallet Balance */}
+          <Card className="p-4 sm:p-5 gap-0">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-xl bg-linear-to-br from-navy-600 to-navy-800 shrink-0">
+                  <IconWallet className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
+                  <p className="text-page-title text-foreground mt-0.5">
+                    <span className="text-gradient">${balance.toFixed(2)}</span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">This is the money available to invest</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground">Your Wallet Balance</p>
-                <p className="text-page-title text-foreground mt-0.5">
-                  <span className="text-gradient">${balance.toFixed(2)}</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">This is the money available to invest</p>
-              </div>
+              {balance <= 0 && (
+                <Button asChild size="sm" className="shrink-0 btn-glow btn-glow-hover">
+                  <Link href="/dashboard/wallet">Add Funds</Link>
+                </Button>
+              )}
             </div>
-            {balance <= 0 && (
-              <Button asChild size="sm" className="shrink-0 btn-glow btn-glow-hover">
-                <Link href="/dashboard/wallet">Add Funds</Link>
-              </Button>
-            )}
-          </div>
-        </Card>
+          </Card>
 
-        {/* Active / Matured Investments */}
-        {activeInvestments.length > 0 && (
+          {/* Active / Matured Investments */}
+          {activeInvestments.length > 0 && (
           <Card className="p-4 sm:p-6 gap-0">
             <h2 className="font-display text-base sm:text-lg font-semibold mb-1">
               Your Investments ({activeInvestments.length})
@@ -533,7 +534,8 @@ export default function IndexPage() {
               })}
             </div>
           </Card>
-        )}
+          )}
+        </div>
 
         {/* Invest / Choose a Plan */}
         <Card id="invest-in-index" className="p-4 sm:p-6 gap-0">
@@ -569,9 +571,8 @@ export default function IndexPage() {
                   return (
                     <div
                       key={t.id}
-                      className={`rounded-2xl border-2 p-4 sm:p-5 transition-colors ${
-                        isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border"
-                      }`}
+                      className={`rounded-2xl border-2 p-4 sm:p-5 transition-colors ${isSelected ? "border-brand bg-brand/5" : investAmountNum > 0 && !isEligible ? "border-border opacity-50" : "border-border"
+                        }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
@@ -751,11 +752,10 @@ export default function IndexPage() {
                 type="button"
                 onClick={() => setTimeframe(tf.key)}
                 aria-pressed={activeFrame.key === tf.key}
-                className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
-                  activeFrame.key === tf.key
+                className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${activeFrame.key === tf.key
                     ? "bg-card text-brand shadow-xs ring-1 ring-brand/20"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 {tf.label}
               </button>
