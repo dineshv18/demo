@@ -840,9 +840,9 @@ export default function IndexPage() {
         )}
 
         <Dialog open={allocationOpen} onOpenChange={setAllocationOpen}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto overflow-x-hidden w-[calc(100%-2rem)]">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <IconChartPie className="h-4 w-4 text-brand shrink-0" /> How Your Investment Is Diversified
               </DialogTitle>
             </DialogHeader>
@@ -850,8 +850,8 @@ export default function IndexPage() {
               When you invest in an Index tier, your funds are strategically allocated across multiple asset classes to reduce risk and maximize returns.
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:items-center">
-              <div className="h-52 w-52 sm:h-56 sm:w-56 mx-auto relative shrink-0">
+            <div className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-6 md:items-center">
+              <div className="h-44 w-44 sm:h-52 sm:w-52 mx-auto relative shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -877,39 +877,46 @@ export default function IndexPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
-                {allocations.map((a, i) => (
-                  <div key={a.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-3">
-                    {a.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.imageUrl} alt="" className="size-16 sm:size-20 shrink-0 rounded-lg object-contain bg-card p-1.5 ring-1 ring-border" />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="size-16 sm:size-20 shrink-0 rounded-lg"
-                        style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <div className="grid grid-cols-1 min-w-0 gap-3">
+                {allocations.map((a, i) => {
+                  const color = ALLOCATION_COLORS[i % ALLOCATION_COLORS.length];
+                  return (
+                    <div
+                      key={a.id}
+                      className="flex items-center gap-3 rounded-xl border p-3"
+                      style={{ backgroundColor: `color-mix(in srgb, ${color} 10%, var(--card))`, borderColor: `color-mix(in srgb, ${color} 35%, var(--border))` }}
+                    >
+                      {a.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={a.imageUrl} alt="" className="size-16 sm:size-20 shrink-0 rounded-lg object-contain bg-card p-1.5 ring-1" style={{ boxShadow: `0 0 0 1px color-mix(in srgb, ${color} 35%, var(--border))` }} />
+                      ) : (
                         <span
                           aria-hidden
-                          className="size-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: ALLOCATION_COLORS[i % ALLOCATION_COLORS.length] }}
+                          className="size-16 sm:size-20 shrink-0 rounded-lg"
+                          style={{ backgroundColor: color }}
                         />
-                        {a.label} <span className="text-brand">{a.percent.toFixed(0)}%</span>
-                      </p>
-                      {a.description && (
-                        <p className="text-xs sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
                       )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                          <span
+                            aria-hidden
+                            className="size-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                          {a.label} <span style={{ color }}>{a.percent.toFixed(0)}%</span>
+                        </p>
+                        {a.description && (
+                          <p className="text-xs sm:text-[11px] text-muted-foreground leading-snug mt-0.5">{a.description}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {allocations.some((a) => a.details && a.details.length > 0) && (
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                 {allocations.filter((a) => a.details && a.details.length > 0).map((a) => (
                   <div key={a.id} className="rounded-lg border border-border bg-surface-2/50 p-3.5">
                     <p className="text-xs font-semibold text-foreground mb-2">{a.label}</p>

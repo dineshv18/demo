@@ -63,7 +63,8 @@ export const allNavItems: NavItem[] = [
   { slug: "dashboard", to: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard, group: "main", alwaysVisible: true },
   { slug: "wallet", to: "/dashboard/wallet", label: "My Wallet", icon: IconWallet, group: "main", alwaysVisible: true },
   { slug: "index", to: "/dashboard/index", label: "Index", icon: IconChartLine, group: "main", alwaysVisible: true },
-  { slug: "transfer", to: "/dashboard/transfer", label: "Internal Transfer", icon: IconSend, group: "main", alwaysVisible: true },
+  // Internal Transfer nav entry temporarily hidden — re-add when the feature is turned back on.
+  // { slug: "transfer", to: "/dashboard/transfer", label: "Internal Transfer", icon: IconSend, group: "main", alwaysVisible: true },
   { slug: "transactions", to: "/dashboard/transactions", label: "Transactions", icon: IconArrowsExchange, group: "main", alwaysVisible: true },
   { slug: "kyc", to: "/dashboard/kyc", label: "KYC Verification", icon: IconShield, group: "other", alwaysVisible: true },
   { slug: "profile", to: "/dashboard/profile", label: "My Profile", icon: IconUser, group: "other", alwaysVisible: true },
