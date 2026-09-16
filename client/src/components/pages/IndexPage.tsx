@@ -132,7 +132,7 @@ export default function IndexPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [allocationOpen, setAllocationOpen] = useState(false);
 
-  const [timeframe, setTimeframe] = useState<Timeframe>("ALL");
+  const [timeframe, setTimeframe] = useState<Timeframe>("1M");
 
   const [investAmount, setInvestAmount] = useState("");
   const [selectedTierId, setSelectedTierId] = useState("");
@@ -845,7 +845,7 @@ export default function IndexPage() {
                   width={64}
                 />
                 <Tooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="price" stroke="var(--brand)" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={{ r: 3, fill: "var(--brand)", strokeWidth: 2, stroke: "var(--card)" }} activeDot={{ r: 5, fill: "var(--brand)", strokeWidth: 2, stroke: "var(--card)" }} />
+                <Area type="monotone" dataKey="price" stroke="var(--brand)" strokeWidth={2} fillOpacity={1} fill="url(#idxGrad)" dot={false} activeDot={{ r: 4, fill: "var(--brand)", strokeWidth: 2, stroke: "var(--card)" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
